@@ -1,7 +1,7 @@
 {
-  "name": "pi-llm-wiki",
+  "name": "pi-brain-wiki",
   "version": "0.1.0",
-  "description": "A Pi package for persistent markdown wikis with source capture, generated metadata, linting, and an LLM wiki-maintainer skill.",
+  "description": "A Pi package for persistent markdown wikis with source capture, generated metadata, linting, and LLM wiki-maintainer skills.",
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -16,11 +16,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Kausik-A/pi-llm-wiki.git"
+    "url": "git+https://github.com/walker/pi-brain-wiki.git"
   },
   "homepage": "https://github.com/Kausik-A/pi-llm-wiki#readme",
   "bugs": {
-    "url": "https://github.com/Kausik-A/pi-llm-wiki/issues"
+    "url": "https://github.com/walker/pi-brain-wiki/issues"
   },
   "files": [
     "extensions",

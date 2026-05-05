@@ -30,4 +30,4 @@ if (!Array.isArray(pkg.keywords) || !pkg.keywords.includes("pi-package")) {
   throw new Error('package.json keywords must include "pi-package"');
 }
 
-console.log("pi-llm-wiki sanity check passed");
+console.log("pi-brain-wiki sanity check passed");
