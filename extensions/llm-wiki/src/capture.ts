@@ -3,7 +3,7 @@ import { mkdir, readdir, readFile, stat, writeFile, copyFile } from "node:fs/pro
 import { basename, extname, join } from "node:path";
 import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
 import { resolveFrom, sourcePacketDir, sourcePagePath, toRelative } from "./paths.ts";
-import { makeSourceId } from "./slug.ts";
+import { dedupeSlug, makeSourceId, slugifyTitle } from "./slug.ts";
 import type { CaptureParams, CaptureResult, SourceManifest, WikiConfig } from "./types.ts";
 
 export interface CommandRunner {
@@ -261,7 +261,7 @@ async function createSourcePageStub(
     summary: string;
   },
 ): Promise<string> {
-  const template = await readTemplate(join(root, config.templates.source));
+  const template = await readTemplate(join(root, config.templates.summary));
   const rendered = renderTemplate(template, {
     id: values.sourceId,
     title: values.title,
@@ -273,13 +273,17 @@ async function createSourcePageStub(
     raw_path: values.rawPath,
   });
 
-  const absolutePath = sourcePagePath(root, values.sourceId);
+  // Build title-slug filename: YYYY-MM-DD-Source-Title.md
+  const datePrefix = values.capturedAt.slice(0, 10);
+  const titleSlug = slugifyTitle(values.title);
+  const summarySlug = `${datePrefix}-${titleSlug}`;
+  const absolutePath = sourcePagePath(root, values.sourceId, summarySlug);
   const bodyStart = rendered.indexOf("\n---\n", 4);
   const body = bodyStart >= 0 ? rendered.slice(bodyStart + 5).trimStart() : rendered;
 
   await writePage(absolutePath, {
     id: values.sourceId,
-    type: "source",
+    type: "summary",
     title: values.title,
     kind: values.kind,
     status: "captured",
@@ -315,9 +319,9 @@ async function runMarkitdown(input: string, runner: CommandRunner, signal?: Abor
 }
 
 async function listExistingSourceIds(root: string): Promise<string[]> {
-  const sourcesDir = join(root, "raw", "sources");
+  const inboxDir = join(root, "inbox");
   try {
-    const entries = await readdir(sourcesDir, { withFileTypes: true });
+    const entries = await readdir(inboxDir, { withFileTypes: true });
     return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
   } catch {
     return [];

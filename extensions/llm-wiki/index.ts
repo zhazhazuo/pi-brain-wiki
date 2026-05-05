@@ -20,10 +20,10 @@ const baseDir = dirname(fileURLToPath(import.meta.url));
 const skillPath = join(baseDir, "resources", "skills", "llm-wiki", "SKILL.md");
 const dirtyRoots = new Set<string>();
 
-const PAGE_TYPE_ENUM = StringEnum(["source", "concept", "entity", "synthesis", "analysis"] as const);
-const CANONICAL_TYPE_ENUM = StringEnum(["concept", "entity", "synthesis", "analysis"] as const);
+const PAGE_TYPE_ENUM = StringEnum(["summary", "topic", "plan", "review"] as const);
+const CANONICAL_TYPE_ENUM = StringEnum(["topic"] as const);
 const LINT_MODE_ENUM = StringEnum(["links", "orphans", "frontmatter", "duplicates", "coverage", "staleness", "all"] as const);
-const EVENT_KIND_ENUM = StringEnum(["capture", "integrate", "query", "file-analysis", "lint", "refactor", "rebuild"] as const);
+const EVENT_KIND_ENUM = StringEnum(["capture", "integrate", "query", "plan", "review", "lint", "refactor", "rebuild"] as const);
 
 export default function llmWikiExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", () => ({
@@ -98,7 +98,7 @@ export default function llmWikiExtension(pi: ExtensionAPI) {
     name: "wiki_capture_source",
     label: "Wiki Capture Source",
     description: "Capture a URL, file, or pasted text into an immutable source packet and scaffold a source page.",
-    promptSnippet: "Capture a new source into raw/ and create a wiki/sources page before integrating it into canonical pages",
+    promptSnippet: "Capture a new source into inbox/ and create a summary page before integrating it into topic pages",
     promptGuidelines: [
       "Use this tool when a user supplies a URL, local file, PDF, webpage, transcript, or pasted text that should become part of the wiki.",
       "After capture, read the source page before updating canonical pages.",
@@ -109,7 +109,7 @@ export default function llmWikiExtension(pi: ExtensionAPI) {
       title: Type.Optional(Type.String({ description: "Optional override title" })),
       kind: Type.Optional(Type.String({ description: "Optional source kind, e.g. article, paper, note, transcript" })),
       tags: Type.Optional(Type.Array(Type.String({ description: "Tag" }))),
-      createSourcePage: Type.Optional(Type.Boolean({ description: "Whether to create wiki/sources/SRC-*.md (default true)" })),
+      createSourcePage: Type.Optional(Type.Boolean({ description: "Whether to create a summary page (default true)" })),
     }),
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
@@ -172,14 +172,16 @@ export default function llmWikiExtension(pi: ExtensionAPI) {
     name: "wiki_ensure_page",
     label: "Wiki Ensure Page",
     description: "Resolve an existing canonical page by title or alias, or create it safely from a template if missing.",
-    promptSnippet: "Resolve or create canonical concept/entity/synthesis/analysis pages without duplicating titles or aliases",
-    promptGuidelines: ["Use this tool before creating a new canonical page in wiki/concepts, wiki/entities, wiki/syntheses, or wiki/analyses."],
+    promptSnippet: "Resolve or create canonical topic pages without duplicating titles or aliases",
+    promptGuidelines: ["Use this tool before creating a new canonical page in pages/topics."],
     parameters: Type.Object({
       type: CANONICAL_TYPE_ENUM,
       title: Type.String({ description: "Page title" }),
       aliases: Type.Optional(Type.Array(Type.String({ description: "Alias" }))),
       tags: Type.Optional(Type.Array(Type.String({ description: "Tag" }))),
       summary: Type.Optional(Type.String({ description: "Optional one-line summary" })),
+      date: Type.Optional(Type.String({ description: "Date for plan pages: YYYY-MM-DD" })),
+      period: Type.Optional(Type.String({ description: "Period for review pages: YYYY-Www" })),
       createIfMissing: Type.Optional(Type.Boolean({ description: "Create page if not found (default true)" })),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -252,7 +254,7 @@ export default function llmWikiExtension(pi: ExtensionAPI) {
     name: "wiki_log_event",
     label: "Wiki Log Event",
     description: "Append a structured event to meta/events.jsonl, regenerate meta/log.md, and optionally mark captured sources as integrated.",
-    promptSnippet: "Record structured wiki events such as capture, integrate, query, file-analysis, lint, refactor, and rebuild",
+    promptSnippet: "Record structured wiki events such as capture, integrate, query, plan, review, lint, refactor, and rebuild",
     promptGuidelines: [
       "Use this tool after integration when you want the chronology preserved in meta/events.jsonl and meta/log.md.",
       "If you pass kind=integrate and sourceIds, the corresponding source packets and source pages are marked integrated.",
@@ -262,7 +264,7 @@ export default function llmWikiExtension(pi: ExtensionAPI) {
       title: Type.String({ description: "Short event title" }),
       summary: Type.Optional(Type.String({ description: "Optional event summary" })),
       sourceIds: Type.Optional(Type.Array(Type.String({ description: "Source ID" }))),
-      pagePaths: Type.Optional(Type.Array(Type.String({ description: "Relative page path, e.g. wiki/concepts/foo.md" }))),
+      pagePaths: Type.Optional(Type.Array(Type.String({ description: "Relative page path, e.g. pages/topics/foo.md" }))),
       notes: Type.Optional(Type.Array(Type.String({ description: "Additional note" }))),
       actor: Type.Optional(StringEnum(["agent", "user", "extension"] as const)),
     }),
@@ -375,13 +377,12 @@ async function buildStatus(root: string): Promise<StatusSummary> {
   const events = await readEvents(root);
   const totals = {
     allPages: registry.pages.length,
-    source: registry.pages.filter((page) => page.type === "source").length,
-    concept: registry.pages.filter((page) => page.type === "concept").length,
-    entity: registry.pages.filter((page) => page.type === "entity").length,
-    synthesis: registry.pages.filter((page) => page.type === "synthesis").length,
-    analysis: registry.pages.filter((page) => page.type === "analysis").length,
+    summary: registry.pages.filter((page) => page.type === "summary").length,
+    topic: registry.pages.filter((page) => page.type === "topic").length,
+    plan: registry.pages.filter((page) => page.type === "plan").length,
+    review: registry.pages.filter((page) => page.type === "review").length,
   };
-  const sources = registry.pages.filter((page) => page.type === "source");
+  const sources = registry.pages.filter((page) => page.type === "summary");
   const captured = sources.filter((page) => page.status === "captured").length;
   const integrated = sources.filter((page) => page.status === "integrated").length;
 
@@ -426,7 +427,7 @@ function formatLint(result: Awaited<ReturnType<typeof runLint>>): string {
 
 function formatStatus(status: StatusSummary): string {
   return [
-    `Pages: ${status.totals.allPages} total (${status.totals.source} source, ${status.totals.concept} concept, ${status.totals.entity} entity, ${status.totals.synthesis} synthesis, ${status.totals.analysis} analysis)`,
+    `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review)`,
     `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.unintegrated} unintegrated`,
     ...(status.lastCapture ? [`Last capture: ${status.lastCapture}`] : []),
     ...(status.lastEvent ? [`Last event: ${status.lastEvent}`] : []),

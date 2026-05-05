@@ -59,29 +59,30 @@ export function isWithin(parent: string, target: string): boolean {
 }
 
 export function sourcePacketDir(root: string, sourceId: string): string {
-  return join(root, "raw", "sources", sourceId);
+  return join(root, "inbox", sourceId);
 }
 
-export function sourcePagePath(root: string, sourceId: string): string {
-  return join(root, "wiki", "sources", `${sourceId}.md`);
+export function sourcePagePath(root: string, sourceId: string, titleSlug?: string): string {
+  if (titleSlug) {
+    return join(root, "pages", "summaries", `${titleSlug}.md`);
+  }
+  return join(root, "pages", "summaries", `${sourceId}.md`);
 }
 
 export function canonicalDir(root: string, type: CanonicalPageType): string {
-  switch (type) {
-    case "concept":
-      return join(root, "wiki", "concepts");
-    case "entity":
-      return join(root, "wiki", "entities");
-    case "synthesis":
-      return join(root, "wiki", "syntheses");
-    case "analysis":
-      return join(root, "wiki", "analyses");
-  }
+  // All canonical types map to pages/{type}s/
+  return join(root, "pages", `${type}s`);
 }
 
-export function canonicalPagePath(root: string, type: CanonicalPageType, slug: string, dateStamp?: string): string {
-  if (type === "analysis") {
-    return join(canonicalDir(root, type), `${dateStamp ?? "analysis"}-${slug}.md`);
+export function canonicalPagePath(root: string, type: CanonicalPageType, slug: string, dateStamp?: string, period?: string): string {
+  // topic: Topic-Name.md
+  // plan: YYYY-MM-DD-Plan.md (dateStamp = today)
+  // review: YYYY-Www-Review.md (period = ISO week)
+  if (type === "plan") {
+    return join(canonicalDir(root, type), `${dateStamp ?? "plan"}-Plan.md`);
+  }
+  if (type === "review") {
+    return join(canonicalDir(root, type), `${period ?? "review"}-Review.md`);
   }
   return join(canonicalDir(root, type), `${slug}.md`);
 }
@@ -95,17 +96,31 @@ export function lockPath(root: string): string {
 }
 
 export function normalizeWikiLinkTarget(target: string): string | undefined {
-  const clean = target.trim().replace(/\\/g, "/").replace(/\.md$/i, "").replace(/^wiki\//, "");
+  const clean = target.trim().replace(/\\/g, "/").replace(/\.md$/i, "");
   if (!clean) return undefined;
+
+  // Wiki-internal links: summaries/, topics/, plans/, reviews/
   if (
-    clean.startsWith("sources/") ||
-    clean.startsWith("concepts/") ||
-    clean.startsWith("entities/") ||
-    clean.startsWith("syntheses/") ||
-    clean.startsWith("analyses/")
+    clean.startsWith("summaries/") ||
+    clean.startsWith("topics/") ||
+    clean.startsWith("plans/") ||
+    clean.startsWith("reviews/")
   ) {
-    return `wiki/${clean}.md`;
+    return `pages/${clean}.md`;
   }
+
+  // PARA links (Resource/, Project/, Area/, Archive/, Draft/) are external — don't flag
+  if (
+    clean.startsWith("Resource/") ||
+    clean.startsWith("Project/") ||
+    clean.startsWith("Area/") ||
+    clean.startsWith("Archive/") ||
+    clean.startsWith("Draft/")
+  ) {
+    // Return clean PARA path — linter should NOT flag these
+    return undefined;
+  }
+
   return undefined;
 }
 

@@ -1,7 +1,7 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parsePage, writePage } from "./frontmatter.ts";
-import { metaPath, sourcePacketDir, sourcePagePath } from "./paths.ts";
+import { metaPath, sourcePacketDir } from "./paths.ts";
 import { todayStamp } from "./slug.ts";
 import type { WikiEvent } from "./types.ts";
 
@@ -37,12 +37,12 @@ export function renderLogMarkdown(title: string, events: WikiEvent[]): string {
     lines.push(`## [${formatTimestamp(event.ts)}] ${event.kind} | ${event.title}`);
     if (event.summary) lines.push(`- Summary: ${event.summary}`);
     if (event.sourceIds?.length) {
-      lines.push(`- Sources: ${event.sourceIds.map((id) => `[[sources/${id}|${id}]]`).join(", ")}`);
+      lines.push(`- Sources: ${event.sourceIds.map((id) => `[[inbox/${id}|${id}]]`).join(", ")}`);
     }
     if (event.pagePaths?.length) {
       lines.push(
         `- Pages: ${event.pagePaths
-          .map((path) => `[[${path.replace(/^wiki\//, "").replace(/\.md$/, "")}]]`)
+          .map((path) => `[[${path.replace(/\.md$/, "")}]]`)
           .join(", ")}`,
       );
     }
@@ -72,21 +72,34 @@ export async function markSourcesIntegrated(root: string, sourceIds: string[], i
       // Ignore missing manifests so logging remains robust.
     }
 
-    const sourcePath = sourcePagePath(root, sourceId);
+    // Find and update the summary page — scan pages/summaries/ for matching source_id
+    const summariesDir = join(root, "pages", "summaries");
     try {
-      const page = await parsePage(root, sourcePath);
-      await writePage(
-        sourcePath,
-        {
-          ...page.frontmatter,
-          status: "integrated",
-          integrated_at: integratedAt,
-          updated: todayStamp(new Date(integratedAt)),
-        },
-        page.body,
-      );
+      const pages = await readdir(summariesDir);
+      for (const pageFile of pages) {
+        if (!pageFile.endsWith(".md")) continue;
+        const pagePath = join(summariesDir, pageFile);
+        try {
+          const page = await parsePage(root, pagePath);
+          const srcIds: string[] = Array.isArray(page.frontmatter.source_ids) ? page.frontmatter.source_ids : [];
+          if (srcIds.includes(sourceId)) {
+            await writePage(
+              pagePath,
+              {
+                ...page.frontmatter,
+                status: "integrated",
+                integrated_at: integratedAt,
+                updated: todayStamp(new Date(integratedAt)),
+              },
+              page.body,
+            );
+          }
+        } catch {
+          // Skip unparseable pages
+        }
+      }
     } catch {
-      // Ignore missing source pages.
+      // Summaries dir may not exist yet
     }
   }
 }

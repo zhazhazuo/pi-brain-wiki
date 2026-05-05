@@ -3,7 +3,7 @@ import { buildBacklinks, buildRegistry, scanWikiPages } from "./indexer.ts";
 import { metaPath, normalizeWikiLinkTarget } from "./paths.ts";
 import type { BacklinksData, LintIssue, LintRun, ParsedPage, RegistryData } from "./types.ts";
 
-const SOURCE_REQUIRED = [
+const SUMMARY_REQUIRED = [
   "id",
   "type",
   "title",
@@ -16,7 +16,18 @@ const SOURCE_REQUIRED = [
   "source_ids",
 ] as const;
 
-const CANONICAL_REQUIRED = ["id", "type", "title", "status", "updated", "source_ids", "summary"] as const;
+const TOPIC_REQUIRED = ["id", "type", "title", "status", "updated", "source_ids", "summary"] as const;
+
+const PLAN_REQUIRED = ["id", "type", "title", "status", "date", "updated"] as const;
+
+const REVIEW_REQUIRED = ["id", "type", "title", "status", "period", "updated"] as const;
+
+const FRONTMATTER_REQUIRED: Record<string, readonly string[]> = {
+  summary: SUMMARY_REQUIRED,
+  topic: TOPIC_REQUIRED,
+  plan: PLAN_REQUIRED,
+  review: REVIEW_REQUIRED,
+};
 
 export async function runLint(root: string, mode: string, writeReport = false, limit?: number): Promise<LintRun> {
   const pages = await scanWikiPages(root);
@@ -94,6 +105,17 @@ function lintLinks(pages: ParsedPage[], registry: RegistryData): LintIssue[] {
 
   for (const page of pages) {
     for (const rawLink of page.rawLinks) {
+      // Skip PARA links — they point outside the wiki
+      if (
+        rawLink.startsWith("Resource/") ||
+        rawLink.startsWith("Project/") ||
+        rawLink.startsWith("Area/") ||
+        rawLink.startsWith("Archive/") ||
+        rawLink.startsWith("Draft/")
+      ) {
+        continue;
+      }
+
       const normalized = normalizeWikiLinkTarget(rawLink);
       if (!normalized) {
         issues.push({
@@ -119,8 +141,9 @@ function lintLinks(pages: ParsedPage[], registry: RegistryData): LintIssue[] {
 }
 
 function lintOrphans(registry: RegistryData, backlinks: BacklinksData): LintIssue[] {
+  // Only flag topics as orphans (plans and reviews are time-bound, not expected to be linked)
   return registry.pages
-    .filter((page) => page.type !== "source")
+    .filter((page) => page.type === "topic")
     .flatMap((page) => {
       const record = backlinks.byPath[page.path];
       if (!record) return [];
@@ -141,7 +164,17 @@ function lintOrphans(registry: RegistryData, backlinks: BacklinksData): LintIssu
 function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
   const issues: LintIssue[] = [];
   for (const page of pages) {
-    const required = page.frontmatter.type === "source" ? SOURCE_REQUIRED : CANONICAL_REQUIRED;
+    const pageType = String(page.frontmatter.type || "");
+    const required = FRONTMATTER_REQUIRED[pageType];
+    if (!required) {
+      issues.push({
+        kind: "frontmatter",
+        severity: "warning",
+        path: page.relativePath,
+        message: `Unknown page type: ${pageType}`,
+      });
+      continue;
+    }
     for (const field of required) {
       if (!Object.prototype.hasOwnProperty.call(page.frontmatter, field)) {
         issues.push({
@@ -162,7 +195,8 @@ function lintDuplicates(registry: RegistryData): LintIssue[] {
   const seenAliases = new Map<string, string>();
   const seenIds = new Map<string, string>();
 
-  for (const page of registry.pages.filter((entry) => entry.type !== "source")) {
+  // Only check topics for duplicates (summaries are date-stamped, plans/reviews are time-bound)
+  for (const page of registry.pages.filter((entry) => entry.type === "topic")) {
     const normalizedTitle = page.title.trim().toLowerCase();
     if (seenTitles.has(normalizedTitle)) {
       issues.push({
@@ -208,26 +242,26 @@ function lintDuplicates(registry: RegistryData): LintIssue[] {
 function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIssue[] {
   const issues: LintIssue[] = [];
   for (const page of registry.pages) {
-    if (page.type === "source") {
+    if (page.type === "summary") {
       const inbound = backlinks.byPath[page.path]?.inbound ?? [];
-      const citedByCanonical = inbound.filter((path) => !path.includes("/sources/") && path !== page.path);
-      if (citedByCanonical.length === 0) {
+      const citedByTopic = inbound.filter((path) => !path.includes("/summaries/") && path !== page.path);
+      if (citedByTopic.length === 0) {
         issues.push({
           kind: "coverage",
           severity: "info",
           path: page.path,
-          message: "Source page is not cited by any canonical page yet.",
+          message: "Summary page is not cited by any topic page yet.",
         });
       }
       continue;
     }
 
-    if (page.sourceIds.length === 0) {
+    if (page.sourceIds.length === 0 && page.type !== "plan" && page.type !== "review") {
       issues.push({
         kind: "coverage",
         severity: "warning",
         path: page.path,
-        message: "Canonical page has no source_ids listed.",
+        message: "Topic page has no source_ids listed.",
       });
     }
   }
@@ -236,16 +270,39 @@ function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIss
 
 function lintStaleness(registry: RegistryData): LintIssue[] {
   return registry.pages.flatMap((page) => {
-    if (page.type === "source" && page.status === "captured") {
-      return [
-        {
-          kind: "staleness",
-          severity: "info",
-          path: page.path,
-          message: "Source page is still in captured state and has not been marked integrated.",
-        } satisfies LintIssue,
-      ];
+    if (page.type === "summary") {
+      if (page.status === "captured") {
+        return [
+          {
+            kind: "staleness",
+            severity: "info",
+            path: page.path,
+            message: "Summary page is still in captured state and has not been marked integrated.",
+          } satisfies LintIssue,
+        ];
+      }
+      return [];
     }
+
+    if (page.type === "topic" && page.status === "draft") {
+      // Flag topics in draft >30 days
+      if (page.updated) {
+        const updated = new Date(page.updated).getTime();
+        const now = Date.now();
+        const days = (now - updated) / 86_400_000;
+        if (days > 30) {
+          return [
+            {
+              kind: "staleness",
+              severity: "warning",
+              path: page.path,
+              message: `Topic page has been in draft status for ${Math.floor(days)} days.`,
+            } satisfies LintIssue,
+          ];
+        }
+      }
+    }
+
     return [];
   });
 }

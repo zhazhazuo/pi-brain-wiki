@@ -49,7 +49,7 @@ function extractPathsFromPatch(patch: string): string[] {
 }
 
 function isProtected(root: string, absolutePath: string): boolean {
-  if (isWithin(resolve(root, "raw"), absolutePath)) return true;
+  if (isWithin(resolve(root, "inbox"), absolutePath)) return true;
   return generatedMetaFiles(root).some((path) => resolve(path) === resolve(absolutePath));
 }
 

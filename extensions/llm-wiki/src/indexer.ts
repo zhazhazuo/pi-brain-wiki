@@ -5,7 +5,7 @@ import { parsePage } from "./frontmatter.ts";
 import { metaPath, toRelative } from "./paths.ts";
 import type { BacklinksData, BacklinksRecord, ParsedPage, RegistryData, RegistryEntry, WikiPageType } from "./types.ts";
 
-const PAGE_ORDER: WikiPageType[] = ["source", "concept", "entity", "synthesis", "analysis"];
+const PAGE_ORDER: WikiPageType[] = ["summary", "topic", "plan", "review"];
 
 export async function scanWikiPages(root: string): Promise<ParsedPage[]> {
   const config = await loadConfig(root);
@@ -77,11 +77,19 @@ export function buildBacklinks(registry: RegistryData): BacklinksData {
   };
 }
 
+const PAGE_LABELS: Record<string, string> = {
+  summary: "Summaries",
+  topic: "Topics",
+  plan: "Plans",
+  review: "Reviews",
+};
+
 export function renderIndexMarkdown(registry: RegistryData, title = "Wiki"): string {
   const lines: string[] = [`# ${title} Index`, "", `Generated: ${registry.generatedAt}`, ""];
   for (const type of PAGE_ORDER) {
     const entries = registry.pages.filter((page) => page.type === type);
-    lines.push(`## ${capitalize(type)} Pages`, "");
+    const label = PAGE_LABELS[type] ?? capitalize(type);
+    lines.push(`## ${label}`, "");
     if (entries.length === 0) {
       lines.push("_None yet._", "");
       continue;
@@ -90,7 +98,7 @@ export function renderIndexMarkdown(registry: RegistryData, title = "Wiki"): str
     for (const entry of entries) {
       const summary = entry.summary?.trim() ? ` — ${entry.summary.trim()}` : "";
       const sources = entry.sourceIds.length ? ` _(sources: ${entry.sourceIds.length})_` : "";
-      lines.push(`- [[${entry.path.replace(/^wiki\//, "").replace(/\.md$/, "")}|${entry.title}]]${summary}${sources}`);
+      lines.push(`- [[${entry.path.replace(/\.md$/, "")}|${entry.title}]]${summary}${sources}`);
     }
     lines.push("");
   }
@@ -146,11 +154,10 @@ function arrayOfStrings(value: unknown): string[] {
 }
 
 function inferTypeFromPath(relativePath: string): WikiPageType {
-  if (relativePath.includes("/sources/")) return "source";
-  if (relativePath.includes("/concepts/")) return "concept";
-  if (relativePath.includes("/entities/")) return "entity";
-  if (relativePath.includes("/syntheses/")) return "synthesis";
-  return "analysis";
+  if (relativePath.includes("/summaries/")) return "summary";
+  if (relativePath.includes("/topics/")) return "topic";
+  if (relativePath.includes("/plans/")) return "plan";
+  return "review";
 }
 
 function capitalize(value: string): string {

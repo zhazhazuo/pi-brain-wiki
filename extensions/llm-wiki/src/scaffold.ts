@@ -6,9 +6,11 @@ import { canonicalPagePath, metaPath, toRelative } from "./paths.ts";
 import { dedupeSlug, makePageId, slugifyTitle, todayStamp } from "./slug.ts";
 import type { EnsurePageParams, EnsurePageResult, RegistryData, WikiConfig } from "./types.ts";
 
-export const DEFAULT_SOURCE_TEMPLATE = `---
+// ── Templates ────────────────────────────────────────────────
+
+export const DEFAULT_SUMMARY_TEMPLATE = `---
 id: {{id}}
-type: source
+type: summary
 title: {{title}}
 kind: {{kind}}
 status: captured
@@ -28,40 +30,28 @@ summary:
 # {{title}}
 
 ## Source at a glance
-- Source ID: {{id}}
-- Kind: {{kind}}
-- Captured: {{captured_at}}
-- Origin: {{origin_type}} — {{origin_value}}
 
 ## Executive summary
 
 ## Main claims
-- Claim:
-  - Support in source:
-  - Caveat:
 
 ## Important details and data points
 
 ## Entities and concepts mentioned
-### Entities
-
-### Concepts
 
 ## Reliability / caveats
 
 ## Integration targets
-- Candidate concept pages:
-- Candidate entity pages:
-- Candidate synthesis pages:
+- [[topics/...]] — what this source affects
 
 ## Open questions
 
 ## Related pages
 `;
 
-export const DEFAULT_CONCEPT_TEMPLATE = `---
+export const DEFAULT_TOPIC_TEMPLATE = `---
 id: {{id}}
-type: concept
+type: topic
 title: {{title}}
 aliases: []
 tags: []
@@ -75,93 +65,60 @@ summary:
 
 ## Current understanding
 
-## Key distinctions
-
-## Supporting evidence
-
-## Tensions / caveats
+## Connections
+- [[topics/...]] — related topics
+- [[Resource/...]] — vault pages with depth
 
 ## Open questions
 
 ## Related pages
 `;
 
-export const DEFAULT_ENTITY_TEMPLATE = `---
+export const DEFAULT_PLAN_TEMPLATE = `---
 id: {{id}}
-type: entity
+type: plan
 title: {{title}}
-aliases: []
-tags: []
-status: draft
-updated: {{updated}}
-source_ids: []
-summary:
----
-
-# {{title}}
-
-## Who / what
-
-## Relationships
-
-## Supporting evidence
-
-## Tensions / caveats
-
-## Open questions
-
-## Related pages
-`;
-
-export const DEFAULT_SYNTHESIS_TEMPLATE = `---
-id: {{id}}
-type: synthesis
-title: {{title}}
-aliases: []
-tags: []
-status: draft
-updated: {{updated}}
-source_ids: []
-summary:
----
-
-# {{title}}
-
-## Current thesis
-
-## Why this seems true
-
-## Counterevidence / disagreement
-
-## Decision boundary
-
-## Unknowns
-
-## Related pages
-`;
-
-export const DEFAULT_ANALYSIS_TEMPLATE = `---
-id: {{id}}
-type: analysis
-title: {{title}}
-aliases: []
-tags: []
 status: active
+date: {{date}}
 updated: {{updated}}
-source_ids: []
-summary:
 ---
 
 # {{title}}
 
-## Question
+## Date / Period
 
-## Answer
+## Priorities
 
-## Evidence used
+## Timeboxed blocks
 
-## Follow-up opportunities
+## Dependencies
+
+## Notes
 `;
+
+export const DEFAULT_REVIEW_TEMPLATE = `---
+id: {{id}}
+type: review
+title: {{title}}
+status: active
+period: {{period}}
+updated: {{updated}}
+---
+
+# {{title}}
+
+## Period
+
+## Activity clusters
+
+## Neglected areas
+
+## Emerging patterns
+
+## Recommendations
+`;
+
+// ── Schema ───────────────────────────────────────────────────
 
 export function defaultSchemaMarkdown(title: string, domain = "General"): string {
   return `# ${title} Wiki Schema
@@ -170,71 +127,70 @@ This wiki is maintained as a persistent LLM-authored knowledge base for **${doma
 
 ## Layers
 
-1. **raw/** - immutable source capture packets
-2. **wiki/** - editable source pages and canonical knowledge pages
+1. **inbox/** - immutable source capture packets
+2. **pages/** - editable wiki pages (summaries, topics, plans, reviews)
 3. **meta/** - generated registry, backlinks, index, logs, and reports
 4. **schema** - this file and .wiki/config.json
 
 ## Non-negotiable rules
 
-- Never directly edit raw/**.
+- Never directly edit inbox/** or meta/**.
 - Never hand-maintain generated metadata under meta/**.
-- Every source must become a source page before it influences canonical pages.
-- Update existing canonical pages before creating new ones.
-- Use folder-qualified wikilinks such as [[concepts/example-topic]].
-- Cite factual claims with source page ID links such as [[sources/SRC-YYYY-MM-DD-NNN|SRC-YYYY-MM-DD-NNN]].
-- Query mode is read-only by default; file durable answers deliberately into wiki/analyses/.
-- Use Tensions / caveats and Open questions whenever evidence is uncertain.
+- Every source must become a summary page before it influences topics.
+- Update existing pages before creating new ones.
+- Use folder-qualified wikilinks such as [[topics/example-topic]].
+- Cite factual claims with source page ID links such as [[summaries/YYYY-MM-DD-Title|SRC-YYYY-MM-DD-NNN]].
+- Query mode is read-only by default.
+- Use Open questions and Tensions / caveats whenever evidence is uncertain.
 
 ## Page Taxonomy
 
-- wiki/sources/ = what one source says
-- wiki/concepts/ = stable concepts tracked over time
-- wiki/entities/ = people, orgs, products, papers, etc.
-- wiki/syntheses/ = cross-source theses and unresolved tensions
-- wiki/analyses/ = durable filed answers from queries
+- pages/summaries/ = what one source says
+- pages/topics/ = what the wiki knows about a subject
+- pages/plans/ = timeboxed plans with priorities
+- pages/reviews/ = attention analysis and activity review
 
-## Source-page standard
+## Summary-page standard
 
-Every source page should answer these questions:
+Every summary page should answer:
 - What is this source?
 - What are its main claims?
 - What concrete details or data points matter?
-- Which concepts and entities does it touch?
+- Which topics does it touch?
 - How reliable or limited is it?
-- Which canonical pages should be updated because of it?
+- Which topics should be updated because of it?
 
-Fill these sections whenever possible:
-- Source at a glance
-- Executive summary
-- Main claims
-- Important details and data points
-- Entities and concepts mentioned
-- Reliability / caveats
-- Integration targets
-- Open questions
+## Integration targets
+
+Every summary page lists which topics it affects:
+\`\`\`markdown
+## Integration targets
+- [[topics/functional-programming]] — adds historical context
+- [[topics/lambda-calculus]] — confirms existing timeline
+\`\`\`
 
 ## Workflows
 
 ### Capture
-1. Use the capture tool to preserve the source packet.
-2. Read the extracted content and source page.
-3. Improve the source page first.
-4. Only then update impacted canonical pages.
+1. Use wiki_capture_source to preserve the source packet.
+2. Read the extracted content and summary page.
+3. Improve the summary page first.
+4. Only then update impacted topics.
 5. Log integration when done.
 
 ### Query
-1. Search the wiki first.
+1. Search the wiki first with wiki_search.
 2. Read the most relevant pages.
-3. Answer using source page citations.
-4. Only create analysis pages if asked or if the result is explicitly worth filing.
+3. Answer using summary page citations.
 
 ### Audit
-1. Run deterministic lint for structural issues.
-2. Then reason about semantic gaps, contradictions, stale theses, and missing pages.
+1. Run wiki_lint for structural issues.
+2. Then reason about semantic gaps, contradictions, and missing pages.
 3. Report tensions before resolving them.
 `;
 }
+
+// ── Bootstrap ────────────────────────────────────────────────
 
 export async function bootstrapVault(root: string, title: string, domain?: string, force = false): Promise<string[]> {
   const configPath = join(root, ".wiki", "config.json");
@@ -243,13 +199,13 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   }
 
   const created = [
-    join(root, "raw", "sources"),
-    join(root, "wiki", "sources"),
-    join(root, "wiki", "concepts"),
-    join(root, "wiki", "entities"),
-    join(root, "wiki", "syntheses"),
-    join(root, "wiki", "analyses"),
+    join(root, "inbox"),
+    join(root, "pages", "summaries"),
+    join(root, "pages", "topics"),
+    join(root, "pages", "plans"),
+    join(root, "pages", "reviews"),
     join(root, "meta"),
+    join(root, "archive"),
     join(root, ".wiki", "templates"),
   ];
 
@@ -260,11 +216,10 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   await writeDefaultConfig(root, title, domain);
 
   const config = createDefaultConfig(title, domain);
-  await writeFile(join(root, config.templates.source), DEFAULT_SOURCE_TEMPLATE, "utf8");
-  await writeFile(join(root, config.templates.concept), DEFAULT_CONCEPT_TEMPLATE, "utf8");
-  await writeFile(join(root, config.templates.entity), DEFAULT_ENTITY_TEMPLATE, "utf8");
-  await writeFile(join(root, config.templates.synthesis), DEFAULT_SYNTHESIS_TEMPLATE, "utf8");
-  await writeFile(join(root, config.templates.analysis), DEFAULT_ANALYSIS_TEMPLATE, "utf8");
+  await writeFile(join(root, config.templates.summary), DEFAULT_SUMMARY_TEMPLATE, "utf8");
+  await writeFile(join(root, config.templates.topic), DEFAULT_TOPIC_TEMPLATE, "utf8");
+  await writeFile(join(root, config.templates.plan), DEFAULT_PLAN_TEMPLATE, "utf8");
+  await writeFile(join(root, config.templates.review), DEFAULT_REVIEW_TEMPLATE, "utf8");
 
   await writeFile(join(root, "WIKI_SCHEMA.md"), defaultSchemaMarkdown(title, domain), "utf8");
   await writeFile(metaPath(root, "registry.json"), `${JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), pages: [] }, null, 2)}\n`, "utf8");
@@ -276,6 +231,8 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
 
   return [toRelative(root, configPath), ...created.map((dir) => toRelative(root, dir))];
 }
+
+// ── Ensure Page ──────────────────────────────────────────────
 
 export async function ensureCanonicalPage(
   root: string,
@@ -318,36 +275,71 @@ export async function ensureCanonicalPage(
     };
   }
 
-  if (!params.createIfMissing) {
+  if (params.createIfMissing === false) {
     return { resolved: false, created: false, conflict: false };
   }
 
-  const existingSlugs = registry.pages
-    .filter((page) => page.type === targetType)
-    .map((page) => basename(page.path, ".md").replace(/^\d{4}-\d{2}-\d{2}-/, ""));
-  const slug = dedupeSlug(slugifyTitle(params.title), existingSlugs);
   const now = new Date();
   const dateStamp = todayStamp(now);
-  const absolutePath = canonicalPagePath(root, targetType, slug, dateStamp);
+
+  // Determine slug and filename based on type
+  let slug: string;
+  let absolutePath: string;
+
+  if (targetType === "plan") {
+    slug = params.date ?? dateStamp;
+    absolutePath = canonicalPagePath(root, targetType, "Plan", slug);
+  } else if (targetType === "review") {
+    slug = params.period ?? `review`;
+    absolutePath = canonicalPagePath(root, targetType, "Review", undefined, slug);
+  } else {
+    // topic
+    const baseSlug = slugifyTitle(params.title);
+    const existingSlugs = registry.pages
+      .filter((page) => page.type === targetType)
+      .map((page) => basename(page.path, ".md"));
+    slug = dedupeSlug(baseSlug, existingSlugs);
+    absolutePath = canonicalPagePath(root, targetType, slug);
+  }
+
   const template = await readTemplate(join(root, config.templates[targetType]));
   const id = makePageId(targetType, slug, now);
-  const rendered = renderTemplate(template, {
+
+  // Build template variables per type
+  const templateValues: Record<string, string> = {
     id,
     title: params.title,
     updated: dateStamp,
-  });
+    date: params.date ?? dateStamp,
+    period: params.period ?? "",
+  };
+  const rendered = renderTemplate(template, templateValues);
 
-  const parsed = {
+  // Default status per type
+  const defaultStatus = targetType === "topic" ? "draft" : "active";
+
+  const parsed: Record<string, any> = {
     id,
     type: targetType,
     title: params.title,
     aliases: params.aliases ?? [],
     tags: params.tags ?? [],
-    status: targetType === "analysis" ? "active" : "draft",
+    status: defaultStatus,
     updated: dateStamp,
     source_ids: [],
     summary: params.summary ?? "",
   };
+
+  // Add type-specific fields
+  if (targetType === "plan") {
+    parsed.date = params.date ?? dateStamp;
+  }
+  if (targetType === "review") {
+    parsed.period = params.period ?? "";
+  }
+  if (targetType === "topic") {
+    // topics get no extra fields beyond the base set
+  }
 
   const frontmatterStart = rendered.indexOf("---\n");
   const secondDelimiter = rendered.indexOf("\n---\n", frontmatterStart + 4);

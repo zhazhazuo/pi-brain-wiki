@@ -1,7 +1,7 @@
-export const PAGE_TYPES = ["source", "concept", "entity", "synthesis", "analysis"] as const;
+export const PAGE_TYPES = ["summary", "topic", "plan", "review"] as const;
 export type WikiPageType = (typeof PAGE_TYPES)[number];
 
-export const CANONICAL_PAGE_TYPES = ["concept", "entity", "synthesis", "analysis"] as const;
+export const CANONICAL_PAGE_TYPES = ["topic"] as const;
 export type CanonicalPageType = (typeof CANONICAL_PAGE_TYPES)[number];
 
 export interface WikiConfig {
@@ -10,9 +10,10 @@ export interface WikiConfig {
   domain: string;
   timezone: string;
   paths: {
-    raw: string;
-    wiki: string;
+    inbox: string;
+    pages: string;
     meta: string;
+    archive: string;
   };
   pageTypes: Record<WikiPageType, string>;
   templates: Record<WikiPageType, string>;
@@ -72,7 +73,8 @@ export type WikiEventKind =
   | "capture"
   | "integrate"
   | "query"
-  | "file-analysis"
+  | "plan"
+  | "review"
   | "lint"
   | "refactor"
   | "rebuild";
@@ -166,6 +168,8 @@ export interface EnsurePageParams {
   aliases?: string[];
   tags?: string[];
   summary?: string;
+  date?: string;        // For plan pages: YYYY-MM-DD
+  period?: string;      // For review pages: YYYY-Www
   createIfMissing?: boolean;
 }
 
@@ -204,11 +208,10 @@ export interface SearchResult {
 export interface StatusSummary {
   totals: {
     allPages: number;
-    source: number;
-    concept: number;
-    entity: number;
-    synthesis: number;
-    analysis: number;
+    summary: number;
+    topic: number;
+    plan: number;
+    review: number;
   };
   sources: {
     captured: number;

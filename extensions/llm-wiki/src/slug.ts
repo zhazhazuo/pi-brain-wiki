@@ -26,9 +26,13 @@ export function makeSourceId(existingIds: string[], now = new Date()): string {
 }
 
 export function makePageId(type: CanonicalPageType, slug: string, now = new Date()): string {
-  if (type === "analysis") {
-    return `analysis-${todayStamp(now)}-${slug}`;
+  if (type === "plan") {
+    return `plan-${slug}`;
   }
+  if (type === "review") {
+    return `review-${slug}`;
+  }
+  // topic: topic-<slug>
   return `${type}-${slug}`;
 }
 
