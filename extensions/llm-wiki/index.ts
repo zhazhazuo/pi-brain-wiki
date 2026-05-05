@@ -5,6 +5,7 @@ import { StringEnum } from "@mariozechner/pi-ai";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { withFileMutationQueue } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { scanActivity } from "./src/activity.ts";
 import { captureSource } from "./src/capture.ts";
 import { loadConfig } from "./src/config.ts";
 import { analyzeToolMutation } from "./src/guards.ts";
@@ -320,6 +321,29 @@ export default function llmWikiExtension(pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "wiki_scan_activity",
+    label: "Wiki Scan Activity",
+    description: "Scan vault and wiki activity for a given period. Returns structured data for the Intelligence agent.",
+    promptSnippet: "Scan recent activity across the wiki and vault",
+    parameters: Type.Object({
+      since: Type.Optional(Type.String({ description: "ISO date to scan from (default: 7 days ago)" })),
+      scope: Type.Optional(StringEnum(["wiki", "vault", "both"] as const)),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const vaultRoot = resolve(root, ".."); // Wiki/ is inside the vault
+      const result = await scanActivity(root, vaultRoot, {
+        since: params.since,
+        scope: params.scope ?? "both",
+      });
+      return {
+        content: [{ type: "text", text: formatActivity(result) }],
+        details: result,
+      };
+    },
+  });
+
   pi.registerCommand("wiki-status", {
     description: "Show a short llm-wiki status summary",
     handler: async (_args, ctx) => {
@@ -432,4 +456,49 @@ function formatStatus(status: StatusSummary): string {
     ...(status.lastCapture ? [`Last capture: ${status.lastCapture}`] : []),
     ...(status.lastEvent ? [`Last event: ${status.lastEvent}`] : []),
   ].join("\n");
+}
+
+function formatActivity(result: Awaited<ReturnType<typeof scanActivity>>): string {
+  const lines: string[] = [
+    `Activity: ${result.period.since} → ${result.period.until}`,
+    ``,// empty string
+  ];
+  // Wiki activity
+  lines.push(`Wiki pages: ${result.wikiActivity.totalPages} total`);
+  if (Object.keys(result.wikiActivity.pagesByStatus).length > 0) {
+    const statusStr = Object.entries(result.wikiActivity.pagesByStatus)
+      .map(([s, n]) => `${s}: ${n}`)
+      .join(", ");
+    lines.push(`Page statuses: ${statusStr}`);
+  }
+  lines.push(`Events in period: ${result.wikiActivity.recentEvents.length}`);
+  lines.push(`Recent page changes: ${result.wikiActivity.recentPageChanges.length}`);
+
+  // Vault activity
+  if (result.vaultActivity) {
+    lines.push(`\nVault changes:`);
+    lines.push(`  Project/: ${result.vaultActivity.recentProjectChanges.length} files`);
+    lines.push(`  Resource/: ${result.vaultActivity.recentResourceChanges.length} files`);
+    lines.push(`  Draft/: ${result.vaultActivity.recentDraftChanges.length} files`);
+    lines.push(`  LIST.md items: ${result.vaultActivity.listItems.length}`);
+  }
+
+  // Projects
+  if (result.projects && result.projects.length > 0) {
+    lines.push(`\nProjects:`);
+    for (const p of result.projects) {
+      lines.push(`  ${p.title} — ${p.status}, ${p.priority} priority` +
+        (p.deadline ? `, deadline: ${p.deadline}` : "") +
+        (p.lastAction ? `, last action: ${p.lastAction}` : ""));
+    }
+  }
+
+  // Git
+  if (result.gitLog) {
+    lines.push(`\nGit commits in period: ${result.gitLog.commits}`);
+  } else {
+    lines.push(`\nGit log: not available (not a git repo or git not found)`);
+  }
+
+  return lines.join("\n");
 }
