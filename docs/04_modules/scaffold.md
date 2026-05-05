@@ -1,0 +1,29 @@
+# Module: scaffold
+
+## Responsibility
+
+Bootstraps a new wiki vault: creates the directory structure (inbox, pages, meta, archive, .wiki/templates), writes default config, templates, schema, and initial metadata files. Also implements ensureCanonicalPage() for creating deduplicated topic/plan/review pages.
+
+## Entry Points
+
+- extensions/brain-wiki/src/scaffold.ts → bootstrapVault(), ensureCanonicalPage()
+
+## Key Files
+
+- extensions/brain-wiki/src/scaffold.ts → all scaffolding logic
+
+## Constraints
+
+- bootstrapVault() refuses to run if .wiki/config.json already exists unless force=true
+- Page creation deduplicates against the existing registry — prevents duplicate titles and aliases
+- Templates are rendered with template variables (id, title, date, etc.)
+- Default templates are embedded as constants in the file
+
+## Scope Table
+
+| Layer | Item | Description |
+|-------|------|-------------|
+| Implementation | extensions/brain-wiki/src/scaffold.ts | bootstrapVault(): creates all directories, writes config, templates, schema, metadata files; ensureCanonicalPage(): finds or creates canonical pages with dedup |
+| Consumer | extensions/brain-wiki/index.ts | wiki_bootstrap tool handler calls bootstrapVault(); wiki_ensure_page tool handler calls ensureCanonicalPage() |
+| Consumer | extensions/brain-wiki/src/frontmatter.ts | readTemplate() and renderTemplate() are used for page content generation |
+| Consumer | extensions/brain-wiki/src/slug.ts | slugifyTitle() and dedupeSlug() used for page filename generation |
