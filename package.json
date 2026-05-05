@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/walker/pi-brain-wiki.git"
   },
-  "homepage": "https://github.com/Kausik-A/pi-llm-wiki#readme",
+  "homepage": "https://github.com/walker/pi-brain-wiki#readme",
   "bugs": {
     "url": "https://github.com/walker/pi-brain-wiki/issues"
   },
@@ -42,7 +42,7 @@
   },
   "pi": {
     "extensions": [
-      "./extensions/llm-wiki/index.ts"
+      "./extensions/brain-wiki/index.ts"
     ]
   },
   "dependencies": {

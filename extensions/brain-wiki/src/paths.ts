@@ -4,6 +4,9 @@ import type { CanonicalPageType } from "./types.ts";
 
 export const CONFIG_PATH = join(".wiki", "config.json");
 
+// Common subdirectory names under which a vault may be rooted (checked at each level)
+const VAULT_SUBDIRS = [".", "Wiki", "wiki"];
+
 async function exists(path: string): Promise<boolean> {
   try {
     await access(path);
@@ -27,7 +30,11 @@ export async function resolveWikiRoot(cwd: string, explicitRoot?: string): Promi
 
   let current = resolve(cwd);
   while (true) {
-    if (await exists(join(current, CONFIG_PATH))) return current;
+    // Check each vault-subdirectory name at this level
+    for (const subdir of VAULT_SUBDIRS) {
+      const candidate = subdir === "." ? current : join(current, subdir);
+      if (await exists(join(candidate, CONFIG_PATH))) return candidate;
+    }
     const parent = dirname(current);
     if (parent === current) break;
     current = parent;
@@ -92,7 +99,7 @@ export function metaPath(root: string, name: string): string {
 }
 
 export function lockPath(root: string): string {
-  return join(root, ".wiki", ".llm-wiki.lock");
+  return join(root, ".wiki", ".brain-wiki.lock");
 }
 
 export function normalizeWikiLinkTarget(target: string): string | undefined {

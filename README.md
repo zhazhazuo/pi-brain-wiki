@@ -65,7 +65,7 @@ Wiki/
 cd ~/projects/pi-brain-wiki
 npm install
 npm run check
-pi -e ./extensions/llm-wiki/index.ts
+pi -e ./extensions/brain-wiki/index.ts
 ```
 
 ## License
