@@ -108,6 +108,21 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       };
     }
 
+    if (analysis.outsidePaths.length > 0) {
+      const outsideList = analysis.outsidePaths
+        .map((path) => toRelative(root, path))
+        .join(", ");
+      if (ctx.hasUI)
+        ctx.ui.notify(
+          `Blocked write outside wiki: ${outsideList}. Write into Wiki/ instead — the user is responsible for content outside the wiki.`,
+          "warning",
+        );
+      return {
+        block: true,
+        reason: `brain-wiki restricts agent writes to the wiki domain. Write into Wiki/ instead of: ${outsideList}`,
+      };
+    }
+
     if (analysis.wikiPaths.length > 0) {
       dirtyRoots.add(root);
     }

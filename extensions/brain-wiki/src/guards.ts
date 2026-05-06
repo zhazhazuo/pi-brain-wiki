@@ -5,13 +5,17 @@ interface GuardAnalysis {
   allPaths: string[];
   protectedPaths: string[];
   wikiPaths: string[];
+  outsidePaths: string[];
 }
 
 export function analyzeToolMutation(root: string, toolName: string, input: any, cwd: string): GuardAnalysis {
   const allPaths = extractPaths(toolName, input, cwd);
   const protectedPaths = allPaths.filter((path) => isProtected(root, path));
-  const wikiPaths = allPaths.filter((path) => isWithin(resolve(root, "wiki"), path));
-  return { allPaths, protectedPaths, wikiPaths };
+  const wikiPaths = allPaths.filter((path) => isWithin(root, path));
+  const outsidePaths = allPaths.filter(
+    (path) => !isWithin(root, path) && !isProtected(root, path),
+  );
+  return { allPaths, protectedPaths, wikiPaths, outsidePaths };
 }
 
 function extractPaths(toolName: string, input: any, cwd: string): string[] {
