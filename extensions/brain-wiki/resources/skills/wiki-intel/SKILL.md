@@ -57,6 +57,10 @@ This is the difference between a file list and an intelligence product.
 5. Read wiki/meta/index.md → knowledge state
 6. Read recent wiki events → what knowledge was recently added/updated
 7. Read Draft/ maturity → "ready to file" candidates
+8. Check lifecycle backlog from `wiki_scan_activity` output:
+   - Integrated entries awaiting Recall review (2+ weeks old)
+   - Archived entries that may be clearable
+   - Consumed topics with new sources (needs reactivation)
 
 Synthesize into:
 - What's active and needs attention (deadlines, blocked projects)
@@ -144,6 +148,19 @@ New connections or themes across activity.
 
 ## Recommendations
 Specific, actionable next steps with reasoning.
+
+### Lifecycle Backlog
+
+#### Awaiting Recall review (integrated → consumed)
+- [[summaries/Source-A]] — integrated 16 days ago, no PKB entry found
+- [[summaries/Source-B]] — integrated 14 days ago
+
+#### Awaiting clearing (archived → cleared)
+- [[summaries/Source-C]] — PKB covered: Resource/1 CS/17 AI/LLM Memory.md
+- [[summaries/Source-D]] — no active links
+
+#### Reactivated (consumed with new sources)
+- [[topics/Type-Theory]] — new integrated source pointing at consumed topic
 ```
 
 ## Rules

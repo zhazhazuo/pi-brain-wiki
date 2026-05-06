@@ -138,6 +138,7 @@ Follow all rules from `brain-wiki` skill:
 | Finish enriching topic (multiple sources) | topic → `integrated` |
 | Find contradiction | both pages → `contested` (flag to Walker) |
 | Newer source replaces older | older → `superseded`, link back |
+| New source integrated into consumed topic | topic → `integrated` (reactivated), log `refactor` event noting reactivation |
 
 ### 9. Discuss contradictions, don't silently resolve
 
@@ -186,3 +187,15 @@ This is the same protocol minus the capture step. The absorption loop and superv
 - **Does not modify PARA files.** Read-only access to Project/, Area/, Resource/, Draft/.
 - **Does not answer orientation questions.** That's the Intelligence agent. If Walker asks "what was I focused on?", suggest an intelligence session.
 - **Does not create plans or reviews.** Those are Intelligence agent outputs.
+
+### 10. Reactivation rule
+
+When integrating a new source into a topic that is currently `consumed`:
+
+1. Check the topic's status before editing
+2. If the topic is `consumed`, flip its status back to `integrated`
+3. Add a note to the frontmatter `updated` field with today's date
+4. Log a `refactor` event: `wiki_log_event kind=refactor title="Reactivated [topic name]" pagePaths=[topic path] notes=["reactivated-from-consumed"]`
+5. Proceed with the integration as normal
+
+This ensures that consumed topics are automatically re-reviewed when new information arrives. The lint `staleness` check catches any consumed topics that were missed.

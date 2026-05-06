@@ -59,6 +59,32 @@ export async function rebuildLog(root: string, title: string): Promise<string> {
   return "meta/log.md";
 }
 
+export async function markPageStatus(
+  root: string,
+  pagePaths: string[],
+  status: string,
+  extraFields: Record<string, any>,
+): Promise<void> {
+  for (const relativePath of pagePaths) {
+    const absolutePath = join(root, relativePath);
+    try {
+      const page = await parsePage(root, absolutePath);
+      await writePage(
+        absolutePath,
+        {
+          ...page.frontmatter,
+          status,
+          updated: todayStamp(new Date()),
+          ...extraFields,
+        },
+        page.body,
+      );
+    } catch {
+      // Skip pages that don't exist or can't be parsed
+    }
+  }
+}
+
 export async function markSourcesIntegrated(root: string, sourceIds: string[], integratedAt: string): Promise<void> {
   for (const sourceId of sourceIds) {
     const manifestPath = join(sourcePacketDir(root, sourceId), "manifest.json");

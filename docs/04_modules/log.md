@@ -19,6 +19,14 @@ Appends structured events to meta/events.jsonl and regenerates meta/log.md from 
 - log.md is regenerated from scratch each time from the events.jsonl file
 - Event kinds: capture, integrate, query, plan, review, lint, refactor, rebuild
 
+## Lifecycle Events
+
+| Kind | Effect |
+|------|--------|
+| `consumed` | Updates page frontmatter: `status: consumed`, `consumed_at: <timestamp>`, `pkb_refs: [...]`. Notes prefixed `pkb:` provide the PKB paths. |
+| `archived` | Updates page frontmatter: `status: archived` |
+| `cleared` | Updates page frontmatter: `status: cleared`, `cleared_at: <timestamp>` |
+
 ## Scope Table
 
 | Layer | Item | Description |

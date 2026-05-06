@@ -7,6 +7,7 @@ export async function searchRegistry(
   query: string,
   type?: WikiPageType,
   limit?: number,
+  excludeStatuses?: string[],
 ): Promise<SearchResult> {
   const config = await loadConfig(root);
   const normalized = query.trim().toLowerCase();
@@ -14,6 +15,10 @@ export async function searchRegistry(
 
   const matches = registry.pages
     .filter((entry) => !type || entry.type === type)
+    .filter((entry) => {
+      if (!excludeStatuses || excludeStatuses.length === 0) return true;
+      return !excludeStatuses.includes(entry.status ?? "");
+    })
     .map((entry) => ({
       entry,
       score: scoreEntry(entry, normalized, tokens),

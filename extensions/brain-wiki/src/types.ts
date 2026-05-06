@@ -47,6 +47,8 @@ export interface RegistryEntry {
   tags: string[];
   updated?: string;
   sourceIds: string[];
+  consumedAt?: string;
+  pkbRefs?: string[];
   linksOut: string[];
   headings: string[];
   wordCount: number;
@@ -77,7 +79,10 @@ export type WikiEventKind =
   | "review"
   | "lint"
   | "refactor"
-  | "rebuild";
+  | "rebuild"
+  | "consumed"
+  | "archived"
+  | "cleared";
 
 export interface WikiEvent {
   ts: string;
@@ -140,7 +145,7 @@ export interface SourceManifest {
     size?: number;
     sha256?: string;
   }>;
-  status: "captured" | "integrated" | "superseded" | "archived";
+  status: "captured" | "integrated" | "superseded" | "archived" | "consumed" | "cleared";
 }
 
 export interface CaptureParams {
@@ -217,7 +222,17 @@ export interface StatusSummary {
     captured: number;
     integrated: number;
     unintegrated: number;
+    consumed: number;
+    archived: number;
+    cleared: number;
   };
   lastCapture?: string;
   lastEvent?: string;
+  oldestIntegrated?: string;
+}
+
+export interface LifecycleBacklog {
+  integratedAwaitingRecall: Array<{ path: string; title: string; status: string; integratedAt?: string; daysSinceIntegration: number }>;
+  consumedReactivated: Array<{ path: string; title: string; consumedAt: string; newSourceIds: string[] }>;
+  clearableCandidates: Array<{ path: string; title: string; reason: "pkb-covered" | "superseded" | "no-active-links"; pkbRefs?: string[] }>;
 }

@@ -106,17 +106,23 @@ This applies to every session, every ingest, every edit. No exceptions.
 ## Page Lifecycle
 
 ```
-captured → integrated → contested | superseded | archived
+captured → integrated → consumed → archived → cleared
+               ↑            │
+               └────────────┘  (reactivation on new source)
 ```
 
 | Status | Meaning | When Applied |
 |--------|---------|-------------|
 | `captured` | Source ingested but not integrated into topics | Auto-set on capture |
 | `integrated` | Content woven into wiki; page is authoritative | Set after integration complete |
+| `consumed` | Walker has internalized this; PKB is the source of truth | Set via Recall skill or `/wiki-consumed` command |
 | `draft` | Topic page exists but not yet authoritative | Set on topic creation |
 | `contested` | Two sources openly disagree; resolution pending | Set when contradiction flagged |
 | `superseded` | Newer source has replaced this page's claims | Old page kept for provenance |
-| `archived` | Retired to Wiki/archive/ | Set on commit-to-KB or when no longer needed |
+| `archived` | Retired; excluded from search and lint by default | Set when knowledge is fully in PKB and no longer needed in wiki |
+| `cleared` | Removed from wiki; preserved during grace period | Set by Recall/Intelligence when archiving clears old entries |
+
+**Reactivation:** When a new source is integrated into a `consumed` topic, flip the topic back to `integrated`. Consumed is a checkpoint, not a destination.
 
 **Superseded sources are never deleted.** They preserve the evolution of understanding. The newer page links back: "Supersedes `[[summaries/old-summary]]`."
 
@@ -141,6 +147,8 @@ title: "Source Title"
 status: captured
 captured_at: 2026-05-05
 integrated_at:
+consumed_at:    # ISO date when Walker confirmed internalization (only for consumed status)
+pkb_refs:       # Array of vault-relative paths to PKB entries (only for consumed status)
 origin_type: url
 origin_value: https://...
 manifest_path: inbox/SRC-2026-05-05-001/manifest.json
@@ -160,6 +168,8 @@ tags: [programming-paradigm]
 status: integrated
 updated: 2026-05-05
 source_ids: []
+consumed_at:    # ISO date when Walker confirmed internalization (only for consumed status)
+pkb_refs:       # Array of vault-relative paths to PKB entries (only for consumed status)
 links:
   - "[[topics/Lambda-Calculus]]"
   - "[[Resource/1 CS/11 Programming Language/FP.md]]"

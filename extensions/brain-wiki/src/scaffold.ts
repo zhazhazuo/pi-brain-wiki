@@ -16,6 +16,8 @@ kind: {{kind}}
 status: captured
 captured_at: {{captured_at}}
 integrated_at:
+consumed_at:
+pkb_refs:
 origin_type: {{origin_type}}
 origin_value: {{origin_value}}
 manifest_path: {{manifest_path}}
@@ -58,6 +60,8 @@ tags: []
 status: draft
 updated: {{updated}}
 source_ids: []
+consumed_at:
+pkb_refs:
 summary:
 ---
 
@@ -168,6 +172,35 @@ Every summary page lists which topics it affects:
 - [[topics/functional-programming]] — adds historical context
 - [[topics/lambda-calculus]] — confirms existing timeline
 \`\`\`
+
+## Knowledge lifecycle
+
+Pages move through statuses:
+
+\`\`\`
+captured → integrated → consumed → archived → cleared
+               ↑            │
+               └────────────┘  (reactivation on new source)
+\`\`\`
+
+| Status | Meaning | Included in search? |
+|--------|---------|---------------------|
+| \`captured\` | Source ingested, not yet integrated | Yes |
+| \`integrated\` | Content woven into topics | Yes |
+| \`consumed\` | Walker internalized; PKB is source of truth | Yes (follows pkb_refs) |
+| \`archived\` | Retired | No (override with includeArchived) |
+| \`cleared\` | Removed during grace period | No |
+
+### Consumed pages
+
+When Walker confirms knowledge is in the PKB:
+1. Run Recall comparison (or /wiki-consumed command)
+2. Page status → \`consumed\`
+3. Frontmatter gains \`consumed_at\` and \`pkb_refs\`
+
+### Reactivation
+
+If a new source integrates into a consumed topic, the topic flips back to integrated. Consumed is a checkpoint, not a destination.
 
 ## Workflows
 

@@ -18,6 +18,14 @@ Scans vault and wiki activity for a given time period. Returns structured data a
 - Returns file-level change data with timestamps
 - Default scan window is 7 days
 
+## Lifecycle Backlog
+
+`wiki_scan_activity` now returns a `lifecycle` object containing:
+
+- `integratedAwaitingRecall`: pages in `integrated` status for 14+ days
+- `consumedReactivated`: consumed topics with newly integrated sources
+- `clearableCandidates`: archived entries that may be eligible for clearing
+
 ## Scope Table
 
 | Layer | Item | Description |

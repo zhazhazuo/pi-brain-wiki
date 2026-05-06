@@ -29,6 +29,11 @@ const FRONTMATTER_REQUIRED: Record<string, readonly string[]> = {
   review: REVIEW_REQUIRED,
 };
 
+function isArchivedOrCleared(page: ParsedPage | RegistryData["pages"][number]): boolean {
+  const status = ("frontmatter" in page ? page.frontmatter.status : page.status) ?? "";
+  return status === "archived" || status === "cleared";
+}
+
 export async function runLint(root: string, mode: string, writeReport = false, limit?: number): Promise<LintRun> {
   const pages = await scanWikiPages(root);
   const registry = buildRegistry(pages);
@@ -42,6 +47,7 @@ export async function runLint(root: string, mode: string, writeReport = false, l
   if (mode === "duplicates" || mode === "all") allIssues.push(...lintDuplicates(registry));
   if (mode === "coverage" || mode === "all") allIssues.push(...lintCoverage(registry, backlinks));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleness(registry));
+  if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleConsumed(registry, backlinks));
 
   const issues = typeof limit === "number" ? allIssues.slice(0, limit) : allIssues;
   const run: LintRun = {
@@ -100,10 +106,12 @@ export function renderLintReport(run: LintRun): string {
 }
 
 function lintLinks(pages: ParsedPage[], registry: RegistryData): LintIssue[] {
-  const known = new Set(registry.pages.map((page) => page.path));
+  const known = new Set(registry.pages.filter((p) => !isArchivedOrCleared(p)).map((page) => page.path));
+  const hiddenSet = new Set(registry.pages.filter((p) => isArchivedOrCleared(p)).map((page) => page.path));
   const issues: LintIssue[] = [];
 
   for (const page of pages) {
+    if (isArchivedOrCleared(page)) continue;
     for (const rawLink of page.rawLinks) {
       // Skip PARA links — they point outside the wiki
       if (
@@ -143,7 +151,7 @@ function lintLinks(pages: ParsedPage[], registry: RegistryData): LintIssue[] {
 function lintOrphans(registry: RegistryData, backlinks: BacklinksData): LintIssue[] {
   // Only flag topics as orphans (plans and reviews are time-bound, not expected to be linked)
   return registry.pages
-    .filter((page) => page.type === "topic")
+    .filter((page) => page.type === "topic" && !isArchivedOrCleared(page))
     .flatMap((page) => {
       const record = backlinks.byPath[page.path];
       if (!record) return [];
@@ -164,6 +172,7 @@ function lintOrphans(registry: RegistryData, backlinks: BacklinksData): LintIssu
 function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
   const issues: LintIssue[] = [];
   for (const page of pages) {
+    if (isArchivedOrCleared(page)) continue;
     const pageType = String(page.frontmatter.type || "");
     const required = FRONTMATTER_REQUIRED[pageType];
     if (!required) {
@@ -185,6 +194,26 @@ function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
         });
       }
     }
+
+    // Validate consumed pages have consumed_at and pkb_refs
+    if (String(page.frontmatter.status) === "consumed") {
+      if (!Object.prototype.hasOwnProperty.call(page.frontmatter, "consumed_at")) {
+        issues.push({
+          kind: "frontmatter",
+          severity: "error",
+          path: page.relativePath,
+          message: "Consumed page is missing consumed_at field.",
+        });
+      }
+      if (!Object.prototype.hasOwnProperty.call(page.frontmatter, "pkb_refs") || !Array.isArray(page.frontmatter.pkb_refs) || page.frontmatter.pkb_refs.length === 0) {
+        issues.push({
+          kind: "frontmatter",
+          severity: "error",
+          path: page.relativePath,
+          message: "Consumed page is missing pkb_refs field or it is empty.",
+        });
+      }
+    }
   }
   return issues;
 }
@@ -196,7 +225,7 @@ function lintDuplicates(registry: RegistryData): LintIssue[] {
   const seenIds = new Map<string, string>();
 
   // Only check topics for duplicates (summaries are date-stamped, plans/reviews are time-bound)
-  for (const page of registry.pages.filter((entry) => entry.type === "topic")) {
+  for (const page of registry.pages.filter((entry) => entry.type === "topic" && !isArchivedOrCleared(entry))) {
     const normalizedTitle = page.title.trim().toLowerCase();
     if (seenTitles.has(normalizedTitle)) {
       issues.push({
@@ -242,6 +271,7 @@ function lintDuplicates(registry: RegistryData): LintIssue[] {
 function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIssue[] {
   const issues: LintIssue[] = [];
   for (const page of registry.pages) {
+    if (isArchivedOrCleared(page)) continue;
     if (page.type === "summary") {
       const inbound = backlinks.byPath[page.path]?.inbound ?? [];
       const citedByTopic = inbound.filter((path) => !path.includes("/summaries/") && path !== page.path);
@@ -270,6 +300,7 @@ function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIss
 
 function lintStaleness(registry: RegistryData): LintIssue[] {
   return registry.pages.flatMap((page) => {
+    if (isArchivedOrCleared(page)) return [];
     if (page.type === "summary") {
       if (page.status === "captured") {
         return [
@@ -305,4 +336,26 @@ function lintStaleness(registry: RegistryData): LintIssue[] {
 
     return [];
   });
+}
+
+function lintStaleConsumed(registry: RegistryData, backlinks: BacklinksData): LintIssue[] {
+  const issues: LintIssue[] = [];
+  for (const page of registry.pages) {
+    if (page.status !== "consumed") continue;
+    const record = backlinks.byPath[page.path];
+    if (!record) continue;
+    const inboundIntegrated = record.inbound.filter((inPath) => {
+      const inboundPage = registry.pages.find((p) => p.path === inPath);
+      return inboundPage && inboundPage.status === "integrated";
+    });
+    if (inboundIntegrated.length > 0) {
+      issues.push({
+        kind: "staleness",
+        severity: "warning",
+        path: page.path,
+        message: `Consumed page has ${inboundIntegrated.length} newly integrated source(s) pointing at it. Consider reactivation (flip to integrated).`,
+      });
+    }
+  }
+  return issues;
 }

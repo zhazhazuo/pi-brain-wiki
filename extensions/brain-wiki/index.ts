@@ -13,6 +13,7 @@ import { rebuildRegistryAndIndex } from "./src/indexer.ts";
 import { runLint } from "./src/lint.ts";
 import {
   appendEvent,
+  markPageStatus,
   markSourcesIntegrated,
   readEvents,
   rebuildLog,
@@ -63,6 +64,9 @@ const EVENT_KIND_ENUM = StringEnum([
   "lint",
   "refactor",
   "rebuild",
+  "consumed",
+  "archived",
+  "cleared",
 ] as const);
 
 export default function brainWikiExtension(pi: ExtensionAPI) {
@@ -72,6 +76,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       join(skillDir, "wiki-map", "SKILL.md"),
       join(skillDir, "wiki-workshop", "SKILL.md"),
       join(skillDir, "wiki-intel", "SKILL.md"),
+      join(skillDir, "recall", "SKILL.md"),
     ],
   }));
 
@@ -266,16 +271,25 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       limit: Type.Optional(
         Type.Number({ description: "Maximum number of matches to return" }),
       ),
+      includeArchived: Type.Optional(
+        Type.Boolean({
+          description: "Include archived and cleared entries in results (default: false)",
+        }),
+      ),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const registry = await loadRegistry(root);
+      const excludeStatuses = params.includeArchived
+        ? []
+        : ["archived", "cleared"];
       const result = await searchRegistry(
         root,
         registry,
         params.query,
         params.type as WikiPageType | undefined,
         params.limit,
+        excludeStatuses,
       );
       return {
         content: [{ type: "text", text: formatSearch(result) }],
@@ -446,6 +460,21 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         if (params.kind === "integrate" && params.sourceIds?.length) {
           await markSourcesIntegrated(root, params.sourceIds, ts);
           await rebuildAllGeneratedArtifacts(root);
+        } else if (params.kind === "consumed" && params.pagePaths?.length) {
+          const pkbRefs = (params.notes ?? []).filter((n) => n.startsWith("pkb:")).map((n) => n.slice(4));
+          await markPageStatus(root, params.pagePaths, "consumed", {
+            consumed_at: ts,
+            pkb_refs: pkbRefs.length > 0 ? pkbRefs : undefined,
+          });
+          await rebuildAllGeneratedArtifacts(root);
+        } else if (params.kind === "archived" && params.pagePaths?.length) {
+          await markPageStatus(root, params.pagePaths, "archived", {});
+          await rebuildAllGeneratedArtifacts(root);
+        } else if (params.kind === "cleared" && params.pagePaths?.length) {
+          await markPageStatus(root, params.pagePaths, "cleared", {
+            cleared_at: new Date().toISOString(),
+          });
+          await rebuildAllGeneratedArtifacts(root);
         } else {
           await rebuildLog(root, config.title);
         }
@@ -542,6 +571,45 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       ctx.ui.notify("brain-wiki metadata rebuilt", "info");
     },
   });
+
+  pi.registerCommand("wiki-consumed", {
+    description:
+      "Mark wiki pages as consumed by PKB. Usage: /wiki-consumed <page-path> <pkb-ref-1> [pkb-ref-2] ...",
+    handler: async (args, ctx) => {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const parts = (args ?? "").trim().split(/\s+/);
+      if (parts.length < 2 || !parts[0]) {
+        ctx.ui.notify(
+          "Usage: /wiki-consumed <page-path> <pkb-ref-1> [pkb-ref-2] ...",
+          "warning",
+        );
+        return;
+      }
+      const pagePath = parts[0];
+      const pkbRefs = parts.slice(1);
+
+      return withRootLock(root, async () => {
+        const ts = new Date().toISOString();
+        await appendEvent(root, {
+          ts,
+          kind: "consumed",
+          title: `Consumed ${pagePath}`,
+          pagePaths: [pagePath],
+          notes: pkbRefs.map((ref) => `pkb:${ref}`),
+          actor: "user",
+        });
+        await markPageStatus(root, [pagePath], "consumed", {
+          consumed_at: ts,
+          pkb_refs: pkbRefs,
+        });
+        await rebuildAllGeneratedArtifacts(root);
+        ctx.ui.notify(
+          `Marked ${pagePath} as consumed (PKB: ${pkbRefs.join(", ")})`,
+          "info",
+        );
+      });
+    },
+  });
 }
 
 async function withRootLock<T>(
@@ -583,6 +651,14 @@ async function buildStatus(root: string): Promise<StatusSummary> {
   const integrated = sources.filter(
     (page) => page.status === "integrated",
   ).length;
+  const consumed = sources.filter((page) => page.status === "consumed").length;
+  const archived = sources.filter((page) => page.status === "archived").length;
+  const cleared = sources.filter((page) => page.status === "cleared").length;
+
+  const integratedEntries = sources.filter((page) => page.status === "integrated" && page.updated);
+  const oldestIntegrated = integratedEntries.length > 0
+    ? integratedEntries.reduce((oldest, entry) => entry.updated! < oldest ? entry.updated! : oldest, integratedEntries[0].updated!)
+    : undefined;
 
   return {
     totals,
@@ -590,10 +666,14 @@ async function buildStatus(root: string): Promise<StatusSummary> {
       captured,
       integrated,
       unintegrated: captured,
+      consumed,
+      archived,
+      cleared,
     },
     lastCapture: [...events].reverse().find((event) => event.kind === "capture")
       ?.ts,
     lastEvent: events.at(-1)?.ts,
+    oldestIntegrated,
   };
 }
 
@@ -640,7 +720,8 @@ function formatLint(result: Awaited<ReturnType<typeof runLint>>): string {
 function formatStatus(status: StatusSummary): string {
   return [
     `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review)`,
-    `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.unintegrated} unintegrated`,
+    `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.consumed} consumed, ${status.sources.archived} archived, ${status.sources.cleared} cleared`,
+    ...(status.oldestIntegrated ? [`Oldest unintegrated: ${status.oldestIntegrated}`] : []),
     ...(status.lastCapture ? [`Last capture: ${status.lastCapture}`] : []),
     ...(status.lastEvent ? [`Last event: ${status.lastEvent}`] : []),
   ].join("\n");
@@ -698,6 +779,27 @@ function formatActivity(
     lines.push(`\nGit commits in period: ${result.gitLog.commits}`);
   } else {
     lines.push(`\nGit log: not available (not a git repo or git not found)`);
+  }
+
+  // Lifecycle backlog
+  if (result.lifecycle) {
+    lines.push(`\nLifecycle backlog:`);
+    if (result.lifecycle.integratedAwaitingRecall.length > 0) {
+      lines.push(`  Awaiting Recall: ${result.lifecycle.integratedAwaitingRecall.length} entries`);
+      for (const entry of result.lifecycle.integratedAwaitingRecall.slice(0, 5)) {
+        lines.push(`    - ${entry.title} (${entry.daysSinceIntegration}d since integration)`);
+      }
+    } else {
+      lines.push(`  Awaiting Recall: none`);
+    }
+    if (result.lifecycle.consumedReactivated.length > 0) {
+      lines.push(`  Reactivated (consumed with new sources): ${result.lifecycle.consumedReactivated.length} entries`);
+    }
+    if (result.lifecycle.clearableCandidates.length > 0) {
+      lines.push(`  Clearable: ${result.lifecycle.clearableCandidates.length} archived entries`);
+    } else {
+      lines.push(`  Clearable: none`);
+    }
   }
 
   return lines.join("\n");

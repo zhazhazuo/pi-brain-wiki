@@ -19,6 +19,10 @@ Queries the compiled page registry with keyword matching, scoring, and ranking. 
 - Default result limit is configured in wiki config (default 10)
 - Supports filtering by page type (summary, topic, plan, review)
 
+## Lifecycle Filtering
+
+Search excludes `archived` and `cleared` entries by default. Set `includeArchived: true` to include them.
+
 ## Scope Table
 
 | Layer | Item | Description |

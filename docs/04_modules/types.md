@@ -18,6 +18,16 @@ Defines all shared TypeScript interfaces, types, and enums used across the exten
 - No implementation logic — types only
 - Tool parameter schemas are defined inline in index.ts using @sinclair/typebox, not in types.ts
 
+## Lifecycle Types
+
+| Type | New Fields |
+|------|-----------|
+| `SourceManifest.status` | Added `"consumed"` and `"cleared"` |
+| `WikiEventKind` | Added `"consumed"`, `"archived"`, `"cleared"` |
+| `RegistryEntry` | Added `consumedAt?`, `pkbRefs?` |
+| `StatusSummary.sources` | Added `consumed`, `archived`, `cleared` |
+| `LifecycleBacklog` | New interface for activity scan backlog data |
+
 ## Scope Table
 
 | Layer | Item | Description |

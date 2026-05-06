@@ -28,6 +28,11 @@ Search wiki (wiki_search)
     │       ▼
     │   Read topic summaries (5-20 lines each)
     │       │
+    │       │   If a topic is `consumed`, follow its `pkb_refs` to the PKB entry
+    │       │   instead of reading the wiki page. The PKB is the source of truth
+    │       │   for consumed knowledge. If the PKB entry is missing, flag it:
+    │       │   "Topic marked consumed but PKB entry not found at [path]."
+    │       │
     │       ├── Enough depth for the question?
     │       │       │
     │       │       ▼

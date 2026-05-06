@@ -3,9 +3,10 @@ import { readFile, readdir, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import { loadConfig } from "./config.ts";
+import { buildRegistry, scanWikiPages } from "./indexer.ts";
 import { readEvents } from "./log.ts";
 import { metaPath } from "./paths.ts";
-import type { WikiEvent } from "./types.ts";
+import type { LifecycleBacklog, WikiEvent } from "./types.ts";
 
 const execAsync = promisify(execFile);
 
@@ -35,6 +36,7 @@ export interface ActivityResult {
     commits: number;
     summary: string;
   } | null;
+  lifecycle: LifecycleBacklog;
 }
 
 export interface ActivityParams {
@@ -87,12 +89,58 @@ export async function scanActivity(root: string, vaultRoot: string, params: Acti
     gitLog = await getGitLog(vaultRoot, since);
   }
 
+  const lifecycle = await computeLifecycleBacklog(root);
+
   return {
     period: { since, until },
     wikiActivity,
+    lifecycle,
     vaultActivity,
     projects,
     gitLog,
+  };
+}
+
+// ── Lifecycle backlog ──
+
+async function computeLifecycleBacklog(root: string): Promise<LifecycleBacklog> {
+  const pages = await scanWikiPages(root);
+  const registry = buildRegistry(pages);
+
+  const now = Date.now();
+
+  const integratedAwaitingRecall: LifecycleBacklog["integratedAwaitingRecall"] = [];
+
+  for (const entry of registry.pages) {
+    if (entry.status === "integrated" && entry.updated) {
+      const daysSince = (now - new Date(entry.updated).getTime()) / 86_400_000;
+      if (daysSince >= 14) {
+        integratedAwaitingRecall.push({
+          path: entry.path,
+          title: entry.title,
+          status: entry.status,
+          integratedAt: entry.updated,
+          daysSinceIntegration: Math.floor(daysSince),
+        });
+      }
+    }
+  }
+
+  const clearableCandidates: LifecycleBacklog["clearableCandidates"] = [];
+  for (const entry of registry.pages) {
+    if (entry.status === "archived") {
+      clearableCandidates.push({
+        path: entry.path,
+        title: entry.title,
+        reason: "no-active-links",
+      });
+    }
+  }
+
+  return {
+    integratedAwaitingRecall,
+    consumedReactivated: [],
+    clearableCandidates,
   };
 }
 

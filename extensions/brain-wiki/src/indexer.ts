@@ -35,6 +35,8 @@ export function buildRegistry(pages: ParsedPage[]): RegistryData {
       tags: arrayOfStrings(page.frontmatter.tags),
       updated: typeof page.frontmatter.updated === "string" ? page.frontmatter.updated : undefined,
       sourceIds: arrayOfStrings(page.frontmatter.source_ids),
+      consumedAt: typeof page.frontmatter.consumed_at === "string" && page.frontmatter.consumed_at ? page.frontmatter.consumed_at : undefined,
+      pkbRefs: arrayOfStrings(page.frontmatter.pkb_refs).length > 0 ? arrayOfStrings(page.frontmatter.pkb_refs) : undefined,
       linksOut: [...new Set(page.normalizedLinks)],
       headings: page.headings,
       wordCount: page.wordCount,

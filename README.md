@@ -17,6 +17,43 @@ Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates 
 - **Workshop agent** — supervised source ingest and integration
 - **Intelligence agent** — activity analysis, plans, and reviews
 
+## When to use each agent
+
+| Scenario | Agent | Why this agent |
+|----------|-------|----------------|
+| "What do we know about X?" | **Map** | Progressive disclosure: search registry → topic summaries → deep dive only if needed |
+| "Find sources about Y" | **Map** | Queries the compiled registry, surfaces summaries with citations |
+| "Where did I read about Z?" | **Map** | `wiki_search` matches on title, aliases, summary text, headings, tags |
+| "What topics are related to X?" | **Map** | Reads topic page → follows wikilinks → surfaces connected knowledge |
+| "Is there conflicting info about X?" | **Map** | Surfaces contradictions across summaries and topics, cites both sides |
+| "I found this article/video/paper" | **Workshop** | `wiki_capture_source` → creates inbox packet + summary stub → supervised integration |
+| "Integrate this into the wiki" | **Workshop** | Absorption loop: re-read targets → discuss takeaways → get confirmation → write |
+| "This topic page is thin, enrich it" | **Workshop** | Reads existing summaries that informed it → identifies gaps → proposes edits → confirms with Walker |
+| "Create a new topic page for X" | **Workshop** | Concrete noun test → `wiki_ensure_page` → write with substance → anti-thinning |
+| "Two sources disagree, reconcile" | **Workshop** | Flags both claims as `contested`, surfaces to Walker, waits for input |
+| "Refine this topic without new source" | **Workshop** | Re-read topic + its source pages → identify what's missing → propose improvements |
+| "What was I focused on this week?" | **Intelligence** | `wiki_scan_activity` → synthesizes activity clusters, not file lists |
+| "What should I work on next?" | **Intelligence** | Reads activity + LIST.md + Project/ frontmatter → prioritized, timeboxed plan |
+| "Give me a weekly/monthly review" | **Intelligence** | Period review: compares activity vs. stated priorities, flags neglected areas |
+| "What's been neglected?" | **Intelligence** | Scans for stale `last_action` in Project/ frontmatter, empty wiki topics, dormant Draft/ pages |
+| "Are there knowledge gaps I should fill?" | **Intelligence** | Cross-references wiki topic coverage with Area/ and Resource/ → suggests workshop sessions |
+
+**Decision rule of thumb:**
+
+| You want to… | Use… |
+|---|---|
+| **Read** from the wiki | Map |
+| **Write** to the wiki (with Walker supervising) | Workshop |
+| **Reflect** on activity and plan ahead | Intelligence |
+
+**Handoff pattern:**
+
+```
+Map finds a gap       → "This could benefit from a workshop session."
+Intelligence finds gap → "A workshop session on X is recommended."
+Workshop finishes      → Logs event, topics updated, Map can query them next time.
+```
+
 ## Page model
 
 | Type | Purpose | Template sections |
