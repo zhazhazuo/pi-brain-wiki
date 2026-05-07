@@ -231,6 +231,11 @@ export interface StatusSummary {
   lastCapture?: string;
   lastEvent?: string;
   oldestIntegrated?: string;
+  externalBacklinks?: {
+    total: number;
+    pageCount: number;
+    topPage?: { title: string; count: number };
+  };
 }
 
 export type ListItemCategory = "source" | "task" | "idea" | "meeting-note" | "plan" | "unknown";

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { StringEnum } from "@mariozechner/pi-ai";
@@ -25,7 +26,8 @@ import {
   resolveWikiRoot,
   toRelative,
 } from "./src/paths.ts";
-import { searchRegistry } from "./src/search.ts";
+import { searchRegistry, searchViaObsidian } from "./src/search.ts";
+import { ObsidianClient } from "./src/obsidian-client.ts";
 import { bootstrapVault, ensureCanonicalPage } from "./src/scaffold.ts";
 import type {
   RegistryData,
@@ -38,6 +40,23 @@ import type {
 const baseDir = dirname(fileURLToPath(import.meta.url));
 const skillDir = join(baseDir, "resources", "skills");
 const dirtyRoots = new Set<string>();
+
+let cachedClient: ObsidianClient | null = null;
+
+async function getObsidianClient(root: string): Promise<ObsidianClient | null> {
+  if (cachedClient) return cachedClient;
+  const vaultCwd = resolve(root, "..");
+  const client = new ObsidianClient({
+    socketPath: join(homedir(), ".obsidian-cli.sock"),
+    vaultCwd,
+    timeout: 10000,
+  });
+  if (await client.ping()) {
+    cachedClient = client;
+    return client;
+  }
+  return null;
+}
 
 const PAGE_TYPE_ENUM = StringEnum([
   "summary",
@@ -294,18 +313,31 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
+      const client = await getObsidianClient(root);
       const registry = await loadRegistry(root);
       const excludeStatuses = params.includeArchived
         ? []
         : ["archived", "cleared"];
-      const result = await searchRegistry(
-        root,
-        registry,
-        params.query,
-        params.type as WikiPageType | undefined,
-        params.limit,
-        excludeStatuses,
-      );
+      let result;
+      if (client) {
+        result = await searchViaObsidian(
+          client,
+          registry,
+          params.query,
+          params.type as WikiPageType | undefined,
+          params.limit,
+          excludeStatuses,
+        );
+      } else {
+        result = await searchRegistry(
+          root,
+          registry,
+          params.query,
+          params.type as WikiPageType | undefined,
+          params.limit,
+          excludeStatuses,
+        );
+      }
       return {
         content: [{ type: "text", text: formatSearch(result) }],
         details: result,
@@ -636,7 +668,8 @@ async function withRootLock<T>(
 
 async function rebuildAllGeneratedArtifacts(root: string): Promise<string[]> {
   const config = await loadConfig(root);
-  const { rebuilt } = await rebuildRegistryAndIndex(root);
+  const client = await getObsidianClient(root);
+  const { rebuilt } = await rebuildRegistryAndIndex(root, client);
   const logPath = await rebuildLog(root, config.title);
   return [...rebuilt, logPath];
 }
@@ -675,6 +708,18 @@ async function buildStatus(root: string): Promise<StatusSummary> {
     ? integratedEntries.reduce((oldest, entry) => entry.updated! < oldest ? entry.updated! : oldest, integratedEntries[0].updated!)
     : undefined;
 
+  const pagesWithExternal = registry.pages.filter(p => p.externalBacklinks > 0);
+  const externalTotal = pagesWithExternal.reduce((sum, p) => sum + p.externalBacklinks, 0);
+  const topPage = pagesWithExternal.length > 0
+    ? pagesWithExternal.reduce((best, p) => p.externalBacklinks > best.externalBacklinks ? p : best, pagesWithExternal[0])
+    : undefined;
+
+  const externalBacklinks = externalTotal > 0 ? {
+    total: externalTotal,
+    pageCount: pagesWithExternal.length,
+    topPage: topPage ? { title: topPage.title, count: topPage.externalBacklinks } : undefined,
+  } : undefined;
+
   return {
     totals,
     sources: {
@@ -689,6 +734,7 @@ async function buildStatus(root: string): Promise<StatusSummary> {
       ?.ts,
     lastEvent: events.at(-1)?.ts,
     oldestIntegrated,
+    externalBacklinks,
   };
 }
 
@@ -736,6 +782,12 @@ function formatStatus(status: StatusSummary): string {
   return [
     `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review)`,
     `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.consumed} consumed, ${status.sources.archived} archived, ${status.sources.cleared} cleared`,
+    ...(status.externalBacklinks ? [
+      `Cross-vault backlinks: ${status.externalBacklinks.total} across ${status.externalBacklinks.pageCount} pages` +
+        (status.externalBacklinks.topPage
+          ? ` (top: ${status.externalBacklinks.topPage.title} — ${status.externalBacklinks.topPage.count} external)`
+          : ""),
+    ] : []),
     ...(status.oldestIntegrated ? [`Oldest unintegrated: ${status.oldestIntegrated}`] : []),
     ...(status.lastCapture ? [`Last capture: ${status.lastCapture}`] : []),
     ...(status.lastEvent ? [`Last event: ${status.lastEvent}`] : []),
