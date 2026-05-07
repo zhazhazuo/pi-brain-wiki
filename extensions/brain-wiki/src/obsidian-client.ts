@@ -127,4 +127,244 @@ export class ObsidianClient {
       throw new Error(`Obsidian write failed for ${filePath}: ${raw}`);
     }
   }
+
+  // ── File Operations ────────────────────────────────────────────
+
+  async create(
+    path: string,
+    content?: string,
+    options?: { template?: string; overwrite?: boolean; open?: boolean }
+  ): Promise<void> {
+    const params: Record<string, string | boolean> = {};
+    if (content !== undefined) params.content = content;
+    if (options?.template) params.template = options.template;
+    if (options?.overwrite) params.overwrite = true;
+    if (options?.open) params.open = true;
+
+    const raw = await this.exec(["create", path], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian create failed for ${path}: ${raw}`);
+    }
+  }
+
+  async append(
+    path: string,
+    content: string,
+    options?: { inline?: boolean }
+  ): Promise<void> {
+    const params: Record<string, string | boolean> = { content };
+    if (options?.inline) params.inline = true;
+
+    const raw = await this.exec(["append", path], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian append failed for ${path}: ${raw}`);
+    }
+  }
+
+  async prepend(
+    path: string,
+    content: string,
+    options?: { inline?: boolean }
+  ): Promise<void> {
+    const params: Record<string, string | boolean> = { content };
+    if (options?.inline) params.inline = true;
+
+    const raw = await this.exec(["prepend", path], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian prepend failed for ${path}: ${raw}`);
+    }
+  }
+
+  async move(from: string, to: string): Promise<void> {
+    const raw = await this.exec(["move", from], { to });
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian move failed for ${from} -> ${to}: ${raw}`);
+    }
+  }
+
+  async rename(path: string, name: string): Promise<void> {
+    const raw = await this.exec(["rename", path], { name });
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian rename failed for ${path}: ${raw}`);
+    }
+  }
+
+  async delete(path: string, permanent = false): Promise<void> {
+    const params: Record<string, string | boolean> = {};
+    if (permanent) params.permanent = true;
+
+    const raw = await this.exec(["delete", path], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian delete failed for ${path}: ${raw}`);
+    }
+  }
+
+  // ── Graph Lint ─────────────────────────────────────────────────
+
+  async unresolved(options?: {
+    total?: boolean;
+    counts?: boolean;
+    verbose?: boolean;
+    format?: "json" | "tsv" | "csv";
+  }): Promise<any[]> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.total) params.total = true;
+    if (options?.counts) params.counts = true;
+    if (options?.verbose) params.verbose = true;
+    if (options?.format) params.format = options.format;
+
+    const raw = await this.exec(["unresolved"], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian unresolved failed: ${raw}`);
+    }
+    return parsed.data ?? [];
+  }
+
+  async orphans(options?: { total?: boolean }): Promise<string[]> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.total) params.total = true;
+
+    const raw = await this.exec(["orphans"], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian orphans failed: ${raw}`);
+    }
+    return parsed.data ?? [];
+  }
+
+  async deadends(options?: { total?: boolean }): Promise<string[]> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.total) params.total = true;
+
+    const raw = await this.exec(["deadends"], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian deadends failed: ${raw}`);
+    }
+    return parsed.data ?? [];
+  }
+
+  // ── Properties ─────────────────────────────────────────────────
+
+  async propertySet(
+    file: string,
+    name: string,
+    value: string,
+    type?: "text" | "list" | "number" | "checkbox" | "date" | "datetime"
+  ): Promise<void> {
+    const params: Record<string, string | boolean> = { name, value };
+    if (type) params.type = type;
+
+    const raw = await this.exec(["property:set", file], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian property:set failed for ${file}: ${raw}`);
+    }
+  }
+
+  async propertyRead(file: string, name: string): Promise<any> {
+    const raw = await this.exec(["property:read", file], { name });
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian property:read failed for ${file}: ${raw}`);
+    }
+    return parsed.data;
+  }
+
+  async properties(file: string, options?: {
+    format?: "yaml" | "json" | "tsv";
+    counts?: boolean;
+  }): Promise<Record<string, any>> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.format) params.format = options.format;
+    if (options?.counts) params.counts = true;
+
+    const raw = await this.exec(["properties", file], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian properties failed for ${file}: ${raw}`);
+    }
+    return parsed.data ?? {};
+  }
+
+  // ── Search & Templates ─────────────────────────────────────────
+
+  async search(query: string, options?: {
+    path?: string;
+    limit?: number;
+    format?: "text" | "json";
+    caseSensitive?: boolean;
+    total?: boolean;
+  }): Promise<any> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.path) params.path = options.path;
+    if (options?.limit) params.limit = String(options.limit);
+    if (options?.format) params.format = options.format;
+    if (options?.caseSensitive) params.case = true;
+    if (options?.total) params.total = true;
+
+    const raw = await this.exec(["search", query], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian search failed for "${query}": ${raw}`);
+    }
+    return parsed.data ?? [];
+  }
+
+  async templateRead(name: string, options?: {
+    resolve?: boolean;
+    title?: string;
+  }): Promise<string> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.resolve) params.resolve = true;
+    if (options?.title) params.title = options.title;
+
+    const raw = await this.exec(["template:read", name], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok || typeof parsed.data !== "string") {
+      throw new Error(`Obsidian template:read failed for "${name}": ${raw}`);
+    }
+    return parsed.data;
+  }
+
+  async files(options?: {
+    folder?: string;
+    ext?: string;
+    total?: boolean;
+  }): Promise<string[]> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.folder) params.folder = options.folder;
+    if (options?.ext) params.ext = options.ext;
+    if (options?.total) params.total = true;
+
+    const raw = await this.exec(["files"], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian files failed: ${raw}`);
+    }
+    return parsed.data ?? [];
+  }
+
+  async folders(options?: {
+    folder?: string;
+    total?: boolean;
+  }): Promise<string[]> {
+    const params: Record<string, string | boolean> = {};
+    if (options?.folder) params.folder = options.folder;
+    if (options?.total) params.total = true;
+
+    const raw = await this.exec(["folders"], params);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian folders failed: ${raw}`);
+    }
+    return parsed.data ?? [];
+  }
 }
