@@ -31,6 +31,7 @@ export function createDefaultConfig(title: string, domain = "General"): WikiConf
     linkStyle: "wikilink-folder-qualified",
     citationStyle: "source-page-id-link",
     protect: [
+      "Area/**",
       "inbox/**",
       "meta/registry.json",
       "meta/backlinks.json",
@@ -39,7 +40,12 @@ export function createDefaultConfig(title: string, domain = "General"): WikiConf
       "meta/log.md",
       "meta/lint-report.md",
     ],
-    allowExternal: [],
+    allowExternal: [
+      "../LIST.md",
+      "../Project/**",
+      "../Resource/**",
+      "../Draft/**",
+    ],
     search: {
       defaultLimit: 10,
     },
