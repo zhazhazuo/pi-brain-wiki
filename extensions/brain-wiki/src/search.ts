@@ -1,5 +1,6 @@
 import { loadConfig } from "./config.ts";
-import type { RegistryData, SearchMatch, SearchResult, WikiPageType } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
+import type { RegistryData, RegistryEntry, SearchHit, SearchMatch, SearchResult, WikiPageType } from "./types.ts";
 
 export async function searchRegistry(
   root: string,
@@ -69,6 +70,57 @@ function scoreEntry(entry: RegistryData["pages"][number], normalizedQuery: strin
   }
 
   return score;
+}
+
+export async function searchViaObsidian(
+  client: ObsidianClient,
+  registry: RegistryData,
+  query: string,
+  type?: WikiPageType,
+  limit?: number,
+  excludeStatuses?: string[],
+): Promise<SearchResult> {
+  const scope = type ? `Wiki/pages/${type}s` : "Wiki";
+  const hits = await client.searchContext(query, { path: scope, limit: limit ?? 10 });
+
+  // Deduplicate by file — preserve first occurrence order
+  const seen = new Set<string>();
+  const dedupedHits: SearchHit[] = [];
+  for (const hit of hits) {
+    if (!seen.has(hit.file)) {
+      seen.add(hit.file);
+      dedupedHits.push(hit);
+    }
+  }
+
+  // Build lookup: vault-relative path → RegistryEntry
+  const byPath = new Map<string, RegistryEntry>();
+  for (const entry of registry.pages) {
+    byPath.set(`Wiki/${entry.path}`, entry);
+  }
+
+  const excl = new Set(excludeStatuses ?? []);
+
+  const matches: SearchMatch[] = [];
+  for (let i = 0; i < dedupedHits.length; i++) {
+    const hit = dedupedHits[i];
+    const entry = byPath.get(hit.file);
+    if (!entry) continue;
+    if (excl.has(entry.status ?? "")) continue;
+
+    matches.push({
+      id: entry.id,
+      type: entry.type,
+      path: entry.path,
+      title: entry.title,
+      summary: entry.summary,
+      aliases: entry.aliases,
+      score: 100 - i * 10,
+      sourceIds: entry.sourceIds,
+    });
+  }
+
+  return { query, matches };
 }
 
 function tokenize(input: string): string[] {
