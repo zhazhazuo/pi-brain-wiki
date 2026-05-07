@@ -176,6 +176,34 @@ captured → integrated → consumed → archived → cleared
 
 ## PARA Integration Rules
 
+### Zone Map
+
+| Zone | Path | Agent | Human |
+|------|------|-------|-------|
+| **Human-only** | `Area/` | Read only | Full control |
+| **Agent-writable** | `Resource/`, `Draft/` | Can create/edit | Full control |
+| **Shared** | `LIST.md`, `Project/` | Can read/write | Full control |
+| **Wiki (agent-owned)** | `Wiki/` | Full control | Read/browse |
+
+### New Tools
+
+- `wiki_sync` — scan PARA vault structure, create/update wiki topic pages
+- `wiki_triage` — read/add/suggest/flag_stale in LIST.md
+- `wiki_project_sync` — scan/add_note/suggest_task in Project/
+
+### LIST.md AI Content Rule
+
+All agent content in LIST.md must use:
+```markdown
+> 🤖 [AI] Agent note: ...
+```
+
+### Obsidian CLI First
+
+Use Obsidian CLI for all supported operations (move, rename, create, read). Direct filesystem only for unsupported operations.
+
+### Legacy Rules
+
 - **Read freely:** Project/, Area/, Resource/, Draft/, LIST.md are all readable
 - **One-way links:** Wiki → PARA only. Never the reverse.
 - **Annotate external links with context:**
@@ -184,7 +212,7 @@ captured → integrated → consumed → archived → cleared
   [[Area/1 CS/17 AI/LLM Memory]] — PKB entry covering the technical background.
   [[Resource/type-theory-paper.pdf]] — external reference on dependent types.
   ```
-- **Never modify PARA files.** Propose placement; Walker decides.
+- **Never modify Area/ files.** Agent may write to Resource/ and Draft/.
 
 **Semantic note:** `Area/` is the PKB (long-term knowledge, consumed wiki content). `Resource/` is external reference material (inputs from outside, raw notes). Follow wikilinks into `Area/` when you need depth on a consumed topic.
 
