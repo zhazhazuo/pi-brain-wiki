@@ -1,21 +1,29 @@
 import { describe, test, expect } from "bun:test";
+import { enrichWithBacklinks } from "./indexer.ts";
 import type { RegistryEntry, BacklinkResult } from "./types.ts";
+
+function makePage(overrides: Partial<RegistryEntry> & { id: string; path: string; title: string }): RegistryEntry {
+  return {
+    type: "topic",
+    aliases: [],
+    summary: "",
+    status: "",
+    tags: [],
+    sourceIds: [],
+    linksOut: [],
+    headings: [],
+    wordCount: 0,
+    externalBacklinks: 0,
+    externalSources: [],
+    ...overrides,
+  };
+}
 
 describe("enrichWithBacklinks", () => {
   test("filters out Wiki/ internal links, sorts by count, caps at 5 sources", async () => {
     const pages: RegistryEntry[] = [
-      {
-        id: "1", type: "topic", path: "pages/topics/Foo.md",
-        title: "Foo", aliases: [], summary: "", status: "", tags: [],
-        sourceIds: [], linksOut: [], headings: [], wordCount: 0,
-        externalBacklinks: 0, externalSources: [],
-      },
-      {
-        id: "2", type: "topic", path: "pages/topics/Bar.md",
-        title: "Bar", aliases: [], summary: "", status: "", tags: [],
-        sourceIds: [], linksOut: [], headings: [], wordCount: 0,
-        externalBacklinks: 0, externalSources: [],
-      },
+      makePage({ id: "1", path: "pages/topics/Foo.md", title: "Foo" }),
+      makePage({ id: "2", path: "pages/topics/Bar.md", title: "Bar" }),
     ];
 
     const mockBacklinks = new Map<string, BacklinkResult[]>();
@@ -34,16 +42,12 @@ describe("enrichWithBacklinks", () => {
       { file: "Area/Extra.md", count: 2 },
     ]);
 
-    // Inline enrichment logic (mirrors actual implementation)
-    for (const page of pages) {
-      const backlinks = mockBacklinks.get(`Wiki/${page.path}`) ?? [];
-      const external = backlinks.filter(b => !b.file.startsWith("Wiki/"));
-      page.externalBacklinks = external.length;
-      page.externalSources = external
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5)
-        .map(b => b.file);
-    }
+    const mockClient = {
+      backlinks: async (file: string) => mockBacklinks.get(file) ?? [],
+      config: { socketPath: "", vaultCwd: "", timeout: 0 },
+    };
+
+    await enrichWithBacklinks(mockClient as any, pages);
 
     expect(pages[0].externalBacklinks).toBe(3);
     expect(pages[0].externalSources).toEqual([
@@ -59,25 +63,15 @@ describe("enrichWithBacklinks", () => {
 
   test("pages with no backlinks get zero/empty", async () => {
     const pages: RegistryEntry[] = [
-      {
-        id: "3", type: "topic", path: "pages/topics/Empty.md",
-        title: "Empty", aliases: [], summary: "", status: "", tags: [],
-        sourceIds: [], linksOut: [], headings: [], wordCount: 0,
-        externalBacklinks: 0, externalSources: [],
-      },
+      makePage({ id: "3", path: "pages/topics/Empty.md", title: "Empty" }),
     ];
 
-    const mockBacklinks = new Map<string, BacklinkResult[]>();
+    const mockClient = {
+      backlinks: async (_file: string) => [],
+      config: { socketPath: "", vaultCwd: "", timeout: 0 },
+    };
 
-    for (const page of pages) {
-      const backlinks = mockBacklinks.get(`Wiki/${page.path}`) ?? [];
-      const external = backlinks.filter(b => !b.file.startsWith("Wiki/"));
-      page.externalBacklinks = external.length;
-      page.externalSources = external
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5)
-        .map(b => b.file);
-    }
+    await enrichWithBacklinks(mockClient as any, pages);
 
     expect(pages[0].externalBacklinks).toBe(0);
     expect(pages[0].externalSources).toEqual([]);
@@ -85,12 +79,7 @@ describe("enrichWithBacklinks", () => {
 
   test("all Wiki/ internal backlinks result in zero external", async () => {
     const pages: RegistryEntry[] = [
-      {
-        id: "4", type: "topic", path: "pages/topics/Internal.md",
-        title: "Internal", aliases: [], summary: "", status: "", tags: [],
-        sourceIds: [], linksOut: [], headings: [], wordCount: 0,
-        externalBacklinks: 0, externalSources: [],
-      },
+      makePage({ id: "4", path: "pages/topics/Internal.md", title: "Internal" }),
     ];
 
     const mockBacklinks = new Map<string, BacklinkResult[]>();
@@ -99,15 +88,28 @@ describe("enrichWithBacklinks", () => {
       { file: "Wiki/pages/summaries/B.md", count: 2 },
     ]);
 
-    for (const page of pages) {
-      const backlinks = mockBacklinks.get(`Wiki/${page.path}`) ?? [];
-      const external = backlinks.filter(b => !b.file.startsWith("Wiki/"));
-      page.externalBacklinks = external.length;
-      page.externalSources = external
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5)
-        .map(b => b.file);
-    }
+    const mockClient = {
+      backlinks: async (file: string) => mockBacklinks.get(file) ?? [],
+      config: { socketPath: "", vaultCwd: "", timeout: 0 },
+    };
+
+    await enrichWithBacklinks(mockClient as any, pages);
+
+    expect(pages[0].externalBacklinks).toBe(0);
+    expect(pages[0].externalSources).toEqual([]);
+  });
+
+  test("backlinks error is caught and defaults to zero/empty", async () => {
+    const pages: RegistryEntry[] = [
+      makePage({ id: "5", path: "pages/topics/Broken.md", title: "Broken" }),
+    ];
+
+    const mockClient = {
+      backlinks: async (_file: string) => { throw new Error("connection lost"); },
+      config: { socketPath: "", vaultCwd: "", timeout: 0 },
+    };
+
+    await enrichWithBacklinks(mockClient as any, pages);
 
     expect(pages[0].externalBacklinks).toBe(0);
     expect(pages[0].externalSources).toEqual([]);
