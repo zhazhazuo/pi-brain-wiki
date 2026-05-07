@@ -269,6 +269,46 @@ export interface LifecycleBacklog {
   clearableCandidates: Array<{ path: string; title: string; reason: "pkb-covered" | "superseded" | "no-active-links"; pkbRefs?: string[] }>;
 }
 
+// ── PARA Integration Types ─────────────────────────────────────
+
+export type SyncScope = "area" | "resource" | "projects" | "all";
+
+export interface SyncResult {
+  topicsCreated: number;
+  topicsUpdated: number;
+  pages: string[];
+}
+
+export type TriageAction = "read" | "add" | "suggest" | "flag_stale";
+
+export interface TriageResult {
+  analysis?: {
+    totalItems: number;
+    uncheckedItems: number;
+    staleItems: number;
+    recentItems: number;
+  };
+  added?: boolean;
+  suggestions?: string[];
+}
+
+export type ProjectSyncAction = "scan" | "add_note" | "suggest_task";
+
+export interface ProjectSyncResult {
+  projects?: Array<{
+    path: string;
+    title: string;
+    status: string;
+    priority: string;
+    deadline: string | null;
+    lastAction: string | null;
+  }>;
+  noteAdded?: boolean;
+  taskSuggested?: boolean;
+}
+
+// ── Obsidian Client Types ──────────────────────────────────────
+
 export interface ObsidianClientConfig {
   socketPath: string;
   vaultCwd: string;
