@@ -52,6 +52,8 @@ export interface RegistryEntry {
   linksOut: string[];
   headings: string[];
   wordCount: number;
+  external_backlinks: number;
+  external_sources: string[];
 }
 
 export interface RegistryData {
@@ -255,3 +257,20 @@ export interface LifecycleBacklog {
   consumedReactivated: Array<{ path: string; title: string; consumedAt: string; newSourceIds: string[] }>;
   clearableCandidates: Array<{ path: string; title: string; reason: "pkb-covered" | "superseded" | "no-active-links"; pkbRefs?: string[] }>;
 }
+
+export interface ObsidianClientConfig {
+  socketPath: string;
+  vaultCwd: string;
+  timeout: number;
+}
+
+export interface BacklinkResult {
+  file: string;
+  count: number;
+}
+
+export interface SearchHit {
+  file: string;
+  matches: Array<{ line: number; text: string }>;
+}
+
