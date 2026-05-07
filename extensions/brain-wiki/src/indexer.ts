@@ -4,6 +4,7 @@ import { loadConfig } from "./config.ts";
 import { parsePage } from "./frontmatter.ts";
 import { metaPath, toRelative } from "./paths.ts";
 import type { BacklinksData, BacklinksRecord, ParsedPage, RegistryData, RegistryEntry, WikiPageType } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
 const PAGE_ORDER: WikiPageType[] = ["summary", "topic", "plan", "review"];
 
@@ -88,6 +89,26 @@ const PAGE_LABELS: Record<string, string> = {
   review: "Reviews",
 };
 
+export async function enrichWithBacklinks(
+  client: ObsidianClient,
+  pages: RegistryEntry[],
+): Promise<void> {
+  for (const page of pages) {
+    try {
+      const backlinks = await client.backlinks(`Wiki/${page.path}`);
+      const external = backlinks.filter(b => !b.file.startsWith("Wiki/"));
+      page.externalBacklinks = external.length;
+      page.externalSources = external
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+        .map(b => b.file);
+    } catch {
+      page.externalBacklinks = 0;
+      page.externalSources = [];
+    }
+  }
+}
+
 export function renderIndexMarkdown(registry: RegistryData, title = "Wiki"): string {
   const lines: string[] = [`# ${title} Index`, "", `Generated: ${registry.generatedAt}`, ""];
   for (const type of PAGE_ORDER) {
@@ -109,7 +130,10 @@ export function renderIndexMarkdown(registry: RegistryData, title = "Wiki"): str
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
-export async function rebuildRegistryAndIndex(root: string): Promise<{
+export async function rebuildRegistryAndIndex(
+  root: string,
+  client?: ObsidianClient,
+): Promise<{
   registry: RegistryData;
   backlinks: BacklinksData;
   rebuilt: string[];
@@ -118,6 +142,10 @@ export async function rebuildRegistryAndIndex(root: string): Promise<{
   const pages = await scanWikiPages(root);
   const registry = buildRegistry(pages);
   const backlinks = buildBacklinks(registry);
+
+  if (client) {
+    await enrichWithBacklinks(client, registry.pages);
+  }
 
   await mkdir(join(root, config.paths.meta), { recursive: true });
   await writeFile(metaPath(root, "registry.json"), `${JSON.stringify(registry, null, 2)}\n`, "utf8");
