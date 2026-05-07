@@ -80,7 +80,14 @@ export async function searchViaObsidian(
   limit?: number,
   excludeStatuses?: string[],
 ): Promise<SearchResult> {
-  const scope = type ? `Wiki/pages/${type}s` : "Wiki";
+  const TYPE_DIR: Record<string, string> = {
+    summary: "pages/summaries",
+    topic: "pages/topics",
+    plan: "pages/plans",
+    review: "pages/reviews",
+  };
+
+  const scope = type ? `Wiki/${TYPE_DIR[type]}` : "Wiki";
   const hits = await client.searchContext(query, { path: scope, limit: limit ?? 10 });
 
   // Deduplicate by file — preserve first occurrence order
@@ -115,7 +122,7 @@ export async function searchViaObsidian(
       title: entry.title,
       summary: entry.summary,
       aliases: entry.aliases,
-      score: 100 - i * 10,
+      score: Math.max(0, 100 - i * 10),
       sourceIds: entry.sourceIds,
     });
   }

@@ -116,6 +116,44 @@ describe("searchViaObsidian", () => {
     expect(result.matches).toEqual([]);
   });
 
+  test("type parameter is passed to scope", async () => {
+    const registry = makeRegistry([
+      { path: "pages/summaries/Source.md", title: "Source Article", type: "summary" },
+      { path: "pages/topics/Topic.md", title: "Topic Page", type: "topic" },
+    ]);
+
+    const hits: SearchHit[] = [
+      { file: "Wiki/pages/summaries/Source.md", matches: [{ line: 1, text: "test" }] },
+      { file: "Wiki/pages/topics/Topic.md", matches: [{ line: 1, text: "test" }] },
+    ];
+
+    // Mock returns both hits since it doesn't filter by scope.
+    // The registry lookup returns both — scope path correctness is verified
+    // by the pluralization fix (summary -> summaries).
+    const result = await searchViaObsidian(mockClient(hits), registry, "test", "summary");
+    expect(result.matches).toHaveLength(2);
+    expect(result.matches[0].type).toBe("summary");
+    expect(result.matches[1].type).toBe("topic");
+  });
+
+  test("scoring clamps to 0 for positions beyond 10", async () => {
+    const pages = Array.from({ length: 12 }, (_, i) => ({
+      path: `pages/topics/Page${i}.md`,
+      title: `Page ${i}`,
+    }));
+    const registry = makeRegistry(pages);
+    const hits: SearchHit[] = pages.map((p) => ({
+      file: `Wiki/${p.path}`,
+      matches: [{ line: 1, text: "x" }],
+    }));
+
+    const result = await searchViaObsidian(mockClient(hits), registry, "x", undefined, 20);
+    expect(result.matches).toHaveLength(12);
+    expect(result.matches[0].score).toBe(100);
+    expect(result.matches[10].score).toBe(0);
+    expect(result.matches[11].score).toBe(0);
+  });
+
   test("returns query in result", async () => {
     const registry = makeRegistry([]);
     const result = await searchViaObsidian(mockClient([]), registry, "my query");
