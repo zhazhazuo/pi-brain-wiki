@@ -7,6 +7,7 @@ A Pi-native implementation of the LLM Wiki pattern, adapted for personal knowled
 
 - **Pi extension** for deterministic operations, guardrails, and generated metadata
 - **Three agent skills** (Map, Workshop, Intelligence) for wiki workflows
+- **PARA integration** — Wiki as knowledge graph layer over your vault
 - A markdown vault structure (`Wiki/`) that accumulates knowledge over time
 
 ## Why this package exists
@@ -95,6 +96,25 @@ Wiki/
 | `wiki_log_event` | Append structured events |
 | `wiki_rebuild_meta` | Force a full metadata rebuild |
 | `wiki_scan_activity` | Scan vault for recent changes (Intelligence agent) |
+| `wiki_sync` | Scan PARA vault structure, update wiki topic pages |
+| `wiki_triage` | Read, add, suggest, or flag stale items in LIST.md |
+| `wiki_project_sync` | Scan projects, add research notes, suggest tasks |
+
+## PARA Integration
+
+The wiki acts as a knowledge graph layer over your PARA vault. The write gate enforces zone-based permissions:
+
+| Zone | Path | Agent | Human |
+|------|------|-------|-------|
+| **Human-only** | `Area/` | Read only | Full control |
+| **Agent-writable** | `Resource/`, `Draft/` | Can create/edit | Full control |
+| **Shared** | `LIST.md`, `Project/` | Can read/write | Full control |
+| **Wiki (agent-owned)** | `Wiki/` | Full control | Read/browse |
+
+**Key rules:**
+- `Area/` is sacred — agent never modifies it
+- All AI content in LIST.md uses `> 🤖 [AI]` prefix
+- Obsidian CLI used for all supported operations
 
 ## Local development
 
