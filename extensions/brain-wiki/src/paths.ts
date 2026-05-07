@@ -141,3 +141,29 @@ export function generatedMetaFiles(root: string): string[] {
     metaPath(root, "lint-report.md"),
   ];
 }
+
+// ── PARA Vault Path Helpers ────────────────────────────────────
+
+export function vaultRoot(wikiRoot: string): string {
+  return resolve(wikiRoot, "..");
+}
+
+export function areaRoot(wikiRoot: string): string {
+  return join(vaultRoot(wikiRoot), "Area");
+}
+
+export function projectRoot(wikiRoot: string): string {
+  return join(vaultRoot(wikiRoot), "Project");
+}
+
+export function resourceRoot(wikiRoot: string): string {
+  return join(vaultRoot(wikiRoot), "Resource");
+}
+
+export function draftRoot(wikiRoot: string): string {
+  return join(vaultRoot(wikiRoot), "Draft");
+}
+
+export function listMdPath(wikiRoot: string): string {
+  return join(vaultRoot(wikiRoot), "LIST.md");
+}
