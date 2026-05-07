@@ -270,6 +270,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const config = await loadConfig(root);
+      const client = await getObsidianClient(root);
       return withRootLock(root, async () => {
         const result = await captureSource(
           root,
@@ -280,6 +281,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
             exec: (command, args, options) => pi.exec(command, args, options),
           },
           signal,
+          client,
         );
 
         await appendEvent(root, {
@@ -292,7 +294,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
             : undefined,
           actor: "extension",
           notes: [`inputType=${params.inputType}`],
-        });
+        }, client);
 
         await rebuildAllGeneratedArtifacts(root);
 
@@ -424,7 +426,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
             title: `Created ${result.type} page ${result.title}`,
             pagePaths: [result.path],
             actor: "extension",
-          });
+          }, client);
           await rebuildAllGeneratedArtifacts(root);
         }
 
@@ -457,11 +459,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
+      const client = await getObsidianClient(root);
       const result = await runLint(
         root,
         params.mode ?? "all",
         params.writeReport ?? true,
         params.limit,
+        client,
       );
       return {
         content: [{ type: "text", text: formatLint(result) }],
@@ -523,6 +527,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const config = await loadConfig(root);
+      const client = await getObsidianClient(root);
       return withRootLock(root, async () => {
         const ts = new Date().toISOString();
         const event: WikiEvent = {
@@ -535,7 +540,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           notes: params.notes,
           actor: params.actor ?? "agent",
         };
-        await appendEvent(root, event);
+        await appendEvent(root, event, client);
         if (params.kind === "integrate" && params.sourceIds?.length) {
           await markSourcesIntegrated(root, params.sourceIds, ts);
           await rebuildAllGeneratedArtifacts(root);
@@ -544,15 +549,15 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           await markPageStatus(root, params.pagePaths, "consumed", {
             consumed_at: ts,
             pkb_refs: pkbRefs.length > 0 ? pkbRefs : undefined,
-          });
+          }, client);
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "archived" && params.pagePaths?.length) {
-          await markPageStatus(root, params.pagePaths, "archived", {});
+          await markPageStatus(root, params.pagePaths, "archived", {}, client);
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "cleared" && params.pagePaths?.length) {
           await markPageStatus(root, params.pagePaths, "cleared", {
             cleared_at: new Date().toISOString(),
-          });
+          }, client);
           await rebuildAllGeneratedArtifacts(root);
         } else {
           await rebuildLog(root, config.title);
@@ -636,9 +641,9 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const config = await loadConfig(root);
+      const client = await getObsidianClient(root);
       return withRootLock(root, async () => {
         const registry = await loadRegistry(root);
-        const client = await getObsidianClient(root);
         const result = await syncParaToWiki(root, config, registry, params.scope, client);
 
         await appendEvent(root, {
@@ -650,7 +655,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
             `created=${result.topicsCreated}`,
             `updated=${result.topicsUpdated}`,
           ],
-        });
+        }, client);
 
         await rebuildAllGeneratedArtifacts(root);
 
@@ -757,8 +762,9 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     description: "Run brain-wiki mechanical lint. Usage: /wiki-lint [mode]",
     handler: async (args, ctx) => {
       const root = await resolveWikiRoot(ctx.cwd);
+      const client = await getObsidianClient(root);
       const mode = (args?.trim() || "all") as Parameters<typeof runLint>[1];
-      const result = await runLint(root, mode, true, 50);
+      const result = await runLint(root, mode, true, 50, client);
       ctx.ui.notify(
         formatLint(result),
         result.counts.total === 0 ? "info" : "warning",
@@ -793,6 +799,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const pagePath = parts[0];
       const pkbRefs = parts.slice(1);
 
+      const client = await getObsidianClient(root);
+
       return withRootLock(root, async () => {
         const ts = new Date().toISOString();
         await appendEvent(root, {
@@ -802,11 +810,11 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           pagePaths: [pagePath],
           notes: pkbRefs.map((ref) => `pkb:${ref}`),
           actor: "user",
-        });
+        }, client);
         await markPageStatus(root, [pagePath], "consumed", {
           consumed_at: ts,
           pkb_refs: pkbRefs,
-        });
+        }, client);
         await rebuildAllGeneratedArtifacts(root);
         ctx.ui.notify(
           `Marked ${pagePath} as consumed (PKB: ${pkbRefs.join(", ")})`,
