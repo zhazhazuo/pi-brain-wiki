@@ -5,6 +5,7 @@ import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
 import { resolveFrom, sourcePacketDir, sourcePagePath, toRelative } from "./paths.ts";
 import { dedupeSlug, makeSourceId, slugifyTitle } from "./slug.ts";
 import type { CaptureParams, CaptureResult, SourceManifest, WikiConfig } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
 export interface CommandRunner {
   exec(command: string, args: string[], options?: { signal?: AbortSignal; timeout?: number }): Promise<{
@@ -44,6 +45,7 @@ export async function captureSource(
   params: CaptureParams,
   runner: CommandRunner,
   signal?: AbortSignal,
+  client?: ObsidianClient | null,
 ): Promise<CaptureResult> {
   const existingIds = await listExistingSourceIds(root);
   const sourceId = makeSourceId(existingIds);
@@ -53,6 +55,17 @@ export async function captureSource(
   await mkdir(originalDir, { recursive: true });
   await mkdir(attachmentsDir, { recursive: true });
 
+  // Helper to write files using CLI when available
+  const writeFileFn = client
+    ? async (path: string, content: string) => {
+        try {
+          await client.create(path, content, { overwrite: true });
+        } catch {
+          await writeFile(path, content, "utf8");
+        }
+      }
+    : async (path: string, content: string) => writeFile(path, content, "utf8");
+
   const capturedAt = new Date().toISOString();
   const captured = await materializeInput(packetDir, cwd, params, runner, signal);
   const title = params.title?.trim() || inferTitle(params, captured) || sourceId;
@@ -61,7 +74,7 @@ export async function captureSource(
   const extractedPath = join(packetDir, "extracted.md");
   const extractedHash = sha256(captured.extractedMarkdown);
 
-  await writeFile(extractedPath, ensureTrailingNewline(captured.extractedMarkdown), "utf8");
+  await writeFileFn(extractedPath, ensureTrailingNewline(captured.extractedMarkdown));
 
   const manifest: SourceManifest = {
     version: 1,
@@ -91,7 +104,7 @@ export async function captureSource(
     status: "captured",
   };
 
-  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  await writeFileFn(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
   let sourcePage: string | undefined;
   if (params.createSourcePage !== false) {
