@@ -40,8 +40,8 @@ export function buildRegistry(pages: ParsedPage[]): RegistryData {
       linksOut: [...new Set(page.normalizedLinks)],
       headings: page.headings,
       wordCount: page.wordCount,
-      external_backlinks: 0,
-      external_sources: [],
+      externalBacklinks: 0,
+      externalSources: [],
     };
   });
 

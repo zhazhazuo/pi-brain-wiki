@@ -52,8 +52,8 @@ export interface RegistryEntry {
   linksOut: string[];
   headings: string[];
   wordCount: number;
-  external_backlinks: number;
-  external_sources: string[];
+  externalBacklinks: number;
+  externalSources: string[];
 }
 
 export interface RegistryData {
