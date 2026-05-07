@@ -42,14 +42,14 @@ Search wiki (wiki_search)
     │       └── Need more depth?
     │               │
     │               ▼
-    │           Follow wikilinks into Resource/ pages
+    │           Follow wikilinks into Area/ pages (PKB depth)
     │           Read only the relevant sections
     │           Synthesize answer with citations
     │
     └── No matching topics?
             │
             ▼
-        Search Resource/ JD shelves directly
+        Search Area/ JD shelves directly (PKB)
         Read relevant pages
         Synthesize answer, note that no wiki topic exists yet
         Suggest creating a topic page if the question is substantive
@@ -64,8 +64,9 @@ Always use `wiki_search` before reading markdown files directly. The registry is
 ### 2. Read metadata first, files second
 
 - Start with `meta/index.md` or `wiki_search` results
-- Read topic pages before diving into Resource/
-- Only read Resource/ pages when the topic summary doesn't provide enough depth
+- Read topic pages before diving into Area/ (PKB) or Resource/ (external reference)
+- Only read Area/ or Resource/ pages when the topic summary doesn't provide enough depth
+- Prefer Area/ over Resource/ for PKB depth — Area/ is the long-term knowledge store
 - Never read more than 5 pages in a single query unless explicitly asked
 
 ### 3. Cross-reference LIST.md during queries
@@ -81,7 +82,8 @@ Every factual claim in your answer must cite its source:
 
 - Wiki topics: `[[topics/Functional-Programming]]`
 - Wiki summaries: `[[summaries/2026-05-05-Source-Title]]`
-- Resource pages: `[[Resource/1 CS/17 AI/LLM Memory]]`
+- Area pages (PKB): `[[Area/1 CS/17 AI/LLM Memory]]`
+- Resource pages (external): `[[Resource/type-theory-paper]]`
 - If a claim has no citation, say so: "This is not yet reflected in the wiki."
 
 ### 5. Read-only by default
@@ -92,12 +94,12 @@ The one exception: if a query produces a durable, synthesized answer that the us
 
 ### 6. Respect the boundary
 
-- Read freely: Wiki/, Resource/, Project/, Area/, Draft/, LIST.md
-- Never write: Resource/, Project/, Area/, Draft/
+- Read freely: Wiki/, Project/, Area/, Resource/, Draft/, LIST.md
+- Never write: Project/, Area/, Resource/, Draft/
 - Write only: Wiki/pages/ (when explicitly asked to file an answer)
 - Never write: Wiki/inbox/, Wiki/meta/ (code-guarded)
 
-### 6. Be honest about gaps
+### 7. Be honest about gaps
 
 If the wiki has no knowledge on a topic, say so clearly:
 > "The wiki doesn't yet have a topic page for [X]. What it does know about related areas is..."
@@ -105,7 +107,7 @@ If the wiki has no knowledge on a topic, say so clearly:
 If sources contradict, surface it:
 > "The wiki has conflicting claims about [X]. [[summaries/2026-04-15-Source-A]] says [claim A], while [[summaries/2026-04-20-Source-B]] says [claim B]."
 
-### 7. Progressive disclosure in action
+### 8. Progressive disclosure in action
 
 When answering "What do we know about X?":
 
@@ -122,12 +124,12 @@ Synthesize what the wiki believes about X
 
 **Level 3 — Deep dive (only if needed):**
 ```
-Follow wikilinks from topics into Resource/ pages
+Follow wikilinks from topics into Area/ pages (PKB depth)
 Read specific sections cited by the topics
-Add Resource/ depth to the synthesis
+Add Area/ depth to the synthesis
 ```
 
-Always return the most useful answer at the shallowest level. If the topic summary answers the question, stop. Don't read Resource/ just because you can.
+Always return the most useful answer at the shallowest level. If the topic summary answers the question, stop. Don't read Area/ or Resource/ just because you can.
 
 ## Answer Format
 

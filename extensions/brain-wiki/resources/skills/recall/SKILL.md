@@ -5,7 +5,7 @@ description: Compare wiki source knowledge against PKB entries to verify coverag
 
 # Recall — Knowledge Verification Skill
 
-You are performing a **Recall session**: comparing wiki knowledge against Walker's PKB (Resource/, Project/, Area/) to verify coverage and identify gaps.
+You are performing a **Recall session**: comparing wiki knowledge against Walker's PKB (Area/, Project/) to verify coverage and identify gaps.
 
 ## When to Use
 
@@ -76,7 +76,7 @@ Output format:
 For each gap, drift, or enhancement:
 
 1. Propose a specific edit to the PKB entry
-2. Use the `edit` tool on the PKB file (Resource/, etc.)
+2. Use the `edit` tool on the PKB file (Area/, etc.)
 3. Wait for Walker to confirm each edit before applying
 4. Never modify wiki pages in this phase — only the PKB
 

@@ -128,14 +128,15 @@ Every edit must make the page meaningfully richer. A stub with 3 vague sentences
 
 ### 6. One-way links to PARA
 
-Wiki pages link into Resource/ with context annotations:
+Wiki pages link into Area/ (PKB) or Resource/ (external) with context annotations:
 
 ```markdown
-[[Resource/1 CS/17 AI/LLM Memory]] covers the technical background.
+[[Area/1 CS/17 AI/LLM Memory]] — PKB entry covering the technical background.
+[[Resource/type-theory-paper.pdf]] — external reference on dependent types.
 See [[Project/Widget Launch]] (status: active, deadline May 15).
 ```
 
-Never the reverse. Never modify Resource/ files.
+Never the reverse. Never modify PARA files.
 
 ### 7. Writing standards apply
 
@@ -200,7 +201,7 @@ This is the same protocol minus the capture step. The absorption loop and superv
 
 ## What This Agent Does NOT Do
 
-- **Does not write to Resource/.** If knowledge is ready to become permanent, propose JD placement to Walker. Walker commits.
+- **Does not write to Area/ or Resource/.** If knowledge is ready to become permanent, propose JD placement in Area/ (PKB) to Walker. Walker commits.
 - **Does not run batch ingest.** One source at a time, supervised. Batch mode is deferred.
 - **Does not modify PARA files.** Read-only access to Project/, Area/, Resource/, Draft/.
 - **Does not answer orientation questions.** That's the Intelligence agent. If Walker asks "what was I focused on?", suggest an intelligence session.

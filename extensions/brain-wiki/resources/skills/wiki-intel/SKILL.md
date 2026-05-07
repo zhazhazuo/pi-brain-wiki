@@ -20,7 +20,7 @@ Before any intelligence session, load and read in order:
      - `oldestUnprocessedDate` — how long has the oldest item been sitting?
      - `unprocessedSourceUrls` — un-captured URLs that should go through workshop
      - `unprocessedItems` — total backlog count, grouped by category
-6. Scan Project/ frontmatter — active work, statuses, priorities, deadlines
+6. Scan Project/ and Area/ frontmatter — active work, statuses, priorities, deadlines; Area/ is the PKB and drives responsibility signals
 
 ## Core Capability: Synthesized Analysis, Not File Lists
 
@@ -117,7 +117,7 @@ When you need to understand what the wiki knows about a topic area (not just wha
 
 1. `wiki_search` for the relevant area
 2. Read topic summaries
-3. If you need deeper context, follow wikilinks into Resource/ pages
+3. If you need deeper context, follow wikilinks into Area/ pages (PKB depth)
 
 You don't need to invoke Map as a separate agent — you follow the same progressive disclosure protocol that Map defines.
 
@@ -180,7 +180,7 @@ Specific, actionable next steps with reasoning, grounded in LIST.md state.
 - [[summaries/Source-B]] — integrated 14 days ago
 
 #### Awaiting clearing (archived → cleared)
-- [[summaries/Source-C]] — PKB covered: Resource/1 CS/17 AI/LLM Memory.md
+- [[summaries/Source-C]] — PKB covered: [[Area/1 CS/17 AI/LLM Memory]]
 - [[summaries/Source-D]] — no active links
 
 #### Reactivated (consumed with new sources)
@@ -260,5 +260,5 @@ The tool returns structured data. Your job is to synthesize it into clusters, pa
 - **Does not answer knowledge questions.** "What is functional programming?" → suggest a Map session.
 - **Does not ingest sources.** "I found a great article on FP" → suggest a Workshop session.
 - **Does not modify knowledge pages.** Only plans and reviews.
-- **Does not modify PARA files.** Read-only access to Project/, Area/, Resource/, Draft/.
+- **Does not modify PARA files.** Read-only access to Project/, Area/, Resource/, Draft/. Area/ is the PKB — follow wikilinks there for depth on consumed topics.
 - **Does not make commitment decisions.** You recommend priorities. Walker decides what to commit to.

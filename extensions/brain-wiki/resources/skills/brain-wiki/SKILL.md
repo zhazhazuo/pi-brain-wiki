@@ -181,9 +181,12 @@ captured → integrated → consumed → archived → cleared
 - **Annotate external links with context:**
   ```markdown
   See [[Project/Widget Launch]] (status: active, deadline May 15).
-  [[Resource/1 CS/17 AI/LLM Memory]] covers the technical background.
+  [[Area/1 CS/17 AI/LLM Memory]] — PKB entry covering the technical background.
+  [[Resource/type-theory-paper.pdf]] — external reference on dependent types.
   ```
 - **Never modify PARA files.** Propose placement; Walker decides.
+
+**Semantic note:** `Area/` is the PKB (long-term knowledge, consumed wiki content). `Resource/` is external reference material (inputs from outside, raw notes). Follow wikilinks into `Area/` when you need depth on a consumed topic.
 
 ## Frontmatter Conventions
 
@@ -220,7 +223,7 @@ consumed_at:    # ISO date when Walker confirmed internalization (only for consu
 pkb_refs:       # Array of vault-relative paths to PKB entries (only for consumed status)
 links:
   - "[[topics/Lambda-Calculus]]"
-  - "[[Resource/1 CS/11 Programming Language/FP.md]]"
+  - "[[Area/1 CS/11 Programming Language/FP.md]]"
 ```
 
 ### Plan pages

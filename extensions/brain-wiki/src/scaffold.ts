@@ -71,7 +71,7 @@ summary:
 
 ## Connections
 - [[topics/...]] — related topics
-- [[Resource/...]] — vault pages with depth
+- [[Area/...]] — PKB entries with depth
 
 ## Open questions
 
