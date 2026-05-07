@@ -9,7 +9,7 @@
 - lint → extensions/brain-wiki/src/lint.ts — run structural checks (links, orphans, frontmatter, duplicates, coverage, staleness)
 - search → extensions/brain-wiki/src/search.ts — query the compiled page registry
 - log → extensions/brain-wiki/src/log.ts — append structured events to events.jsonl and regenerate log.md
-- activity → extensions/brain-wiki/src/activity.ts — scan vault and wiki activity for a time period
+- activity → extensions/brain-wiki/src/activity.ts — scan vault and wiki activity for a time period; parses LIST.md into typed items with category detection and agent notes
 - guards → extensions/brain-wiki/src/guards.ts — analyze tool mutations to protect inbox/ and meta/ paths
 - slug → extensions/brain-wiki/src/slug.ts — slugify titles, generate page IDs, dedupe slugs
 - types → extensions/brain-wiki/src/types.ts — shared TypeScript interfaces and types

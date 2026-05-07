@@ -231,6 +231,25 @@ export interface StatusSummary {
   oldestIntegrated?: string;
 }
 
+export type ListItemCategory = "source" | "task" | "idea" | "meeting-note" | "plan" | "unknown";
+
+export interface ListItem {
+  date: string;
+  text: string;
+  done: boolean;
+  inProgress: boolean;
+  category: ListItemCategory;
+  agentNotes: string[];
+  daysSinceCreation: number;
+}
+
+export interface ListMdData {
+  items: ListItem[];
+  unprocessedItems: ListItem[];
+  oldestUnprocessedDate: string | null;
+  unprocessedSourceUrls: ListItem[];
+}
+
 export interface LifecycleBacklog {
   integratedAwaitingRecall: Array<{ path: string; title: string; status: string; integratedAt?: string; daysSinceIntegration: number }>;
   consumedReactivated: Array<{ path: string; title: string; consumedAt: string; newSourceIds: string[] }>;

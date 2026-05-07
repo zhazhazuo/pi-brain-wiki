@@ -16,6 +16,10 @@ Before any intelligence session, load and read in order:
 3. Read `Wiki/meta/index.md` — orient to current wiki state
 4. Run `wiki_scan_activity` — recent activity across wiki and vault
 5. Read `LIST.md` — pending items and inbox
+   - Pay special attention to `listMdAnalysis` in the scan result:
+     - `oldestUnprocessedDate` — how long has the oldest item been sitting?
+     - `unprocessedSourceUrls` — un-captured URLs that should go through workshop
+     - `unprocessedItems` — total backlog count, grouped by category
 6. Scan Project/ frontmatter — active work, statuses, priorities, deadlines
 
 ## Core Capability: Synthesized Analysis, Not File Lists
@@ -52,6 +56,11 @@ This is the difference between a file list and an intelligence product.
 ```
 1. Read wiki_scan_activity → recent activity patterns
 2. Read LIST.md → pending items
+   - Age-sort items: oldest unprocessed first
+   - Category-sort: separate sources-to-capture from tasks from ideas
+   - Cross-reference LIST.md URLs with wiki registry → flag un-captured sources
+   - Identify stuck items (same item appears across multiple dates unprocessed)
+   - Surface pattern: "You've had an unprocessed task about [X] since May 3."
 3. Read Project/ frontmatter → active work, priorities, deadlines
 4. Read Area/ frontmatter → responsibilities needing attention
 5. Read wiki/meta/index.md → knowledge state
@@ -63,10 +72,11 @@ This is the difference between a file list and an intelligence product.
    - Consumed topics with new sources (needs reactivation)
 
 Synthesize into:
+- LIST.md health: backlog size, oldest item, un-captured sources
 - What's active and needs attention (deadlines, blocked projects)
-- What's been neglected (areas with no recent activity)
+- What's been neglected (areas with no recent activity, stuck LIST.md items)
 - What's emerging (new wiki topics, Draft pages maturing)
-- Recommended priorities with timeboxed blocks
+- Recommended priorities with timeboxed blocks, grounded in LIST.md state
 ```
 
 ### For Review Requests ("What was I focused on?")
@@ -76,10 +86,15 @@ Synthesize into:
 2. Read wiki/meta/events.jsonl → structured event log
 3. Cross-reference with wiki pages → what knowledge was built
 4. Cross-reference with Project/ statuses → what work was done
+5. Cross-reference LIST.md state → what was added vs. what was processed
+   - Items added during the period: new inbound
+   - Items completed during the period: throughput
+   - Items that crossed into the period without action: growing backlog
 
 Synthesize into:
 - Activity clusters (what topics/areas got attention)
-- Neglected areas (what fell off)
+- Neglected areas (what fell off, what's stuck in LIST.md)
+- LIST.md throughput: items captured vs. items processed
 - Emerging patterns (new connections, recurring themes)
 - Recommendations (where to invest next)
 ```
@@ -89,7 +104,9 @@ Synthesize into:
 ```
 Same as review, plus:
 - Compare activity against stated priorities (Project/ frontmatter)
-- Identify "always postponed" items in LIST.md
+- Identify "always postponed" items in LIST.md — items that persist across weeks
+- Category trend analysis: is the mix of LIST.md items shifting? More sources vs. more tasks?
+- LIST.md aging report: items by age bucket (<3d, <1w, <2w, 2w+)
 - Check Draft/ maturity — any seedlings ready to become evergreen?
 - Check wiki topic coverage — are there gaps that need sources?
 ```
@@ -135,6 +152,13 @@ Context that doesn't fit neatly above.
 ## Period
 [Week or date range]
 
+## LIST.md health
+- Backlog: 8 items (3 sources, 3 tasks, 1 idea, 1 meeting note)
+- Oldest unprocessed: 2026-04-28 (9 days)
+- Throughput: 4 items captured, 2 items processed this period
+- Stuck: "Blog: [URL]" from April 28 — not yet captured
+- Pattern: most items are source URLs, suggesting a research-heavy week
+
 ## Activity clusters
 Synthesized themes, not file lists.
 "Functional programming deep dive" not "edited 3 FP files."
@@ -147,7 +171,7 @@ What hasn't gotten attention, with evidence.
 New connections or themes across activity.
 
 ## Recommendations
-Specific, actionable next steps with reasoning.
+Specific, actionable next steps with reasoning, grounded in LIST.md state.
 
 ### Lifecycle Backlog
 

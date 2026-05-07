@@ -14,6 +14,7 @@ Before answering any question, load and read in order:
 1. Load the `brain-wiki` skill (shared rules) — **required**
 2. Read `Wiki/WIKI_SCHEMA.md` — conventions and structure
 3. Read `Wiki/meta/index.md` — current page catalog
+4. Read `LIST.md` — surface items that may contain knowledge queries, source requests, or ideas relevant to the question
 
 ## Core Protocol: Search → Orient → Dive
 
@@ -67,7 +68,14 @@ Always use `wiki_search` before reading markdown files directly. The registry is
 - Only read Resource/ pages when the topic summary doesn't provide enough depth
 - Never read more than 5 pages in a single query unless explicitly asked
 
-### 3. Cite everything
+### 3. Cross-reference LIST.md during queries
+
+Before answering, check if LIST.md contains items relevant to the question:
+- A source URL about the topic that hasn't been captured → "There's a blog link in LIST.md about this. Want me to capture it first?"
+- An idea or note that relates → "There's a relevant note in LIST.md from May 3: [excerpt]"
+- Don't just answer from wiki state — LIST.md is the live edge of what Walker is thinking about
+
+### 4. Cite everything
 
 Every factual claim in your answer must cite its source:
 
@@ -76,13 +84,13 @@ Every factual claim in your answer must cite its source:
 - Resource pages: `[[Resource/1 CS/17 AI/LLM Memory]]`
 - If a claim has no citation, say so: "This is not yet reflected in the wiki."
 
-### 4. Read-only by default
+### 5. Read-only by default
 
 You are a query engine. You do not modify wiki pages unless explicitly asked. If the user asks you to update knowledge, that's the Workshop agent's job — suggest they start a workshop session.
 
 The one exception: if a query produces a durable, synthesized answer that the user asks to file, you may create an analysis-style topic page.
 
-### 5. Respect the boundary
+### 6. Respect the boundary
 
 - Read freely: Wiki/, Resource/, Project/, Area/, Draft/, LIST.md
 - Never write: Resource/, Project/, Area/, Draft/

@@ -6,7 +6,7 @@ import { loadConfig } from "./config.ts";
 import { buildRegistry, scanWikiPages } from "./indexer.ts";
 import { readEvents } from "./log.ts";
 import { metaPath } from "./paths.ts";
-import type { LifecycleBacklog, WikiEvent } from "./types.ts";
+import type { LifecycleBacklog, ListItem, ListItemCategory, ListMdData, WikiEvent } from "./types.ts";
 
 const execAsync = promisify(execFile);
 
@@ -22,7 +22,8 @@ export interface ActivityResult {
     recentProjectChanges: string[];
     recentResourceChanges: string[];
     recentDraftChanges: string[];
-    listItems: Array<{ date: string; text: string; done: boolean }>;
+    listItems: ListItem[];
+    listMdAnalysis: ListMdData;
   };
   projects?: Array<{
     path: string;
@@ -76,11 +77,14 @@ export async function scanActivity(root: string, vaultRoot: string, params: Acti
       parseListMd(vaultRoot),
     ]);
 
+    const listMdAnalysis = buildListMdData(listItems);
+
     vaultActivity = {
       recentProjectChanges: projectChanges,
       recentResourceChanges: resourceChanges,
       recentDraftChanges: draftChanges,
       listItems,
+      listMdAnalysis,
     };
 
     projects = await scanProjectFrontmatter(vaultRoot);
@@ -205,31 +209,88 @@ async function scanPageStatuses(root: string): Promise<Record<string, number>> {
   return counts;
 }
 
-async function parseListMd(vaultRoot: string): Promise<Array<{ date: string; text: string; done: boolean }>> {
+const AGENT_LINE_RE = /^  A \d{4}-\d{2}-\d{2}T\d{2}:\d{2} → /;
+
+function detectCategory(text: string): ListItemCategory {
+  const lower = text.toLowerCase();
+  // URL → source candidate
+  if (/https?:\/\//.test(text)) return "source";
+  // Explicit prefixes
+  if (/^todo:/i.test(text)) return "task";
+  if (/^idea/i.test(text)) return "idea";
+  if (/^plan/i.test(text)) return "plan";
+  // Meeting mentions
+  if (/\b(meeting|standup|sync|retro|review|1-1|one-on-one)\b/i.test(text)) return "meeting-note";
+  // Task-like patterns
+  if (/\b(todo|task|fix|update|submit|review|complete|finish|send|prepare|draft|schedule)\b/i.test(text)) return "task";
+  return "unknown";
+}
+
+async function parseListMd(vaultRoot: string): Promise<ListItem[]> {
   try {
     const content = await readFile(join(vaultRoot, "LIST.md"), "utf8");
-    const items: Array<{ date: string; text: string; done: boolean }> = [];
+    const items: ListItem[] = [];
     let currentDate = "";
+    const now = Date.now();
 
     for (const line of content.split("\n")) {
-      const dateMatch = line.match(/^##\s*\[(\d{4}-\d{2}-\d{2})\]/);
+      // Match **YYYY-MM-DD** (primary) or ## [YYYY-MM-DD] (backward compat)
+      const dateMatch = line.match(/^\*{2}(\d{4}-\d{2}-\d{2})\*{2}/) || line.match(/^##\s*\[(\d{4}-\d{2}-\d{2})\]/);
       if (dateMatch) {
         currentDate = dateMatch[1];
         continue;
       }
+
+      // Agent line — capture as note on the current item
+      if (AGENT_LINE_RE.test(line) && items.length > 0) {
+        items[items.length - 1].agentNotes.push(line.trim());
+        continue;
+      }
+
+      // Top-level user item: - [ ], - [x], - [>]
       const taskMatch = line.match(/^-\s*\[([ x>])\]\s*(.+)/);
       if (taskMatch && currentDate) {
+        const text = taskMatch[2].trim();
+        const rawDate = new Date(currentDate);
+        const daysSince = Math.floor((now - rawDate.getTime()) / 86_400_000);
         items.push({
           date: currentDate,
-          text: taskMatch[2].trim(),
+          text,
           done: taskMatch[1] === "x",
+          inProgress: taskMatch[1] === ">",
+          category: detectCategory(text),
+          agentNotes: [],
+          daysSinceCreation: daysSince,
         });
+        continue;
       }
     }
     return items;
   } catch {
     return [];
   }
+}
+
+function buildListMdData(items: ListItem[]): ListMdData {
+  const unprocessedItems = items.filter((item) => !item.done);
+
+  // Oldest unprocessed date
+  let oldestUnprocessedDate: string | null = null;
+  for (const item of unprocessedItems) {
+    if (!oldestUnprocessedDate || item.date < oldestUnprocessedDate) {
+      oldestUnprocessedDate = item.date;
+    }
+  }
+
+  // Items containing URLs that haven't been processed
+  const unprocessedSourceUrls = unprocessedItems.filter((item) => item.category === "source");
+
+  return {
+    items,
+    unprocessedItems,
+    oldestUnprocessedDate,
+    unprocessedSourceUrls,
+  };
 }
 
 async function scanProjectFrontmatter(vaultRoot: string): Promise<

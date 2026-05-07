@@ -26,7 +26,15 @@ Defines all shared TypeScript interfaces, types, and enums used across the exten
 | `WikiEventKind` | Added `"consumed"`, `"archived"`, `"cleared"` |
 | `RegistryEntry` | Added `consumedAt?`, `pkbRefs?` |
 | `StatusSummary.sources` | Added `consumed`, `archived`, `cleared` |
-| `LifecycleBacklog` | New interface for activity scan backlog data |
+| `LifecycleBacklog` | Interface for activity scan backlog data |
+
+## LIST.md Types
+
+| Type | Fields |
+|------|--------|
+| `ListItemCategory` | `"source" | "task" | "idea" | "meeting-note" | "plan" | "unknown"` |
+| `ListItem` | `date`, `text`, `done`, `inProgress`, `category`, `agentNotes[]`, `daysSinceCreation` |
+| `ListMdData` | `items[]`, `unprocessedItems[]`, `oldestUnprocessedDate`, `unprocessedSourceUrls[]` |
 
 ## Scope Table
 

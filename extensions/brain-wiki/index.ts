@@ -774,7 +774,33 @@ function formatActivity(
     lines.push(
       `  Draft/: ${result.vaultActivity.recentDraftChanges.length} files`,
     );
-    lines.push(`  LIST.md items: ${result.vaultActivity.listItems.length}`);
+
+    // LIST.md analysis
+    const listMd = result.vaultActivity.listMdAnalysis;
+    lines.push(`\nLIST.md:`);
+    lines.push(`  Total items: ${listMd.items.length}`);
+    lines.push(`  Unprocessed: ${listMd.unprocessedItems.length}`);
+
+    // Category breakdown
+    const catCounts: Record<string, number> = {};
+    for (const item of listMd.unprocessedItems) {
+      catCounts[item.category] = (catCounts[item.category] ?? 0) + 1;
+    }
+    const catStr = Object.entries(catCounts)
+      .map(([cat, n]) => `${cat}: ${n}`)
+      .join(", ");
+    if (catStr) lines.push(`  By category: ${catStr}`);
+
+    if (listMd.oldestUnprocessedDate) {
+      lines.push(`  Oldest unprocessed: ${listMd.oldestUnprocessedDate}`);
+    }
+
+    if (listMd.unprocessedSourceUrls.length > 0) {
+      lines.push(`  Un-captured source URLs: ${listMd.unprocessedSourceUrls.length}`);
+      for (const item of listMd.unprocessedSourceUrls.slice(0, 3)) {
+        lines.push(`    - ${item.text.slice(0, 80)}${item.text.length > 80 ? "..." : ""}`);
+      }
+    }
   }
 
   // Projects
