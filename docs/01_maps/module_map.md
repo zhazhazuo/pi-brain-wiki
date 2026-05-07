@@ -30,21 +30,37 @@ flowchart LR
   Index --> Guards
   Index --> Slug
   Index --> Types
+  Index -.-> ObsidianClient[src/obsidian-client.ts]
+  Index -.-> ObsidianFs[src/obsidian-fs.ts]
+  Index -.-> Properties[src/properties.ts]
+  Capture -.-> ObsidianClient
+  Indexer -.-> ObsidianClient
+  Lint -.-> ObsidianClient
+  Search -.-> ObsidianClient
+  Scaffold -.-> ObsidianFs
+  Scaffold -.-> ObsidianClient
+  Activity -.-> ObsidianClient
+
+  classDef new stroke-dasharray: 5 5
+  class ObsidianClient,ObsidianFs,Properties new
 ```
 
-| Module | Entry file |
-|--------|-----------|
-| Extension entry | extensions/brain-wiki/index.ts |
-| capture | extensions/brain-wiki/src/capture.ts |
-| config | extensions/brain-wiki/src/config.ts |
-| paths | extensions/brain-wiki/src/paths.ts |
-| scaffold | extensions/brain-wiki/src/scaffold.ts |
-| frontmatter | extensions/brain-wiki/src/frontmatter.ts |
-| indexer | extensions/brain-wiki/src/indexer.ts |
-| lint | extensions/brain-wiki/src/lint.ts |
-| search | extensions/brain-wiki/src/search.ts |
-| log | extensions/brain-wiki/src/log.ts |
-| activity | extensions/brain-wiki/src/activity.ts |
-| guards | extensions/brain-wiki/src/guards.ts |
-| slug | extensions/brain-wiki/src/slug.ts |
-| types | extensions/brain-wiki/src/types.ts |
+| Module | Entry file | Status |
+|--------|-----------|--------|
+| Extension entry | extensions/brain-wiki/index.ts | current |
+| capture | extensions/brain-wiki/src/capture.ts | current |
+| config | extensions/brain-wiki/src/config.ts | current |
+| paths | extensions/brain-wiki/src/paths.ts | current |
+| scaffold | extensions/brain-wiki/src/scaffold.ts | current |
+| frontmatter | extensions/brain-wiki/src/frontmatter.ts | current |
+| indexer | extensions/brain-wiki/src/indexer.ts | current |
+| lint | extensions/brain-wiki/src/lint.ts | current |
+| search | extensions/brain-wiki/src/search.ts | current |
+| log | extensions/brain-wiki/src/log.ts | current |
+| activity | extensions/brain-wiki/src/activity.ts | current |
+| guards | extensions/brain-wiki/src/guards.ts | current |
+| slug | extensions/brain-wiki/src/slug.ts | current |
+| types | extensions/brain-wiki/src/types.ts | current |
+| obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | **proposed** |
+| obsidian-fs | extensions/brain-wiki/src/obsidian-fs.ts | **proposed** |
+| properties | extensions/brain-wiki/src/properties.ts | **proposed** |

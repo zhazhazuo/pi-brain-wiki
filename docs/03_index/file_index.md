@@ -30,9 +30,12 @@
 - extensions/brain-wiki/src/indexer.ts → Builds and persists registry.json, backlinks.json, and index.md
 - extensions/brain-wiki/src/lint.ts → Runs structural health checks: links, orphans, frontmatter, duplicates, coverage, staleness
 - extensions/brain-wiki/src/log.ts → Appends structured events to events.jsonl and regenerates log.md
+- extensions/brain-wiki/src/obsidian-client.ts → New: Unix socket client for the Obsidian CLI
+- extensions/brain-wiki/src/obsidian-fs.ts → New: file operations via obsidian create/move/rename/delete
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths and relative references
+- extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure, templates, and metadata files
-- extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking
+- extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking (planned: delegate to obsidian search:context)
 - extensions/brain-wiki/src/slug.ts → Slugifies titles, generates source/page IDs, deduplicates slugs
 - extensions/brain-wiki/src/types.ts → Shared TypeScript interfaces and type definitions
 

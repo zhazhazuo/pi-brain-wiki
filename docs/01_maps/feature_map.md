@@ -13,3 +13,6 @@
 - guards → extensions/brain-wiki/src/guards.ts — analyze tool mutations to protect inbox/ and meta/ paths
 - slug → extensions/brain-wiki/src/slug.ts — slugify titles, generate page IDs, dedupe slugs
 - types → extensions/brain-wiki/src/types.ts — shared TypeScript interfaces and types
+- obsidian-client → extensions/brain-wiki/src/obsidian-client.ts **(proposed)** — Unix socket client for the Obsidian CLI
+- obsidian-fs → extensions/brain-wiki/src/obsidian-fs.ts **(proposed)** — file operations via obsidian create/move/rename/delete
+- properties → extensions/brain-wiki/src/properties.ts **(proposed)** — lifecycle state management via obsidian property:*

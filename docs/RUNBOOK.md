@@ -39,6 +39,7 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 - [guards](./04_modules/guards.md) - Protected path enforcement
 - [slug](./04_modules/slug.md) - Slug and ID generation utilities
 - [types](./04_modules/types.md) - Shared TypeScript type definitions
+- [obsidian-cli](./04_modules/obsidian-cli.md) - Obsidian CLI integration spec (proposed)
 
 ### How-To
 
