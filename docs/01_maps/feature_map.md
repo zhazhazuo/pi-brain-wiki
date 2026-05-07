@@ -16,3 +16,6 @@
 - obsidian-client → extensions/brain-wiki/src/obsidian-client.ts **(proposed)** — Unix socket client for the Obsidian CLI
 - obsidian-fs → extensions/brain-wiki/src/obsidian-fs.ts **(proposed)** — file operations via obsidian create/move/rename/delete
 - properties → extensions/brain-wiki/src/properties.ts **(proposed)** — lifecycle state management via obsidian property:*
+- project-sync → extensions/brain-wiki/src/project-sync.ts — scan, add notes, suggest tasks for Project/ folders
+- sync → extensions/brain-wiki/src/sync.ts — scan PARA folders and ensure canonical wiki pages
+- triage → extensions/brain-wiki/src/triage.ts — read, add, suggest, flag stale in LIST.md

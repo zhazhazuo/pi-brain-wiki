@@ -2,7 +2,7 @@
 
 <!-- metadata
 generated: 2026-05-05
-last_synced: 2026-05-05
+last_synced: 2026-05-08
 -->
 
 Agent-optimized knowledge base for pi-brain-wiki project.
@@ -39,6 +39,9 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 - [guards](./04_modules/guards.md) - Protected path enforcement
 - [slug](./04_modules/slug.md) - Slug and ID generation utilities
 - [types](./04_modules/types.md) - Shared TypeScript type definitions
+- [sync](./04_modules/sync.md) - PARA vault folder sync to wiki topics
+- [triage](./04_modules/triage.md) - LIST.md routing center
+- [project-sync](./04_modules/project-sync.md) - Project/ folder sync and task suggestions
 - [obsidian-cli](./04_modules/obsidian-cli.md) - Obsidian CLI integration spec (proposed)
 
 ### How-To

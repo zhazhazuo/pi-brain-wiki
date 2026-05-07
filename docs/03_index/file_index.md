@@ -19,6 +19,10 @@
 
 - extensions/brain-wiki/index.ts → Main pi extension entry point: registers tools, lifecycle hooks, and tool definitions
 - extensions/brain-wiki/resources/skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
+- extensions/brain-wiki/resources/skills/recall/SKILL.md → Agent skill: compare wiki sources against PKB entries
+- extensions/brain-wiki/resources/skills/wiki-intel/SKILL.md → Agent skill: synthesize wiki activity patterns and periodic review
+- extensions/brain-wiki/resources/skills/wiki-map/SKILL.md → Agent skill: orient to current wiki knowledge state
+- extensions/brain-wiki/resources/skills/wiki-workshop/SKILL.md → Agent skill: ingest sources and refine wiki topics
 
 ## extensions/brain-wiki/src/
 
@@ -31,12 +35,17 @@
 - extensions/brain-wiki/src/lint.ts → Runs structural health checks: links, orphans, frontmatter, duplicates, coverage, staleness
 - extensions/brain-wiki/src/log.ts → Appends structured events to events.jsonl and regenerates log.md
 - extensions/brain-wiki/src/obsidian-client.ts → New: Unix socket client for the Obsidian CLI
+- extensions/brain-wiki/src/obsidian-client.test.ts → Unit tests for ObsidianClient
 - extensions/brain-wiki/src/obsidian-fs.ts → New: file operations via obsidian create/move/rename/delete
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths and relative references
+- extensions/brain-wiki/src/project-sync.ts → Scan/add notes/suggest tasks for Project/ folders
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure, templates, and metadata files
 - extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking (planned: delegate to obsidian search:context)
+- extensions/brain-wiki/src/search.test.ts → Unit tests for registry search
 - extensions/brain-wiki/src/slug.ts → Slugifies titles, generates source/page IDs, deduplicates slugs
+- extensions/brain-wiki/src/sync.ts → Sync PARA vault folders into wiki topic pages
+- extensions/brain-wiki/src/triage.ts → Read, add, suggest, flag stale items in LIST.md
 - extensions/brain-wiki/src/types.ts → Shared TypeScript interfaces and type definitions
 
 ## scripts/
