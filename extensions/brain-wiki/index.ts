@@ -29,9 +29,14 @@ import {
 import { searchRegistry, searchViaObsidian } from "./src/search.ts";
 import { ObsidianClient } from "./src/obsidian-client.ts";
 import { bootstrapVault, ensureCanonicalPage } from "./src/scaffold.ts";
+import { syncParaToWiki } from "./src/sync.ts";
+import { triageList } from "./src/triage.ts";
+import { syncProject } from "./src/project-sync.ts";
 import type {
+  ProjectSyncResult,
   RegistryData,
   StatusSummary,
+  TriageResult,
   WikiConfig,
   WikiEvent,
   WikiPageType,
@@ -613,6 +618,132 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "wiki_sync",
+    label: "Wiki Sync",
+    description:
+      "Scan PARA vault structure and update wiki topic pages.",
+    promptSnippet:
+      "Sync PARA vault folders (Area/, Resource/, Project/) into wiki topic pages",
+    promptGuidelines: [
+      "Use this tool to keep wiki topics in sync with your PARA vault structure.",
+      "Run with scope='all' after adding new PARA folders.",
+      "Existing topic synthesis content is preserved.",
+    ],
+    parameters: Type.Object({
+      scope: StringEnum(["area", "resource", "projects", "all"] as const),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const config = await loadConfig(root);
+      return withRootLock(root, async () => {
+        const registry = await loadRegistry(root);
+        const client = await getObsidianClient(root);
+        const result = await syncParaToWiki(root, config, registry, params.scope, client);
+
+        await appendEvent(root, {
+          ts: new Date().toISOString(),
+          kind: "refactor",
+          title: `Synced ${params.scope} PARA folders to wiki`,
+          actor: "extension",
+          notes: [
+            `created=${result.topicsCreated}`,
+            `updated=${result.topicsUpdated}`,
+          ],
+        });
+
+        await rebuildAllGeneratedArtifacts(root);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Synced ${params.scope}: ${result.topicsCreated} created, ${result.topicsUpdated} updated`,
+            },
+          ],
+          details: result,
+        };
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_triage",
+    label: "Wiki Triage",
+    description:
+      "Manage LIST.md as shared routing center between human and agent.",
+    promptSnippet:
+      "Read, add, suggest, or flag stale items in the vault's LIST.md",
+    promptGuidelines: [
+      "Use this tool to participate in the human's task inbox.",
+      "All AI content must use the '> 🤖 [AI]' prefix.",
+      "Never mark items complete or delete items.",
+    ],
+    parameters: Type.Object({
+      action: StringEnum(["read", "add", "suggest", "flag_stale"] as const),
+      content: Type.Optional(
+        Type.String({ description: "Content for add action" }),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const result = await triageList(root, params.action, params.content);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatTriageResult(params.action, result),
+          },
+        ],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_project_sync",
+    label: "Wiki Project Sync",
+    description:
+      "Sync with Project/ folders — scan, add notes, suggest tasks.",
+    promptSnippet:
+      "Read project status, add research notes, or suggest tasks in LIST.md",
+    promptGuidelines: [
+      "Use this tool to participate in project workflows.",
+      "scan returns all active projects with status.",
+      "add_note appends research to project/notes.md.",
+      "suggest_task adds to LIST.md with AI indicator.",
+    ],
+    parameters: Type.Object({
+      action: StringEnum(["scan", "add_note", "suggest_task"] as const),
+      project: Type.Optional(
+        Type.String({ description: "Project folder name" }),
+      ),
+      content: Type.Optional(
+        Type.String({ description: "Note content or task suggestion" }),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const result = await syncProject(
+        root,
+        params.action,
+        params.project,
+        params.content,
+      );
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatProjectSyncResult(params.action, result),
+          },
+        ],
+        details: result,
+      };
+    },
+  });
+
   pi.registerCommand("wiki-status", {
     description: "Show a short brain-wiki status summary",
     handler: async (_args, ctx) => {
@@ -923,4 +1054,43 @@ function formatActivity(
   }
 
   return lines.join("\n");
+}
+
+function formatTriageResult(action: string, result: TriageResult): string {
+  if (action === "read" && result.analysis) {
+    return [
+      `LIST.md Analysis:`,
+      `Total items: ${result.analysis.totalItems}`,
+      `Unchecked: ${result.analysis.uncheckedItems}`,
+      `Stale (>7d): ${result.analysis.staleItems}`,
+      `Recent (≤3d): ${result.analysis.recentItems}`,
+    ].join("\n");
+  }
+  if (action === "add" && result.added) {
+    return "Added to LIST.md with AI indicator.";
+  }
+  if (result.suggestions) {
+    return result.suggestions.join("\n");
+  }
+  return "Done.";
+}
+
+function formatProjectSyncResult(action: string, result: ProjectSyncResult): string {
+  if (action === "scan" && result.projects) {
+    if (result.projects.length === 0) return "No projects found.";
+    return [
+      `Projects (${result.projects.length}):`,
+      ...result.projects.map(
+        (p) =>
+          `- ${p.title} [${p.status}] ${p.priority}${p.deadline ? ` (due: ${p.deadline})` : ""}`,
+      ),
+    ].join("\n");
+  }
+  if (action === "add_note" && result.noteAdded) {
+    return "Research note added to project.";
+  }
+  if (action === "suggest_task" && result.taskSuggested) {
+    return "Task suggestion added to LIST.md.";
+  }
+  return "Done.";
 }
