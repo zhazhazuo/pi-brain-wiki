@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { buildBacklinks, buildRegistry, scanWikiPages } from "./indexer.ts";
 import { metaPath, normalizeWikiLinkTarget } from "./paths.ts";
 import type { BacklinksData, LintIssue, LintRun, ParsedPage, RegistryData } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
 const SUMMARY_REQUIRED = [
   "id",
@@ -34,15 +35,43 @@ function isArchivedOrCleared(page: ParsedPage | RegistryData["pages"][number]): 
   return status === "archived" || status === "cleared";
 }
 
-export async function runLint(root: string, mode: string, writeReport = false, limit?: number): Promise<LintRun> {
+export async function runLint(
+  root: string,
+  mode: string,
+  writeReport = false,
+  limit?: number,
+  client?: ObsidianClient | null
+): Promise<LintRun> {
   const pages = await scanWikiPages(root);
   const registry = buildRegistry(pages);
   const backlinks = buildBacklinks(registry);
 
   const allIssues: LintIssue[] = [];
 
-  if (mode === "links" || mode === "all") allIssues.push(...lintLinks(pages, registry));
-  if (mode === "orphans" || mode === "all") allIssues.push(...lintOrphans(registry, backlinks));
+  if (mode === "links" || mode === "all") {
+    if (client) {
+      try {
+        allIssues.push(...await lintLinksViaCLI(root, client));
+      } catch {
+        allIssues.push(...lintLinks(pages, registry));
+      }
+    } else {
+      allIssues.push(...lintLinks(pages, registry));
+    }
+  }
+
+  if (mode === "orphans" || mode === "all") {
+    if (client) {
+      try {
+        allIssues.push(...await lintOrphansViaCLI(root, client));
+      } catch {
+        allIssues.push(...lintOrphans(registry, backlinks));
+      }
+    } else {
+      allIssues.push(...lintOrphans(registry, backlinks));
+    }
+  }
+
   if (mode === "frontmatter" || mode === "all") allIssues.push(...lintFrontmatter(pages));
   if (mode === "duplicates" || mode === "all") allIssues.push(...lintDuplicates(registry));
   if (mode === "coverage" || mode === "all") allIssues.push(...lintCoverage(registry, backlinks));
@@ -357,5 +386,46 @@ function lintStaleConsumed(registry: RegistryData, backlinks: BacklinksData): Li
       });
     }
   }
+  return issues;
+}
+
+// ── CLI-based lint helpers ─────────────────────────────────────
+
+async function lintLinksViaCLI(root: string, client: ObsidianClient): Promise<LintIssue[]> {
+  const issues: LintIssue[] = [];
+  const unresolved = await client.unresolved({ format: "json", verbose: true });
+
+  for (const entry of unresolved) {
+    if (typeof entry === "object" && entry.link && entry.sources) {
+      for (const source of entry.sources) {
+        issues.push({
+          kind: "broken-link",
+          severity: "error",
+          path: source,
+          message: `Unresolved link: ${entry.link}`,
+        });
+      }
+    }
+  }
+
+  return issues;
+}
+
+async function lintOrphansViaCLI(root: string, client: ObsidianClient): Promise<LintIssue[]> {
+  const issues: LintIssue[] = [];
+  const orphans = await client.orphans();
+
+  for (const orphan of orphans) {
+    // Only report wiki pages
+    if (orphan.startsWith("Wiki/")) {
+      issues.push({
+        kind: "orphan",
+        severity: "warning",
+        path: orphan,
+        message: "No incoming links from any vault page",
+      });
+    }
+  }
+
   return issues;
 }
