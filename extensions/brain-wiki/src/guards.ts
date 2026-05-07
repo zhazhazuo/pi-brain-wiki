@@ -20,15 +20,29 @@ export function analyzeToolMutation(
   const protectedPaths = allPaths.filter((path) => isProtected(root, path));
   const wikiPaths = allPaths.filter((path) => isWithin(root, path));
 
+  // Resolve allowedExternal relative to wiki root
   const allowedResolved = allowedExternal.map((pattern) => resolve(root, pattern));
   const outsidePaths = allPaths.filter(
     (path) => !isWithin(root, path) && !isProtected(root, path),
   );
   const allowedExternalPaths = outsidePaths.filter((path) =>
-    allowedResolved.some((allowed) => resolve(path) === resolve(allowed)),
+    allowedResolved.some((allowed) => {
+      // Support glob-like ** patterns
+      if (allowed.includes("**")) {
+        const prefix = allowed.split("**")[0];
+        return resolve(path).startsWith(resolve(prefix));
+      }
+      return resolve(path) === resolve(allowed);
+    }),
   );
   const blockedOutsidePaths = outsidePaths.filter(
-    (path) => !allowedResolved.some((allowed) => resolve(path) === resolve(allowed)),
+    (path) => !allowedResolved.some((allowed) => {
+      if (allowed.includes("**")) {
+        const prefix = allowed.split("**")[0];
+        return resolve(path).startsWith(resolve(prefix));
+      }
+      return resolve(path) === resolve(allowed);
+    }),
   );
 
   return { allPaths, protectedPaths, wikiPaths, outsidePaths: blockedOutsidePaths, allowedExternalPaths };
@@ -69,7 +83,12 @@ function extractPathsFromPatch(patch: string): string[] {
 }
 
 function isProtected(root: string, absolutePath: string): boolean {
+  const vaultRoot = resolve(root, "..");
+  // Protect Area/ (human-only PKB)
+  if (isWithin(resolve(vaultRoot, "Area"), absolutePath)) return true;
+  // Protect inbox/ (immutable source packets)
   if (isWithin(resolve(root, "inbox"), absolutePath)) return true;
+  // Protect generated meta files
   return generatedMetaFiles(root).some((path) => resolve(path) === resolve(absolutePath));
 }
 
