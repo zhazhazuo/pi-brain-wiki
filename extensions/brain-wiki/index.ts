@@ -320,14 +320,26 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         : ["archived", "cleared"];
       let result;
       if (client) {
-        result = await searchViaObsidian(
-          client,
-          registry,
-          params.query,
-          params.type as WikiPageType | undefined,
-          params.limit,
-          excludeStatuses,
-        );
+        try {
+          result = await searchViaObsidian(
+            client,
+            registry,
+            params.query,
+            params.type as WikiPageType | undefined,
+            params.limit,
+            excludeStatuses,
+          );
+        } catch {
+          // Obsidian became unavailable — fall back to registry search
+          result = await searchRegistry(
+            root,
+            registry,
+            params.query,
+            params.type as WikiPageType | undefined,
+            params.limit,
+            excludeStatuses,
+          );
+        }
       } else {
         result = await searchRegistry(
           root,
