@@ -4,9 +4,26 @@ import { parsePage, writePage } from "./frontmatter.ts";
 import { metaPath, sourcePacketDir } from "./paths.ts";
 import { todayStamp } from "./slug.ts";
 import type { WikiEvent } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
-export async function appendEvent(root: string, event: WikiEvent): Promise<void> {
+export async function appendEvent(
+  root: string,
+  event: WikiEvent,
+  client?: ObsidianClient | null
+): Promise<void> {
   const eventsPath = metaPath(root, "events.jsonl");
+  const eventLine = JSON.stringify(event);
+
+  if (client) {
+    try {
+      await client.append(eventsPath, eventLine);
+      return;
+    } catch {
+      // Fallback to filesystem
+    }
+  }
+
+  // Fallback: read-modify-write
   await mkdir(join(root, "meta"), { recursive: true });
   const existing = await readEvents(root);
   existing.push(event);
