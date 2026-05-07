@@ -101,4 +101,30 @@ export class ObsidianClient {
     }
     return parsed.data as SearchHit[];
   }
+
+  async listDir(dirPath: string): Promise<Array<{ name: string; isDir: boolean; path: string }>> {
+    const raw = await this.exec(["list", dirPath]);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok || !Array.isArray(parsed.data)) {
+      throw new Error(`Obsidian list failed for ${dirPath}: ${raw}`);
+    }
+    return parsed.data;
+  }
+
+  async readFile(filePath: string): Promise<string> {
+    const raw = await this.exec(["read", filePath]);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok || typeof parsed.data !== "string") {
+      throw new Error(`Obsidian read failed for ${filePath}: ${raw}`);
+    }
+    return parsed.data;
+  }
+
+  async writeFile(filePath: string, content: string): Promise<void> {
+    const raw = await this.exec(["write", filePath], { content });
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ok) {
+      throw new Error(`Obsidian write failed for ${filePath}: ${raw}`);
+    }
+  }
 }
