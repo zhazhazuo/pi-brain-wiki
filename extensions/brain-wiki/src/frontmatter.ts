@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import matter from "gray-matter";
 import { normalizeWikiLinkTarget, toRelative } from "./paths.ts";
 import type { ParsedPage } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
 export async function parsePage(root: string, absolutePath: string): Promise<ParsedPage> {
   const raw = await readFile(absolutePath, "utf8");
@@ -34,6 +35,36 @@ export async function writePage(
 
 export async function readTemplate(path: string): Promise<string> {
   return readFile(path, "utf8");
+}
+
+export async function setPageProperty(
+  absolutePath: string,
+  name: string,
+  value: any,
+  client?: ObsidianClient | null
+): Promise<void> {
+  if (client) {
+    try {
+      const type = inferPropertyType(value);
+      await client.propertySet(absolutePath, name, String(value), type);
+      return;
+    } catch {
+      // Fallback to gray-matter
+    }
+  }
+
+  // Fallback: use gray-matter
+  const page = await parsePage("", absolutePath);
+  page.frontmatter[name] = value;
+  await writePage(absolutePath, page.frontmatter, page.body);
+}
+
+function inferPropertyType(value: any): "text" | "list" | "number" | "checkbox" | "date" {
+  if (Array.isArray(value)) return "list";
+  if (typeof value === "number") return "number";
+  if (typeof value === "boolean") return "checkbox";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return "date";
+  return "text";
 }
 
 export function renderTemplate(template: string, values: Record<string, string>): string {

@@ -81,9 +81,27 @@ export async function markPageStatus(
   pagePaths: string[],
   status: string,
   extraFields: Record<string, any>,
+  client?: ObsidianClient | null,
 ): Promise<void> {
   for (const relativePath of pagePaths) {
     const absolutePath = join(root, relativePath);
+
+    if (client) {
+      try {
+        await client.propertySet(absolutePath, "status", status, "text");
+        await client.propertySet(absolutePath, "updated", todayStamp(new Date()), "date");
+        for (const [key, value] of Object.entries(extraFields)) {
+          if (value !== undefined) {
+            await setPageProperty(absolutePath, key, value, client);
+          }
+        }
+        continue;
+      } catch {
+        // Fallback to gray-matter
+      }
+    }
+
+    // Fallback: use gray-matter
     try {
       const page = await parsePage(root, absolutePath);
       await writePage(
