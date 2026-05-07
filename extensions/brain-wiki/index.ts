@@ -106,12 +106,23 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     const root = await maybeResolveWikiRoot(ctx.cwd);
     if (!root) return undefined;
 
+    // Load config for allowExternal
+    let allowExternal: string[] = [];
+    try {
+      const config = await loadConfig(root);
+      allowExternal = config.allowExternal ?? [];
+    } catch {
+      // If config can't be loaded, proceed with empty allowlist
+    }
+
     const analysis = analyzeToolMutation(
       root,
       event.toolName,
       event.input,
       ctx.cwd,
+      allowExternal,
     );
+
     if (analysis.protectedPaths.length > 0) {
       const protectedList = analysis.protectedPaths
         .map((path) => toRelative(root, path))
@@ -131,18 +142,22 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const outsideList = analysis.outsidePaths
         .map((path) => toRelative(root, path))
         .join(", ");
+      const allowedList = analysis.allowedExternalPaths
+        .map((path) => toRelative(root, path))
+        .join(", ");
+      const msg =
+        allowedList
+          ? `Blocked write outside wiki: ${outsideList}. Allowed external path(s) passed through: ${allowedList}.`
+          : `Blocked write outside wiki: ${outsideList}. Write into Wiki/ instead — the user is responsible for content outside the wiki.`;
       if (ctx.hasUI)
-        ctx.ui.notify(
-          `Blocked write outside wiki: ${outsideList}. Write into Wiki/ instead — the user is responsible for content outside the wiki.`,
-          "warning",
-        );
+        ctx.ui.notify(msg, "warning");
       return {
         block: true,
         reason: `brain-wiki restricts agent writes to the wiki domain. Write into Wiki/ instead of: ${outsideList}`,
       };
     }
 
-    if (analysis.wikiPaths.length > 0) {
+    if (analysis.wikiPaths.length > 0 || analysis.allowedExternalPaths.length > 0) {
       dirtyRoots.add(root);
     }
 

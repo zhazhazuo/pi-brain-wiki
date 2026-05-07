@@ -20,6 +20,12 @@ export interface WikiConfig {
   linkStyle: string;
   citationStyle: string;
   protect: string[];
+  /**
+   * Path patterns (relative to wiki root) that agents are allowed
+   * to write to, even though they fall outside the wiki directory.
+   * E.g. ["../LIST.md"] to allow editing the PARA vault's top-level list.
+   */
+  allowExternal: string[];
   search: {
     defaultLimit: number;
   };

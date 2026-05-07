@@ -1,21 +1,37 @@
 import { resolve } from "node:path";
 import { generatedMetaFiles, isWithin, normalizeUserPath } from "./paths.ts";
 
-interface GuardAnalysis {
+export interface GuardAnalysis {
   allPaths: string[];
   protectedPaths: string[];
   wikiPaths: string[];
   outsidePaths: string[];
+  allowedExternalPaths: string[];
 }
 
-export function analyzeToolMutation(root: string, toolName: string, input: any, cwd: string): GuardAnalysis {
+export function analyzeToolMutation(
+  root: string,
+  toolName: string,
+  input: any,
+  cwd: string,
+  allowedExternal: string[] = [],
+): GuardAnalysis {
   const allPaths = extractPaths(toolName, input, cwd);
   const protectedPaths = allPaths.filter((path) => isProtected(root, path));
   const wikiPaths = allPaths.filter((path) => isWithin(root, path));
+
+  const allowedResolved = allowedExternal.map((pattern) => resolve(root, pattern));
   const outsidePaths = allPaths.filter(
     (path) => !isWithin(root, path) && !isProtected(root, path),
   );
-  return { allPaths, protectedPaths, wikiPaths, outsidePaths };
+  const allowedExternalPaths = outsidePaths.filter((path) =>
+    allowedResolved.some((allowed) => resolve(path) === resolve(allowed)),
+  );
+  const blockedOutsidePaths = outsidePaths.filter(
+    (path) => !allowedResolved.some((allowed) => resolve(path) === resolve(allowed)),
+  );
+
+  return { allPaths, protectedPaths, wikiPaths, outsidePaths: blockedOutsidePaths, allowedExternalPaths };
 }
 
 function extractPaths(toolName: string, input: any, cwd: string): string[] {

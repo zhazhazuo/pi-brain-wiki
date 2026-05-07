@@ -39,6 +39,7 @@ export function createDefaultConfig(title: string, domain = "General"): WikiConf
       "meta/log.md",
       "meta/lint-report.md",
     ],
+    allowExternal: [],
     search: {
       defaultLimit: 10,
     },
@@ -81,6 +82,7 @@ export async function loadConfig(root: string): Promise<WikiConfig> {
       ...(parsed.search ?? {}),
     },
     protect: Array.isArray(parsed.protect) ? parsed.protect : fallback.protect,
+    allowExternal: Array.isArray(parsed.allowExternal) ? parsed.allowExternal : fallback.allowExternal,
   };
 }
 
