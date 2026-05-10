@@ -14,7 +14,8 @@ Scans vault and wiki activity for a given time period. Returns structured data a
 
 ## Constraints
 
-- Scans both wiki (pages/, inbox/, meta/) and PARA (Resource/, Project/, Area/, Archive/, Draft/) directories
+- Scans wiki (pages/, inbox/, meta/) and PARA (Resource/, Project/, Area/, Archive/) directories
+- Scans Wiki/drafts/ for mutable work-in-progress
 - Returns file-level change data with timestamps
 - Default scan window is 7 days
 - LIST.md parsing supports `**YYYY-MM-DD**` (primary) and `## [YYYY-MM-DD]` (backward compat) date headers
@@ -60,7 +61,7 @@ Agent-written sub-lines use the format `  A YYYY-MM-DDTHH:MM → ...`. The parse
 
 `wiki_scan_activity` returns a `lifecycle` object containing:
 
-- `integratedAwaitingRecall`: pages in `integrated` status for 14+ days
+- `integratedAwaitingRecall`: pages in `integrated` status for 14+ days (uses GRACE_PERIODS)
 - `consumedReactivated`: consumed topics with newly integrated sources
 - `clearableCandidates`: archived entries that may be eligible for clearing
 

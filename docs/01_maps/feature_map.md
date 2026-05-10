@@ -2,20 +2,22 @@
 
 - capture → extensions/brain-wiki/src/capture.ts — capture URL/file/text as immutable source packet and scaffold summary page
 - config → extensions/brain-wiki/src/config.ts — load, create, and write .wiki/config.json with defaults
-- paths → extensions/brain-wiki/src/paths.ts — resolve wiki root from cwd, compute all vault paths
-- scaffold → extensions/brain-wiki/src/scaffold.ts — bootstrap vault directory structure, templates, and metadata files
+- paths → extensions/brain-wiki/src/paths.ts — resolve wiki root from cwd, compute all vault paths, resolve wikilinks to absolute paths
+- scaffold → extensions/brain-wiki/src/scaffold.ts — bootstrap vault directory structure (incl. discussions/, drafts/), templates, and metadata files
 - frontmatter → extensions/brain-wiki/src/frontmatter.ts — parse, render, and write YAML frontmatter for markdown pages
 - indexer → extensions/brain-wiki/src/indexer.ts — build and persist registry.json, backlinks.json, and index.md
-- lint → extensions/brain-wiki/src/lint.ts — run structural checks (links, orphans, frontmatter, duplicates, coverage, staleness)
+- lint → extensions/brain-wiki/src/lint.ts — run structural checks (links, orphans, frontmatter, duplicates, coverage, staleness, stale sync)
 - search → extensions/brain-wiki/src/search.ts — query the compiled page registry
 - log → extensions/brain-wiki/src/log.ts — append structured events to events.jsonl and regenerate log.md
 - activity → extensions/brain-wiki/src/activity.ts — scan vault and wiki activity for a time period; parses LIST.md into typed items with category detection and agent notes
 - guards → extensions/brain-wiki/src/guards.ts — analyze tool mutations to protect inbox/ and meta/ paths
 - slug → extensions/brain-wiki/src/slug.ts — slugify titles, generate page IDs, dedupe slugs
 - types → extensions/brain-wiki/src/types.ts — shared TypeScript interfaces and types
+- digest → extensions/brain-wiki/src/digest.ts — build meta/wiki-digest.md as agent entry point with stats, events, stale items, below-minimum topics
+- lifecycle → extensions/brain-wiki/src/lifecycle.ts — hardcoded grace period constants for page lifecycle transitions
 - obsidian-client → extensions/brain-wiki/src/obsidian-client.ts **(proposed)** — Unix socket client for the Obsidian CLI
 - obsidian-fs → extensions/brain-wiki/src/obsidian-fs.ts **(proposed)** — file operations via obsidian create/move/rename/delete
 - properties → extensions/brain-wiki/src/properties.ts **(proposed)** — lifecycle state management via obsidian property:*
 - project-sync → extensions/brain-wiki/src/project-sync.ts — scan, add notes, suggest tasks for Project/ folders
-- sync → extensions/brain-wiki/src/sync.ts — scan PARA folders and ensure canonical wiki pages
+- sync → extensions/brain-wiki/src/sync.ts — bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json
 - triage → extensions/brain-wiki/src/triage.ts — read, add, suggest, flag stale in LIST.md

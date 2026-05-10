@@ -16,6 +16,8 @@ flowchart LR
   Guards[src/guards.ts]
   Slug[src/slug.ts]
   Types[src/types.ts]
+  Digest[src/digest.ts]
+  Lifecycle[src/lifecycle.ts]
   Sync[src/sync.ts]
   Triage[src/triage.ts]
   ProjectSync[src/project-sync.ts]
@@ -33,6 +35,8 @@ flowchart LR
   Index --> Guards
   Index --> Slug
   Index --> Types
+  Index --> Digest
+  Index --> Lifecycle
   Index --> Sync
   Index --> Triage
   Index --> ProjectSync
@@ -68,6 +72,8 @@ flowchart LR
 | guards | extensions/brain-wiki/src/guards.ts | current |
 | slug | extensions/brain-wiki/src/slug.ts | current |
 | types | extensions/brain-wiki/src/types.ts | current |
+| digest | extensions/brain-wiki/src/digest.ts | current |
+| lifecycle | extensions/brain-wiki/src/lifecycle.ts | current |
 | sync | extensions/brain-wiki/src/sync.ts | current |
 | triage | extensions/brain-wiki/src/triage.ts | current |
 | project-sync | extensions/brain-wiki/src/project-sync.ts | current |
