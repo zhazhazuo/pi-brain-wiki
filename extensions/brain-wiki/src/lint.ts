@@ -1,6 +1,8 @@
-import { writeFile } from "node:fs/promises";
+import { stat, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { buildBacklinks, buildRegistry, scanWikiPages } from "./indexer.ts";
-import { metaPath, normalizeWikiLinkTarget } from "./paths.ts";
+import { GRACE_PERIODS } from "./lifecycle.ts";
+import { metaPath, normalizeWikiLinkTarget, vaultRoot } from "./paths.ts";
 import type { BacklinksData, LintIssue, LintRun, ParsedPage, RegistryData } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
 
@@ -77,6 +79,7 @@ export async function runLint(
   if (mode === "coverage" || mode === "all") allIssues.push(...lintCoverage(registry, backlinks));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleness(registry));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleConsumed(registry, backlinks));
+  if (mode === "staleness" || mode === "all") allIssues.push(...await lintStaleSync(root, registry));
 
   const issues = typeof limit === "number" ? allIssues.slice(0, limit) : allIssues;
   const run: LintRun = {
@@ -345,12 +348,12 @@ function lintStaleness(registry: RegistryData): LintIssue[] {
     }
 
     if (page.type === "topic" && page.status === "draft") {
-      // Flag topics in draft >30 days
+      // Flag topics in draft > grace period
       if (page.updated) {
         const updated = new Date(page.updated).getTime();
         const now = Date.now();
         const days = (now - updated) / 86_400_000;
-        if (days > 30) {
+        if (days > GRACE_PERIODS.draft_stale) {
           return [
             {
               kind: "staleness",
@@ -386,6 +389,38 @@ function lintStaleConsumed(registry: RegistryData, backlinks: BacklinksData): Li
       });
     }
   }
+  return issues;
+}
+
+async function lintStaleSync(root: string, registry: RegistryData): Promise<LintIssue[]> {
+  const issues: LintIssue[] = [];
+  const vRoot = vaultRoot(root);
+
+  for (const page of registry.pages) {
+    if (page.type !== "topic") continue;
+    if (!page.status || page.status === "archived" || page.status === "cleared") continue;
+
+    const lastSynced = (page as any).last_synced;
+    const paraSource = (page as any).para_source;
+    if (!lastSynced || !paraSource) continue;
+
+    const paraPath = resolve(vRoot, paraSource);
+    try {
+      const stats = await stat(paraPath);
+      const lastSyncedMs = new Date(lastSynced).getTime();
+      if (stats.mtimeMs > lastSyncedMs) {
+        issues.push({
+          kind: "staleness",
+          severity: "warning",
+          path: page.path,
+          message: `${page.path} may be stale — ${paraSource} modified ${stats.mtime.toISOString().slice(0, 10)}`,
+        });
+      }
+    } catch {
+      // PARA folder may not exist; skip
+    }
+  }
+
   return issues;
 }
 

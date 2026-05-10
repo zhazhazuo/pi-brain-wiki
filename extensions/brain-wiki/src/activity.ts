@@ -4,8 +4,9 @@ import { join, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import { loadConfig } from "./config.ts";
 import { buildRegistry, scanWikiPages } from "./indexer.ts";
+import { GRACE_PERIODS } from "./lifecycle.ts";
 import { readEvents } from "./log.ts";
-import { metaPath } from "./paths.ts";
+import { draftsDir, metaPath } from "./paths.ts";
 import type { LifecycleBacklog, ListItem, ListItemCategory, ListMdData, WikiEvent } from "./types.ts";
 
 const execAsync = promisify(execFile);
@@ -73,7 +74,7 @@ export async function scanActivity(root: string, vaultRoot: string, params: Acti
     const [projectChanges, resourceChanges, draftChanges, listItems] = await Promise.all([
       scanDirForChanges(join(vaultRoot, "Project"), sinceMs),
       scanDirForChanges(join(vaultRoot, "Resource"), sinceMs),
-      scanDirForChanges(join(vaultRoot, "Draft"), sinceMs),
+      scanDirForChanges(draftsDir(root), sinceMs),
       parseListMd(vaultRoot),
     ]);
 
@@ -118,7 +119,7 @@ async function computeLifecycleBacklog(root: string): Promise<LifecycleBacklog> 
   for (const entry of registry.pages) {
     if (entry.status === "integrated" && entry.updated) {
       const daysSince = (now - new Date(entry.updated).getTime()) / 86_400_000;
-      if (daysSince >= 14) {
+      if (daysSince >= GRACE_PERIODS.integrated_to_consumed) {
         integratedAwaitingRecall.push({
           path: entry.path,
           title: entry.title,

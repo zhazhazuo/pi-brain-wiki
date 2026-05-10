@@ -11,10 +11,12 @@ All wiki agents (Map, Workshop, Intelligence) load this skill. It defines the sh
 
 Every wiki session starts by reading these files in order:
 
-1. **`Wiki/WIKI_SCHEMA.md`** — vault conventions, page types, naming rules
-2. **`Wiki/.wiki/config.json`** — directory paths, page types, protected paths
-3. **`Wiki/meta/index.md`** — current page catalog (or use `wiki_search` if index is large)
-4. **`LIST.md`** — the inbound command center: pending items, sources to capture, tasks, ideas
+1. **`Wiki/discussions/route.md`** — active discussions, where we left off
+2. **`Wiki/meta/wiki-digest.md`** — current wiki state: stats, events, stale items
+3. **`Wiki/WIKI_SCHEMA.md`** — vault conventions, page types, naming rules
+4. **`Wiki/.wiki/config.json`** — directory paths, page types, protected paths
+5. **`Wiki/meta/index.md`** — current page catalog (or use `wiki_search` if index is large)
+6. **`LIST.md`** — the inbound command center: pending items, sources to capture, tasks, ideas
 
 Never skip this. Never edit without re-orienting to current wiki state.
 
@@ -62,6 +64,30 @@ LIST.md is the single front door for everything Walker receives. It lives at vau
 - Agent may NOT create new `- [ ]` top-level items
 - Agent may NOT edit or reorder existing user items
 - Agent may NOT toggle `[>]` or `[x]` backwards
+
+## Discussion System
+
+The wiki maintains a discussion record in `Wiki/discussions/` for session continuity.
+
+**At session start:**
+1. Read `Wiki/discussions/route.md`
+2. Check if there are active discussions (state: `ongoing`)
+3. If continuing an active discussion, read the briefing file
+
+**During a discussion:**
+1. Create or update the briefing file (`Wiki/discussions/YYYY-MM-DD-topic.md`)
+2. Record: context, key points, outcomes, open questions
+3. Update `route.md` to reflect the discussion state
+
+**Discussion states:**
+| State | Meaning |
+|-------|---------|
+| `ongoing` | Started, no result yet |
+| `finish` | Got result, not internalized into PKB |
+| `archive` | Internalized into PKB |
+| `discord` | Started, then dropped |
+
+**No new tools for MVP.** The agent uses existing `read`/`write`/`edit` on markdown files.
 
 ## Non-Negotiable Rules
 
@@ -181,9 +207,11 @@ captured → integrated → consumed → archived → cleared
 | Zone | Path | Agent | Human |
 |------|------|-------|-------|
 | **Human-only** | `Area/` | Read only | Full control |
-| **Agent-writable** | `Resource/`, `Draft/` | Can create/edit | Full control |
+| **Agent-writable** | `Resource/` | Can create/edit | Full control |
 | **Shared** | `LIST.md`, `Project/` | Can read/write | Full control |
 | **Wiki (agent-owned)** | `Wiki/` | Full control | Read/browse |
+
+**Note:** `Draft/` has moved into `Wiki/drafts/` as of v3. The agent uses `Wiki/drafts/` for work-in-progress. External `Draft/` at vault root is deprecated.
 
 ### New Tools
 

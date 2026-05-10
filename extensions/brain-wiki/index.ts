@@ -8,6 +8,7 @@ import { withFileMutationQueue } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { scanActivity } from "./src/activity.ts";
 import { captureSource } from "./src/capture.ts";
+import { rebuildDigest } from "./src/digest.ts";
 import { loadConfig } from "./src/config.ts";
 import { analyzeToolMutation } from "./src/guards.ts";
 import { rebuildRegistryAndIndex } from "./src/indexer.ts";
@@ -597,12 +598,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_sync",
     label: "Wiki Sync",
     description:
-      "Scan PARA vault structure and update wiki topic pages.",
+      "Seed Wiki topic pages from PARA vault structure. Run once during setup, then again only when new PARA folders are added.",
     promptSnippet:
-      "Sync PARA vault folders (Area/, Resource/, Project/) into wiki topic pages",
+      "Bootstrap wiki topics from PARA folders (Area/, Resource/, Project/)",
     promptGuidelines: [
-      "Use this tool to keep wiki topics in sync with your PARA vault structure.",
-      "Run with scope='all' after adding new PARA folders.",
+      "Use this tool to seed Wiki topics from your PARA vault structure during initial setup.",
+      "Run with scope='all' when new PARA folders are added after setup.",
+      "After initial sync, the agent builds Wiki organically from discussions and sources.",
       "Existing topic synthesis content is preserved.",
     ],
     parameters: Type.Object({
@@ -805,9 +807,10 @@ async function withRootLock<T>(
 async function rebuildAllGeneratedArtifacts(root: string): Promise<string[]> {
   const config = await loadConfig(root);
   const client = await getObsidianClient(root);
-  const { rebuilt } = await rebuildRegistryAndIndex(root, client);
+  const { rebuilt, registry } = await rebuildRegistryAndIndex(root, client);
   const logPath = await rebuildLog(root, config.title);
-  return [...rebuilt, logPath];
+  const digestPath = await rebuildDigest(root, registry);
+  return [...rebuilt, logPath, digestPath];
 }
 
 async function loadRegistry(root: string): Promise<RegistryData> {

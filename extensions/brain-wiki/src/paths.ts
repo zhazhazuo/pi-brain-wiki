@@ -164,6 +164,57 @@ export function draftRoot(wikiRoot: string): string {
   return join(vaultRoot(wikiRoot), "Draft");
 }
 
+export function draftsDir(wikiRoot: string): string {
+  return join(wikiRoot, "drafts");
+}
+
 export function listMdPath(wikiRoot: string): string {
   return join(vaultRoot(wikiRoot), "LIST.md");
+}
+
+/**
+ * Resolve a wikilink to an absolute filesystem path.
+ * Handles both PARA links (Area/, Project/, Resource/) and Wiki links (topics/, summaries/, etc.)
+ * Returns null for unresolvable links.
+ */
+export function resolveWikiLink(wikiRoot: string, link: string): string | null {
+  const clean = link
+    .replace(/^\[\[/, "")
+    .replace(/\]\]$/, "")
+    .replace(/\|.*$/, "") // Remove display text alias
+    .replace(/#.*$/, "")  // Remove section anchor
+    .trim();
+
+  if (!clean) return null;
+
+  const normalized = clean.replace(/\\/g, "/");
+
+  // PARA links
+  if (
+    normalized.startsWith("Area/") ||
+    normalized.startsWith("Project/") ||
+    normalized.startsWith("Resource/") ||
+    normalized.startsWith("Archive/") ||
+    normalized.startsWith("Draft/")
+  ) {
+    const paraPath = join(vaultRoot(wikiRoot), normalized + ".md");
+    return paraPath;
+  }
+
+  // Wiki-internal links
+  if (
+    normalized.startsWith("summaries/") ||
+    normalized.startsWith("topics/") ||
+    normalized.startsWith("plans/") ||
+    normalized.startsWith("reviews/")
+  ) {
+    return join(wikiRoot, "pages", normalized + ".md");
+  }
+
+  // Bare topic names (try topics/)
+  if (!normalized.includes("/")) {
+    return join(wikiRoot, "pages", "topics", normalized + ".md");
+  }
+
+  return null;
 }

@@ -1,7 +1,9 @@
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
-import { areaRoot, projectRoot, resourceRoot } from "./paths.ts";
+import { readdir, writeFile } from "node:fs/promises";
+import { join, relative } from "node:path";
+import { parsePage, writePage } from "./frontmatter.ts";
+import { areaRoot, metaPath, projectRoot, resourceRoot } from "./paths.ts";
 import { ensureCanonicalPage } from "./scaffold.ts";
+import { todayStamp } from "./slug.ts";
 import type { RegistryData, SyncResult, SyncScope, WikiConfig } from "./types.ts";
 import { ObsidianClient } from "./obsidian-client.ts";
 
@@ -22,6 +24,8 @@ export async function syncParaToWiki(
   let topicsCreated = 0;
   let topicsUpdated = 0;
   const pages: string[] = [];
+  const now = new Date().toISOString();
+  const dateStamp = todayStamp(new Date());
 
   for (const folder of folders) {
     const result = await ensureCanonicalPage(root, config, registry, {
@@ -30,14 +34,42 @@ export async function syncParaToWiki(
       createIfMissing: true,
     });
 
-    if (result.created) {
-      topicsCreated++;
-      if (result.path) pages.push(result.path);
-    } else if (result.resolved) {
-      topicsUpdated++;
-      if (result.path) pages.push(result.path);
+    if (result.path) {
+      // Update last_synced and para_source on the page
+      const absolutePath = join(root, result.path);
+      try {
+        const page = await parsePage(root, absolutePath);
+        const paraSource = relative(join(root, ".."), folder.path).replace(/\\/g, "/");
+        await writePage(
+          absolutePath,
+          {
+            ...page.frontmatter,
+            last_synced: dateStamp,
+            para_source: paraSource,
+          },
+          page.body,
+        );
+      } catch {
+        // Skip unparseable pages
+      }
+
+      pages.push(result.path);
+      if (result.created) {
+        topicsCreated++;
+      } else if (result.resolved) {
+        topicsUpdated++;
+      }
     }
   }
+
+  // Write sync state
+  const syncState = {
+    last_full_sync: now,
+    scope,
+    topicsCreated,
+    topicsUpdated,
+  };
+  await writeFile(metaPath(root, "sync-state.json"), `${JSON.stringify(syncState, null, 2)}\n`, "utf8");
 
   return { topicsCreated, topicsUpdated, pages };
 }

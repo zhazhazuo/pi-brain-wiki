@@ -223,6 +223,10 @@ If a new source integrates into a consumed topic, the topic flips back to integr
 `;
 }
 
+export function defaultRouteMarkdown(): string {
+  return `---\ntype: discussion-route\nupdated: ${new Date().toISOString().slice(0, 10)}\n---\n\n# Discussions\n\n## Active\n\n## Recent\n\n## Archive\n`;
+}
+
 // ── Bootstrap ────────────────────────────────────────────────
 
 export async function bootstrapVault(root: string, title: string, domain?: string, force = false): Promise<string[]> {
@@ -233,6 +237,8 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
 
   const created = [
     join(root, "inbox"),
+    join(root, "drafts"),
+    join(root, "discussions"),
     join(root, "pages", "summaries"),
     join(root, "pages", "topics"),
     join(root, "pages", "plans"),
@@ -261,6 +267,7 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   await writeFile(metaPath(root, "events.jsonl"), "", "utf8");
   await writeFile(metaPath(root, "log.md"), `# ${title} Log\n\n_No events yet._\n`, "utf8");
   await writeFile(metaPath(root, "lint-report.md"), `# Lint Report\n\n_No lint run yet._\n`, "utf8");
+  await writeFile(join(root, "discussions", "route.md"), defaultRouteMarkdown(), "utf8");
 
   return [toRelative(root, configPath), ...created.map((dir) => toRelative(root, dir))];
 }
