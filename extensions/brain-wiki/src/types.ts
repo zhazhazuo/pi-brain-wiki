@@ -292,7 +292,7 @@ export interface TriageResult {
   suggestions?: string[];
 }
 
-export type ProjectSyncAction = "scan" | "add_note" | "suggest_task";
+export type ProjectSyncAction = "scan" | "create_project" | "add_note" | "suggest_task";
 
 export interface ProjectSyncResult {
   projects?: Array<{
@@ -303,6 +303,9 @@ export interface ProjectSyncResult {
     deadline: string | null;
     lastAction: string | null;
   }>;
+  projectCreated?: boolean;
+  projectPath?: string;
+  projectTitle?: string;
   noteAdded?: boolean;
   taskSuggested?: boolean;
 }

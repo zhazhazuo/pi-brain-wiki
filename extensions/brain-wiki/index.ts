@@ -64,6 +64,14 @@ async function getObsidianClient(root: string): Promise<ObsidianClient | null> {
   return null;
 }
 
+async function requireObsidianClient(root: string): Promise<ObsidianClient> {
+  const client = await getObsidianClient(root);
+  if (!client) {
+    throw new Error("Obsidian CLI is required for this wiki vault operation. Start Obsidian with CLI support enabled and try again.");
+  }
+  return client;
+}
+
 const PAGE_TYPE_ENUM = StringEnum([
   "summary",
   "topic",
@@ -241,7 +249,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const config = await loadConfig(root);
-      const client = await getObsidianClient(root);
+      const client = await requireObsidianClient(root);
       return withRootLock(root, async () => {
         const result = await captureSource(
           root,
@@ -306,43 +314,19 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
-      const client = await getObsidianClient(root);
+      const client = await requireObsidianClient(root);
       const registry = await loadRegistry(root);
       const excludeStatuses = params.includeArchived
         ? []
         : ["archived", "cleared"];
-      let result;
-      if (client) {
-        try {
-          result = await searchViaObsidian(
-            client,
-            registry,
-            params.query,
-            params.type as WikiPageType | undefined,
-            params.limit,
-            excludeStatuses,
-          );
-        } catch {
-          // Obsidian became unavailable — fall back to registry search
-          result = await searchRegistry(
-            root,
-            registry,
-            params.query,
-            params.type as WikiPageType | undefined,
-            params.limit,
-            excludeStatuses,
-          );
-        }
-      } else {
-        result = await searchRegistry(
-          root,
-          registry,
-          params.query,
-          params.type as WikiPageType | undefined,
-          params.limit,
-          excludeStatuses,
-        );
-      }
+      const result = await searchViaObsidian(
+        client,
+        registry,
+        params.query,
+        params.type as WikiPageType | undefined,
+        params.limit,
+        excludeStatuses,
+      );
       return {
         content: [{ type: "text", text: formatSearch(result) }],
         details: result,
@@ -383,12 +367,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const config = await loadConfig(root);
+      const client = await requireObsidianClient(root);
       return withRootLock(root, async () => {
         const registry = await loadRegistry(root);
         const result = await ensureCanonicalPage(root, config, registry, {
           ...params,
           createIfMissing: params.createIfMissing ?? true,
-        });
+        }, client);
 
         if (result.created && result.path) {
           await appendEvent(root, {
@@ -430,7 +415,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
-      const client = await getObsidianClient(root);
+      const client = await requireObsidianClient(root);
       const result = await runLint(
         root,
         params.mode ?? "all",
@@ -511,24 +496,28 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           notes: params.notes,
           actor: params.actor ?? "agent",
         };
-        await appendEvent(root, event, client);
+        await appendEvent(root, event);
         if (params.kind === "integrate" && params.sourceIds?.length) {
-          await markSourcesIntegrated(root, params.sourceIds, ts);
+          const requiredClient = client ?? await requireObsidianClient(root);
+          await markSourcesIntegrated(root, params.sourceIds, ts, requiredClient);
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "consumed" && params.pagePaths?.length) {
           const pkbRefs = (params.notes ?? []).filter((n) => n.startsWith("pkb:")).map((n) => n.slice(4));
+          const requiredClient = client ?? await requireObsidianClient(root);
           await markPageStatus(root, params.pagePaths, "consumed", {
             consumed_at: ts,
             pkb_refs: pkbRefs.length > 0 ? pkbRefs : undefined,
-          }, client);
+          }, requiredClient);
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "archived" && params.pagePaths?.length) {
-          await markPageStatus(root, params.pagePaths, "archived", {}, client);
+          const requiredClient = client ?? await requireObsidianClient(root);
+          await markPageStatus(root, params.pagePaths, "archived", {}, requiredClient);
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "cleared" && params.pagePaths?.length) {
+          const requiredClient = client ?? await requireObsidianClient(root);
           await markPageStatus(root, params.pagePaths, "cleared", {
             cleared_at: new Date().toISOString(),
-          }, client);
+          }, requiredClient);
           await rebuildAllGeneratedArtifacts(root);
         } else {
           await rebuildLog(root, config.title);
@@ -613,7 +602,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const config = await loadConfig(root);
-      const client = await getObsidianClient(root);
+      const client = await requireObsidianClient(root);
       return withRootLock(root, async () => {
         const registry = await loadRegistry(root);
         const result = await syncParaToWiki(root, config, registry, params.scope, client);
@@ -664,7 +653,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
-      const result = await triageList(root, params.action, params.content);
+      const client = await requireObsidianClient(root);
+      const result = await triageList(root, params.action, params.content, client);
 
       return {
         content: [
@@ -688,13 +678,14 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     promptGuidelines: [
       "Use this tool to participate in project workflows.",
       "scan returns all active projects with status.",
+      "create_project creates Project/wNN-Title/wNN-Title.md using the current ISO week.",
       "add_note appends research to project/notes.md.",
       "suggest_task adds to LIST.md with AI indicator.",
     ],
     parameters: Type.Object({
-      action: StringEnum(["scan", "add_note", "suggest_task"] as const),
+      action: StringEnum(["scan", "create_project", "add_note", "suggest_task"] as const),
       project: Type.Optional(
-        Type.String({ description: "Project folder name" }),
+        Type.String({ description: "Project title or folder name" }),
       ),
       content: Type.Optional(
         Type.String({ description: "Note content or task suggestion" }),
@@ -702,11 +693,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
+      const client = await requireObsidianClient(root);
       const result = await syncProject(
         root,
         params.action,
         params.project,
         params.content,
+        client,
       );
 
       return {
@@ -734,7 +727,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     description: "Run brain-wiki mechanical lint. Usage: /wiki-lint [mode]",
     handler: async (args, ctx) => {
       const root = await resolveWikiRoot(ctx.cwd);
-      const client = await getObsidianClient(root);
+      const client = await requireObsidianClient(root);
       const mode = (args?.trim() || "all") as Parameters<typeof runLint>[1];
       const result = await runLint(root, mode, true, 50, client);
       ctx.ui.notify(
@@ -771,7 +764,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const pagePath = parts[0];
       const pkbRefs = parts.slice(1);
 
-      const client = await getObsidianClient(root);
+      const client = await requireObsidianClient(root);
 
       return withRootLock(root, async () => {
         const ts = new Date().toISOString();
@@ -1069,6 +1062,9 @@ function formatProjectSyncResult(action: string, result: ProjectSyncResult): str
   }
   if (action === "add_note" && result.noteAdded) {
     return "Research note added to project.";
+  }
+  if (action === "create_project" && result.projectCreated) {
+    return `Project created: ${result.projectPath}`;
   }
   if (action === "suggest_task" && result.taskSuggested) {
     return "Task suggestion added to LIST.md.";

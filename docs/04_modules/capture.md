@@ -17,11 +17,13 @@ Captures an external source (URL, file, text) as an immutable packet in inbox/ a
 - Inbox packets are immutable — never edited after creation
 - Each capture creates a unique source ID (date-based)
 - Supports three input types: url (fetched via curl/wget), file (copied), text (written directly)
-- Summary page is scaffolded from the configured summary template
+- Extracted markdown, manifest JSON, and summary pages are written through Obsidian CLI when a client is provided
+- Raw filesystem remains for original source acquisition/copying before the captured content is placed in the vault workflow
 
 ## Scope Table
 
 | Layer | Item | Description |
 |-------|------|-------------|
-| Implementation | extensions/brain-wiki/src/capture.ts | captureSource(): validates input, downloads/copies/writes packet, creates manifest.json, scaffolds summary page |
+| Implementation | extensions/brain-wiki/src/capture.ts | captureSource(): validates input, downloads/copies original source, writes extracted/manifest content through Obsidian IO when available, scaffolds summary page |
+| Consumer | extensions/brain-wiki/src/obsidian-io.ts | Provides writeMarkdown() and writeMarkdownPage() for capture outputs |
 | Consumer | extensions/brain-wiki/index.ts | wiki_capture_source tool handler calls captureSource() |

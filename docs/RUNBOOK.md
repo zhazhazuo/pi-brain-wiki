@@ -42,7 +42,8 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 - [sync](./04_modules/sync.md) - PARA vault folder sync to wiki topics
 - [triage](./04_modules/triage.md) - LIST.md routing center
 - [project-sync](./04_modules/project-sync.md) - Project/ folder sync and task suggestions
-- [obsidian-cli](./04_modules/obsidian-cli.md) - Obsidian CLI integration spec (proposed)
+- [obsidian-io](./04_modules/obsidian-io.md) - Obsidian CLI-backed markdown/property IO boundary
+- [obsidian-cli](./04_modules/obsidian-cli.md) - Obsidian CLI integration notes
 
 ### How-To
 

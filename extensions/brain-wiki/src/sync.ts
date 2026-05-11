@@ -1,6 +1,7 @@
 import { readdir, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
-import { parsePage, writePage } from "./frontmatter.ts";
+import { setPageProperty } from "./frontmatter.ts";
+import { toObsidianPath } from "./obsidian-io.ts";
 import { areaRoot, metaPath, projectRoot, resourceRoot } from "./paths.ts";
 import { ensureCanonicalPage } from "./scaffold.ts";
 import { todayStamp } from "./slug.ts";
@@ -32,25 +33,22 @@ export async function syncParaToWiki(
       type: folder.type === "project" ? "plan" : "topic",
       title: folder.name,
       createIfMissing: true,
-    });
+    }, client);
 
     if (result.path) {
       // Update last_synced and para_source on the page
       const absolutePath = join(root, result.path);
-      try {
-        const page = await parsePage(root, absolutePath);
-        const paraSource = relative(join(root, ".."), folder.path).replace(/\\/g, "/");
-        await writePage(
-          absolutePath,
-          {
-            ...page.frontmatter,
-            last_synced: dateStamp,
-            para_source: paraSource,
-          },
-          page.body,
-        );
-      } catch {
-        // Skip unparseable pages
+      const paraSource = relative(join(root, ".."), folder.path).replace(/\\/g, "/");
+      if (client) {
+        await setPageProperty(absolutePath, "last_synced", dateStamp, client);
+        await setPageProperty(absolutePath, "para_source", paraSource, client);
+      } else {
+        try {
+          await setPageProperty(absolutePath, "last_synced", dateStamp);
+          await setPageProperty(absolutePath, "para_source", paraSource);
+        } catch {
+          // Skip pages that cannot be updated without a CLI client.
+        }
       }
 
       pages.push(result.path);
@@ -106,32 +104,28 @@ async function scanDirectory(
 ): Promise<ParaFolder[]> {
   const folders: ParaFolder[] = [];
 
-  try {
-    let entries: Array<{ name: string; isDir: boolean }>;
+  let entries: Array<{ name: string; isDir: boolean }>;
 
-    if (client) {
-      try {
-        const rawEntries = await client.listDir(dirPath);
-        entries = rawEntries.map((e) => ({ name: e.name, isDir: e.isDir }));
-      } catch {
-        // Fallback to filesystem
-        entries = await scanDirFilesystem(dirPath);
-      }
-    } else {
+  if (client) {
+    const rawEntries = await client.listDir(toObsidianPath(client, dirPath));
+    entries = rawEntries.map((e) => ({ name: e.name, isDir: e.isDir }));
+  } else {
+    try {
       entries = await scanDirFilesystem(dirPath);
+    } catch {
+      // Directory may not exist.
+      entries = [];
     }
+  }
 
-    for (const entry of entries) {
-      if (entry.isDir) {
-        folders.push({
-          path: join(dirPath, entry.name),
-          name: entry.name,
-          type,
-        });
-      }
+  for (const entry of entries) {
+    if (entry.isDir) {
+      folders.push({
+        path: join(dirPath, entry.name),
+        name: entry.name,
+        type,
+      });
     }
-  } catch {
-    // Directory may not exist
   }
 
   return folders;

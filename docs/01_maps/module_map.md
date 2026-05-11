@@ -21,6 +21,7 @@ flowchart LR
   Sync[src/sync.ts]
   Triage[src/triage.ts]
   ProjectSync[src/project-sync.ts]
+  ObsidianIo[src/obsidian-io.ts]
 
   Index --> Capture
   Index --> Config
@@ -41,9 +42,13 @@ flowchart LR
   Index --> Triage
   Index --> ProjectSync
   Index -.-> ObsidianClient[src/obsidian-client.ts]
+  Index --> ObsidianIo
+  ObsidianIo --> ObsidianClient
   Index -.-> ObsidianFs[src/obsidian-fs.ts]
   Index -.-> Properties[src/properties.ts]
   Capture -.-> ObsidianClient
+  Capture --> ObsidianIo
+  Fm --> ObsidianIo
   Indexer -.-> ObsidianClient
   Lint -.-> ObsidianClient
   Search -.-> ObsidianClient
@@ -77,6 +82,7 @@ flowchart LR
 | sync | extensions/brain-wiki/src/sync.ts | current |
 | triage | extensions/brain-wiki/src/triage.ts | current |
 | project-sync | extensions/brain-wiki/src/project-sync.ts | current |
-| obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | **proposed** |
+| obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | current |
+| obsidian-io | extensions/brain-wiki/src/obsidian-io.ts | current |
 | obsidian-fs | extensions/brain-wiki/src/obsidian-fs.ts | **proposed** |
 | properties | extensions/brain-wiki/src/properties.ts | **proposed** |

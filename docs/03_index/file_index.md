@@ -30,17 +30,19 @@
 - extensions/brain-wiki/src/capture.ts → Captures URL/file/text as immutable source packet and scaffolds summary page
 - extensions/brain-wiki/src/config.ts → Loads, creates, and writes .wiki/config.json with defaults
 - extensions/brain-wiki/src/digest.ts → Builds meta/wiki-digest.md: agent entry point with stats, events, stale items, below-minimum topics
-- extensions/brain-wiki/src/frontmatter.ts → Parses/writes YAML frontmatter and extracts wiki links and headings
+- extensions/brain-wiki/src/frontmatter.ts → Parses/renders YAML frontmatter, extracts wiki links/headings, delegates CLI-backed writes when a client is provided
 - extensions/brain-wiki/src/guards.ts → Analyzes tool mutations to protect inbox/ and meta/ paths from edits
 - extensions/brain-wiki/src/indexer.ts → Builds and persists registry.json, backlinks.json, and index.md
 - extensions/brain-wiki/src/lifecycle.ts → Hardcoded grace period constants for page lifecycle transitions
 - extensions/brain-wiki/src/lint.ts → Runs structural health checks: links, orphans, frontmatter, duplicates, coverage, staleness, stale sync
 - extensions/brain-wiki/src/log.ts → Appends structured events to events.jsonl and regenerates log.md
-- extensions/brain-wiki/src/obsidian-client.ts → New: Unix socket client for the Obsidian CLI
+- extensions/brain-wiki/src/obsidian-client.ts → Unix socket client for the Obsidian CLI
 - extensions/brain-wiki/src/obsidian-client.test.ts → Unit tests for ObsidianClient
+- extensions/brain-wiki/src/obsidian-io.ts → Markdown/property IO boundary backed by ObsidianClient
+- extensions/brain-wiki/src/obsidian-io.test.ts → Unit tests for CLI-backed markdown/property IO
 - extensions/brain-wiki/src/obsidian-fs.ts → New: file operations via obsidian create/move/rename/delete
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths, resolves wikilinks to absolute paths
-- extensions/brain-wiki/src/project-sync.ts → Scan/add notes/suggest tasks for Project/ folders
+- extensions/brain-wiki/src/project-sync.ts → Create weekly project notes, scan/add notes/suggest tasks for Project/ folders
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure (incl. discussions/, drafts/), templates, and metadata files
 - extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking (planned: delegate to obsidian search:context)

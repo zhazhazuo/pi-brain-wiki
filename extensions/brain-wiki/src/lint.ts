@@ -52,11 +52,7 @@ export async function runLint(
 
   if (mode === "links" || mode === "all") {
     if (client) {
-      try {
-        allIssues.push(...await lintLinksViaCLI(root, client));
-      } catch {
-        allIssues.push(...lintLinks(pages, registry));
-      }
+      allIssues.push(...await lintLinksViaCLI(root, client));
     } else {
       allIssues.push(...lintLinks(pages, registry));
     }
@@ -64,11 +60,7 @@ export async function runLint(
 
   if (mode === "orphans" || mode === "all") {
     if (client) {
-      try {
-        allIssues.push(...await lintOrphansViaCLI(root, client));
-      } catch {
-        allIssues.push(...lintOrphans(registry, backlinks));
-      }
+      allIssues.push(...await lintOrphansViaCLI(root, client));
     } else {
       allIssues.push(...lintOrphans(registry, backlinks));
     }

@@ -5,6 +5,7 @@ import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
 import { canonicalPagePath, metaPath, toRelative } from "./paths.ts";
 import { dedupeSlug, makePageId, slugifyTitle, todayStamp } from "./slug.ts";
 import type { EnsurePageParams, EnsurePageResult, RegistryData, WikiConfig } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
 // ── Templates ────────────────────────────────────────────────
 
@@ -279,6 +280,7 @@ export async function ensureCanonicalPage(
   config: WikiConfig,
   registry: RegistryData,
   params: EnsurePageParams,
+  client?: ObsidianClient | null,
 ): Promise<EnsurePageResult> {
   const targetType = params.type;
   const normalizedTitle = params.title.trim().toLowerCase();
@@ -385,7 +387,7 @@ export async function ensureCanonicalPage(
   const secondDelimiter = rendered.indexOf("\n---\n", frontmatterStart + 4);
   const body = secondDelimiter >= 0 ? rendered.slice(secondDelimiter + 5).trimStart() : rendered;
 
-  await writePage(absolutePath, parsed, body);
+  await writePage(absolutePath, parsed, body, client);
 
   return {
     resolved: true,

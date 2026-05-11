@@ -1,11 +1,11 @@
 # Module: obsidian-cli
 
-> Spec for integrating the Obsidian CLI into the brain-wiki extension.
-> Status: **proposed** — not yet implemented.
+> Integration notes for Obsidian CLI usage in the brain-wiki extension.
+> Status: **partially implemented** — core client, IO boundary, search, backlinks, graph lint, page writes, and property updates are active.
 
 ## Responsibility
 
-Provides a client layer that delegates metadata, search, graph, and file operations to the Obsidian CLI (running app via Unix socket) instead of reimplementing them in Pi. The extension keeps its guardrails and agent workflow layer but uses Obsidian's native engine for all vault-aware operations.
+Provides a client layer that delegates vault-visible content, search, graph, and property operations to the Obsidian CLI (running app via Unix socket). Internal .wiki/meta caches and bootstrap state remain filesystem-backed.
 
 ## Context
 
@@ -129,7 +129,7 @@ async ping(): Promise<boolean> {
 }
 ```
 
-If Obsidian isn't running, the extension falls back to its current file-based implementation.
+If Obsidian isn't running, user-visible vault operations fail with an explicit CLI-required error. Internal generated metadata can still use filesystem paths.
 
 ---
 
@@ -179,9 +179,9 @@ async function searchRegistry(obsidian: ObsidianClient, query: string, options?:
 
 | Step | Action |
 |------|--------|
-| 1 | Add `ObsidianClient` with fallback to file-based registry |
-| 2 | When Obsidian is running, delegate search to CLI; fall back to current `registry.json` |
-| 3 | After stable, remove the custom search ranking and keep only the fallback path |
+| 1 | Add `ObsidianClient` and require it for user-visible search |
+| 2 | Delegate search to CLI and map hits through the current `registry.json` |
+| 3 | Keep `registry.json` as generated internal metadata |
 | 4 | Eventually remove `registry.json` entirely, or generate it only as a cache for offline |
 
 ---
@@ -498,7 +498,7 @@ async function getFileHistory(obsidian: ObsidianClient, path: string): Promise<D
 
 ### Rollback
 
-Every CLI delegation checks `client.ping()` first. If Obsidian is not running, the extension falls back to the current file-based implementation transparently. No data loss risk.
+User-visible CLI delegation checks `client.ping()` before execution. If Obsidian is not running, the operation fails before mutating vault-visible content.
 
 ---
 
@@ -507,7 +507,7 @@ Every CLI delegation checks `client.ping()` first. If Obsidian is not running, t
 | Layer | Item | Description |
 |-------|------|-------------|
 | New | extensions/brain-wiki/src/obsidian-client.ts | `ObsidianClient` class — Unix socket protocol, typed convenience methods, ping/health |
-| New | extensions/brain-wiki/src/obsidian-fs.ts | `ObsidianFS` class — wraps create/move/rename/delete with guard integration |
+| New | extensions/brain-wiki/src/obsidian-io.ts | Markdown/property IO boundary — wraps create/read/append/prepend/property:set with path conversion |
 | New | extensions/brain-wiki/src/properties.ts | Property helpers — `setWikiStatus()`, `addSourceId()`, `readProperties()` |
 | Modified | extensions/brain-wiki/src/search.ts | Delegate to `obsidian search:context` with property enrichment; fallback to registry |
 | Modified | extensions/brain-wiki/src/indexer.ts | Enrich backlinks with cross-vault data via `obsidian backlinks` |

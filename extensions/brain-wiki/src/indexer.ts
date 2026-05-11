@@ -94,18 +94,13 @@ export async function enrichWithBacklinks(
   pages: RegistryEntry[],
 ): Promise<void> {
   for (const page of pages) {
-    try {
-      const backlinks = await client.backlinks(`Wiki/${page.path}`);
-      const external = backlinks.filter(b => !b.file.startsWith("Wiki/"));
-      page.externalBacklinks = external.length;
-      page.externalSources = external
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5)
-        .map(b => b.file);
-    } catch {
-      page.externalBacklinks = 0;
-      page.externalSources = [];
-    }
+    const backlinks = await client.backlinks(`Wiki/${page.path}`);
+    const external = backlinks.filter(b => !b.file.startsWith("Wiki/"));
+    page.externalBacklinks = external.length;
+    page.externalSources = external
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(b => b.file);
   }
 }
 

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, stat, writeFile, copyFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
+import { writeMarkdown } from "./obsidian-io.ts";
 import { resolveFrom, sourcePacketDir, sourcePagePath, toRelative } from "./paths.ts";
 import { dedupeSlug, makeSourceId, slugifyTitle } from "./slug.ts";
 import type { CaptureParams, CaptureResult, SourceManifest, WikiConfig } from "./types.ts";
@@ -55,17 +56,6 @@ export async function captureSource(
   await mkdir(originalDir, { recursive: true });
   await mkdir(attachmentsDir, { recursive: true });
 
-  // Helper to write files using CLI when available
-  const writeFileFn = client
-    ? async (path: string, content: string) => {
-        try {
-          await client.create(path, content, { overwrite: true });
-        } catch {
-          await writeFile(path, content, "utf8");
-        }
-      }
-    : async (path: string, content: string) => writeFile(path, content, "utf8");
-
   const capturedAt = new Date().toISOString();
   const captured = await materializeInput(packetDir, cwd, params, runner, signal);
   const title = params.title?.trim() || inferTitle(params, captured) || sourceId;
@@ -74,7 +64,11 @@ export async function captureSource(
   const extractedPath = join(packetDir, "extracted.md");
   const extractedHash = sha256(captured.extractedMarkdown);
 
-  await writeFileFn(extractedPath, ensureTrailingNewline(captured.extractedMarkdown));
+  if (client) {
+    await writeMarkdown(client, extractedPath, captured.extractedMarkdown);
+  } else {
+    await writeFile(extractedPath, ensureTrailingNewline(captured.extractedMarkdown), "utf8");
+  }
 
   const manifest: SourceManifest = {
     version: 1,
@@ -104,7 +98,11 @@ export async function captureSource(
     status: "captured",
   };
 
-  await writeFileFn(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  if (client) {
+    await writeMarkdown(client, manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  } else {
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  }
 
   let sourcePage: string | undefined;
   if (params.createSourcePage !== false) {
@@ -119,7 +117,7 @@ export async function captureSource(
       rawPath: toRelative(root, extractedPath),
       tags: params.tags ?? [],
       summary: inferSummary(captured.extractedMarkdown),
-    });
+    }, client);
   }
 
   return {
@@ -273,6 +271,7 @@ async function createSourcePageStub(
     tags: string[];
     summary: string;
   },
+  client?: ObsidianClient | null,
 ): Promise<string> {
   const template = await readTemplate(join(root, config.templates.summary));
   const rendered = renderTemplate(template, {
@@ -310,7 +309,7 @@ async function createSourcePageStub(
     tags: values.tags,
     source_ids: [values.sourceId],
     summary: values.summary,
-  }, body);
+  }, body, client);
 
   return toRelative(root, absolutePath);
 }

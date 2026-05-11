@@ -1,6 +1,8 @@
 import { readFile, appendFile, writeFile } from "node:fs/promises";
+import { appendMarkdown, readMarkdown, writeMarkdown } from "./obsidian-io.ts";
 import { listMdPath } from "./paths.ts";
 import type { TriageAction, TriageResult } from "./types.ts";
+import type { ObsidianClient } from "./obsidian-client.ts";
 
 const AI_INDICATOR = "> 🤖 [AI]";
 
@@ -8,26 +10,27 @@ export async function triageList(
   root: string,
   action: TriageAction,
   content?: string,
+  client?: ObsidianClient | null,
 ): Promise<TriageResult> {
   const listPath = listMdPath(root);
 
   switch (action) {
     case "read":
-      return readList(listPath);
+      return readList(listPath, client);
     case "add":
       if (!content) throw new Error("content required for add action");
-      return addToList(listPath, content);
+      return addToList(listPath, content, client);
     case "suggest":
-      return suggestFromList(listPath);
+      return suggestFromList(listPath, client);
     case "flag_stale":
-      return flagStaleItems(listPath);
+      return flagStaleItems(listPath, client);
     default:
       throw new Error(`Unknown triage action: ${action}`);
   }
 }
 
-async function readList(listPath: string): Promise<TriageResult> {
-  const content = await readFile(listPath, "utf8");
+async function readList(listPath: string, client?: ObsidianClient | null): Promise<TriageResult> {
+  const content = client ? await readMarkdown(client, listPath) : await readFile(listPath, "utf8");
   const items = parseListItems(content);
 
   const uncheckedItems = items.filter((item) => !item.done);
@@ -44,12 +47,12 @@ async function readList(listPath: string): Promise<TriageResult> {
   };
 }
 
-async function addToList(listPath: string, content: string): Promise<TriageResult> {
+async function addToList(listPath: string, content: string, client?: ObsidianClient | null): Promise<TriageResult> {
   const today = new Date().toISOString().slice(0, 10);
   const entry = `\n${AI_INDICATOR} ${content}\n`;
 
   // Read current content to find today's section
-  const current = await readFile(listPath, "utf8");
+  const current = client ? await readMarkdown(client, listPath) : await readFile(listPath, "utf8");
   const todaySection = `**${today}**`;
 
   if (current.includes(todaySection)) {
@@ -66,19 +69,27 @@ async function addToList(listPath: string, content: string): Promise<TriageResul
         }
       }
       lines.splice(insertIndex, 0, entry);
-      await writeFile(listPath, lines.join("\n"), "utf8");
+      if (client) {
+        await writeMarkdown(client, listPath, lines.join("\n"));
+      } else {
+        await writeFile(listPath, lines.join("\n"), "utf8");
+      }
     }
   } else {
     // Create new today section
     const newSection = `\n---\n\n**${today}**\n${entry}`;
-    await appendFile(listPath, newSection, "utf8");
+    if (client) {
+      await appendMarkdown(client, listPath, newSection);
+    } else {
+      await appendFile(listPath, newSection, "utf8");
+    }
   }
 
   return { added: true };
 }
 
-async function suggestFromList(listPath: string): Promise<TriageResult> {
-  const content = await readFile(listPath, "utf8");
+async function suggestFromList(listPath: string, client?: ObsidianClient | null): Promise<TriageResult> {
+  const content = client ? await readMarkdown(client, listPath) : await readFile(listPath, "utf8");
   const items = parseListItems(content);
 
   // Find items with URLs that could be captured
@@ -104,8 +115,8 @@ async function suggestFromList(listPath: string): Promise<TriageResult> {
   return { suggestions };
 }
 
-async function flagStaleItems(listPath: string): Promise<TriageResult> {
-  const content = await readFile(listPath, "utf8");
+async function flagStaleItems(listPath: string, client?: ObsidianClient | null): Promise<TriageResult> {
+  const content = client ? await readMarkdown(client, listPath) : await readFile(listPath, "utf8");
   const items = parseListItems(content);
   const staleItems = items.filter((item) => !item.done && item.daysSince > 7);
 

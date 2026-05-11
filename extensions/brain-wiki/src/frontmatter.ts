@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import matter from "gray-matter";
+import { setMarkdownProperty, writeMarkdownPage } from "./obsidian-io.ts";
 import { normalizeWikiLinkTarget, toRelative } from "./paths.ts";
 import type { ParsedPage } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
@@ -27,7 +28,13 @@ export async function writePage(
   absolutePath: string,
   frontmatterData: Record<string, any>,
   body: string,
+  client?: ObsidianClient | null,
 ): Promise<void> {
+  if (client) {
+    await writeMarkdownPage(client, absolutePath, frontmatterData, body);
+    return;
+  }
+
   await mkdir(dirname(absolutePath), { recursive: true });
   const content = matter.stringify(body.trimEnd() + "\n", cleanFrontmatter(frontmatterData));
   await writeFile(absolutePath, normalizeTrailingNewline(content), "utf8");
@@ -44,27 +51,14 @@ export async function setPageProperty(
   client?: ObsidianClient | null
 ): Promise<void> {
   if (client) {
-    try {
-      const type = inferPropertyType(value);
-      await client.propertySet(absolutePath, name, String(value), type);
-      return;
-    } catch {
-      // Fallback to gray-matter
-    }
+    await setMarkdownProperty(client, absolutePath, name, value);
+    return;
   }
 
   // Fallback: use gray-matter
   const page = await parsePage("", absolutePath);
   page.frontmatter[name] = value;
   await writePage(absolutePath, page.frontmatter, page.body);
-}
-
-function inferPropertyType(value: any): "text" | "list" | "number" | "checkbox" | "date" {
-  if (Array.isArray(value)) return "list";
-  if (typeof value === "number") return "number";
-  if (typeof value === "boolean") return "checkbox";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return "date";
-  return "text";
 }
 
 export function renderTemplate(template: string, values: Record<string, string>): string {

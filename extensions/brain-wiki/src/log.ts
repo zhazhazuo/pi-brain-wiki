@@ -1,6 +1,8 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { parsePage, writePage } from "./frontmatter.ts";
+import matter from "gray-matter";
+import { parsePage, setPageProperty, writePage } from "./frontmatter.ts";
+import { readMarkdown, setMarkdownProperty, writeMarkdown } from "./obsidian-io.ts";
 import { metaPath, sourcePacketDir } from "./paths.ts";
 import { todayStamp } from "./slug.ts";
 import type { WikiEvent } from "./types.ts";
@@ -13,15 +15,6 @@ export async function appendEvent(
 ): Promise<void> {
   const eventsPath = metaPath(root, "events.jsonl");
   const eventLine = JSON.stringify(event);
-
-  if (client) {
-    try {
-      await client.append(eventsPath, eventLine);
-      return;
-    } catch {
-      // Fallback to filesystem
-    }
-  }
 
   // Fallback: read-modify-write
   await mkdir(join(root, "meta"), { recursive: true });
@@ -87,18 +80,14 @@ export async function markPageStatus(
     const absolutePath = join(root, relativePath);
 
     if (client) {
-      try {
-        await client.propertySet(absolutePath, "status", status, "text");
-        await client.propertySet(absolutePath, "updated", todayStamp(new Date()), "date");
-        for (const [key, value] of Object.entries(extraFields)) {
-          if (value !== undefined) {
-            await setPageProperty(absolutePath, key, value, client);
-          }
+      await setMarkdownProperty(client, absolutePath, "status", status);
+      await setMarkdownProperty(client, absolutePath, "updated", todayStamp(new Date()));
+      for (const [key, value] of Object.entries(extraFields)) {
+        if (value !== undefined) {
+          await setPageProperty(absolutePath, key, value, client);
         }
-        continue;
-      } catch {
-        // Fallback to gray-matter
       }
+      continue;
     }
 
     // Fallback: use gray-matter
@@ -120,47 +109,85 @@ export async function markPageStatus(
   }
 }
 
-export async function markSourcesIntegrated(root: string, sourceIds: string[], integratedAt: string): Promise<void> {
+export async function markSourcesIntegrated(
+  root: string,
+  sourceIds: string[],
+  integratedAt: string,
+  client?: ObsidianClient | null,
+): Promise<void> {
   for (const sourceId of sourceIds) {
     const manifestPath = join(sourcePacketDir(root, sourceId), "manifest.json");
-    try {
-      const manifestRaw = await readFile(manifestPath, "utf8");
+    if (client) {
+      const manifestRaw = client
+        ? await readMarkdown(client, manifestPath)
+        : await readFile(manifestPath, "utf8");
       const manifest = JSON.parse(manifestRaw) as Record<string, any>;
       manifest.status = "integrated";
       manifest.integratedAt = integratedAt;
-      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-    } catch {
-      // Ignore missing manifests so logging remains robust.
+      const manifestContent = `${JSON.stringify(manifest, null, 2)}\n`;
+      await writeMarkdown(client, manifestPath, manifestContent);
+    } else {
+      try {
+        const manifestRaw = await readFile(manifestPath, "utf8");
+        const manifest = JSON.parse(manifestRaw) as Record<string, any>;
+        manifest.status = "integrated";
+        manifest.integratedAt = integratedAt;
+        await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+      } catch {
+        // Ignore missing manifests so logging remains robust without a CLI client.
+      }
     }
 
     // Find and update the summary page — scan pages/summaries/ for matching source_id
     const summariesDir = join(root, "pages", "summaries");
-    try {
-      const pages = await readdir(summariesDir);
-      for (const pageFile of pages) {
-        if (!pageFile.endsWith(".md")) continue;
-        const pagePath = join(summariesDir, pageFile);
-        try {
-          const page = await parsePage(root, pagePath);
-          const srcIds: string[] = Array.isArray(page.frontmatter.source_ids) ? page.frontmatter.source_ids : [];
-          if (srcIds.includes(sourceId)) {
-            await writePage(
-              pagePath,
-              {
-                ...page.frontmatter,
-                status: "integrated",
-                integrated_at: integratedAt,
-                updated: todayStamp(new Date(integratedAt)),
-              },
-              page.body,
-            );
-          }
-        } catch {
-          // Skip unparseable pages
+    if (client) {
+      const pages = await client.files({ folder: "Wiki/pages/summaries", ext: "md" });
+      for (const pagePath of pages) {
+        const raw = await readMarkdown(client, pagePath);
+        const parsed = matter(raw);
+        const srcIds: string[] = Array.isArray(parsed.data.source_ids) ? parsed.data.source_ids : [];
+        if (srcIds.includes(sourceId)) {
+          await writePage(
+            pagePath,
+            {
+              ...parsed.data,
+              status: "integrated",
+              integrated_at: integratedAt,
+              updated: todayStamp(new Date(integratedAt)),
+            },
+            parsed.content,
+            client,
+          );
         }
       }
-    } catch {
-      // Summaries dir may not exist yet
+    } else {
+      try {
+        const pages = await readdir(summariesDir);
+        for (const pageFile of pages) {
+          if (!pageFile.endsWith(".md")) continue;
+          const pagePath = join(summariesDir, pageFile);
+          try {
+            const page = await parsePage(root, pagePath);
+            const srcIds: string[] = Array.isArray(page.frontmatter.source_ids) ? page.frontmatter.source_ids : [];
+            if (srcIds.includes(sourceId)) {
+              await writePage(
+                pagePath,
+                {
+                  ...page.frontmatter,
+                  status: "integrated",
+                  integrated_at: integratedAt,
+                  updated: todayStamp(new Date(integratedAt)),
+                },
+                page.body,
+              );
+            }
+          } catch {
+            // Skip unparseable pages
+          }
+        }
+      } catch {
+        // Summaries dir may not exist yet
+      }
     }
   }
 }

@@ -99,7 +99,7 @@ describe("enrichWithBacklinks", () => {
     expect(pages[0].externalSources).toEqual([]);
   });
 
-  test("backlinks error is caught and defaults to zero/empty", async () => {
+  test("backlinks errors propagate instead of silently defaulting to zero/empty", async () => {
     const pages: RegistryEntry[] = [
       makePage({ id: "5", path: "pages/topics/Broken.md", title: "Broken" }),
     ];
@@ -109,9 +109,6 @@ describe("enrichWithBacklinks", () => {
       config: { socketPath: "", vaultCwd: "", timeout: 0 },
     };
 
-    await enrichWithBacklinks(mockClient as any, pages);
-
-    expect(pages[0].externalBacklinks).toBe(0);
-    expect(pages[0].externalSources).toEqual([]);
+    await expect(enrichWithBacklinks(mockClient as any, pages)).rejects.toThrow("connection lost");
   });
 });
