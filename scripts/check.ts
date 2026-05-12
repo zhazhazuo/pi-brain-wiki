@@ -1,5 +1,6 @@
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { loadSkills } from "@mariozechner/pi-coding-agent";
 
 const requiredFiles = [
   "package.json",
@@ -7,7 +8,7 @@ const requiredFiles = [
   "README.md",
   "LICENSE",
   "extensions/brain-wiki/index.ts",
-  "extensions/brain-wiki/resources/skills/brain-wiki/SKILL.md",
+  "skills/brain-wiki/SKILL.md",
   "extensions/brain-wiki/src/config.ts",
   "extensions/brain-wiki/src/capture.ts",
   "extensions/brain-wiki/src/indexer.ts",
@@ -24,6 +25,40 @@ for (const path of requiredFiles) {
 const pkg = JSON.parse(await readFile("package.json", "utf8"));
 if (!pkg.pi?.extensions?.includes("./extensions/brain-wiki/index.ts")) {
   throw new Error("package.json pi.extensions is missing ./extensions/brain-wiki/index.ts");
+}
+
+if (!pkg.files?.includes("skills")) {
+  throw new Error('package.json files must include "skills"');
+}
+
+const skillsPath = "./skills";
+if (!pkg.pi?.skills?.includes(skillsPath)) {
+  throw new Error(`package.json pi.skills is missing ${skillsPath}`);
+}
+
+const expectedSkills = [
+  "brain-wiki",
+  "recall",
+  "wiki-intel",
+  "wiki-map",
+  "wiki-workshop",
+];
+const skillsResult = loadSkills({
+  cwd: process.cwd(),
+  skillPaths: [skillsPath],
+  includeDefaults: false,
+});
+const loadedSkillNames = new Set(skillsResult.skills.map((skill) => skill.name));
+for (const name of expectedSkills) {
+  if (!loadedSkillNames.has(name)) {
+    throw new Error(`Expected Pi skill to load: ${name}`);
+  }
+}
+if (skillsResult.diagnostics.length > 0) {
+  const diagnostics = skillsResult.diagnostics
+    .map((diagnostic) => `${diagnostic.path}: ${diagnostic.message}`)
+    .join("\n");
+  throw new Error(`Pi skill diagnostics found:\n${diagnostics}`);
 }
 
 if (!Array.isArray(pkg.keywords) || !pkg.keywords.includes("pi-package")) {

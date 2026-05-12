@@ -24,6 +24,7 @@
   },
   "files": [
     "extensions",
+    "skills",
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
@@ -43,6 +44,9 @@
   "pi": {
     "extensions": [
       "./extensions/brain-wiki/index.ts"
+    ],
+    "skills": [
+      "./skills"
     ]
   },
   "dependencies": {

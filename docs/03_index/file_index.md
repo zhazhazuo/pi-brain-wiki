@@ -18,11 +18,11 @@
 ## extensions/brain-wiki/
 
 - extensions/brain-wiki/index.ts → Main pi extension entry point: registers tools, lifecycle hooks, and tool definitions
-- extensions/brain-wiki/resources/skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
-- extensions/brain-wiki/resources/skills/recall/SKILL.md → Agent skill: compare wiki sources against PKB entries
-- extensions/brain-wiki/resources/skills/wiki-intel/SKILL.md → Agent skill: synthesize wiki activity patterns and periodic review
-- extensions/brain-wiki/resources/skills/wiki-map/SKILL.md → Agent skill: orient to current wiki knowledge state
-- extensions/brain-wiki/resources/skills/wiki-workshop/SKILL.md → Agent skill: ingest sources and refine wiki topics
+- skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
+- skills/recall/SKILL.md → Agent skill: compare wiki sources against PKB entries
+- skills/wiki-intel/SKILL.md → Agent skill: synthesize wiki activity patterns and periodic review
+- skills/wiki-map/SKILL.md → Agent skill: orient to current wiki knowledge state
+- skills/wiki-workshop/SKILL.md → Agent skill: ingest sources and refine wiki topics
 
 ## extensions/brain-wiki/src/
 

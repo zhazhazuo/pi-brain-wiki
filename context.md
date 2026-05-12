@@ -13,7 +13,7 @@ pi-brain-wiki/
   docs/01_maps/module_map.md → Mermaid dependency diagram showing how extension modules connect
   docs/01_maps/system_map.md → Architecture layers diagram: pi agent → tools → domain modules → filesystem
   extensions/brain-wiki/index.ts → Main pi extension entry point: registers tools, lifecycle hooks, and tool definitions
-  extensions/brain-wiki/resources/skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
+  skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
   extensions/brain-wiki/src/activity.ts → Scans vault for recent changes across wiki and PARA folders
   extensions/brain-wiki/src/capture.ts → Captures URL/file/text as immutable source packet and scaffolds summary page
   extensions/brain-wiki/src/config.ts → Loads, creates, and writes .wiki/config.json with defaults

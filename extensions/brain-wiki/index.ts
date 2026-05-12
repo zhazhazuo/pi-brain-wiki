@@ -44,7 +44,7 @@ import type {
 } from "./src/types.ts";
 
 const baseDir = dirname(fileURLToPath(import.meta.url));
-const skillDir = join(baseDir, "resources", "skills");
+const skillDir = resolve(baseDir, "..", "..", "skills");
 const dirtyRoots = new Set<string>();
 
 let cachedClient: ObsidianClient | null = null;
