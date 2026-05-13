@@ -6,7 +6,7 @@ import { metaPath, toRelative } from "./paths.ts";
 import type { BacklinksData, BacklinksRecord, ParsedPage, RegistryData, RegistryEntry, WikiPageType } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
 
-const PAGE_ORDER: WikiPageType[] = ["summary", "topic", "plan", "review"];
+const PAGE_ORDER: WikiPageType[] = ["summary", "topic", "plan", "review", "workflow"];
 
 export async function scanWikiPages(root: string): Promise<ParsedPage[]> {
   const config = await loadConfig(root);
@@ -87,6 +87,7 @@ const PAGE_LABELS: Record<string, string> = {
   topic: "Topics",
   plan: "Plans",
   review: "Reviews",
+  workflow: "Workflows",
 };
 
 export async function enrichWithBacklinks(
@@ -184,6 +185,7 @@ function inferTypeFromPath(relativePath: string): WikiPageType {
   if (relativePath.includes("/summaries/")) return "summary";
   if (relativePath.includes("/topics/")) return "topic";
   if (relativePath.includes("/plans/")) return "plan";
+  if (relativePath.includes("/workflows/")) return "workflow";
   return "review";
 }
 

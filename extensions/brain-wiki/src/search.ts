@@ -85,6 +85,7 @@ export async function searchViaObsidian(
     topic: "pages/topics",
     plan: "pages/plans",
     review: "pages/reviews",
+    workflow: "pages/workflows",
   };
 
   const scope = type ? `Wiki/${TYPE_DIR[type]}` : "Wiki";

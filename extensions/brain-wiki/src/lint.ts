@@ -25,11 +25,14 @@ const PLAN_REQUIRED = ["id", "type", "title", "status", "date", "updated"] as co
 
 const REVIEW_REQUIRED = ["id", "type", "title", "status", "period", "updated"] as const;
 
+const WORKFLOW_REQUIRED = ["id", "type", "title", "status", "updated", "version", "triggers", "summary"] as const;
+
 const FRONTMATTER_REQUIRED: Record<string, readonly string[]> = {
   summary: SUMMARY_REQUIRED,
   topic: TOPIC_REQUIRED,
   plan: PLAN_REQUIRED,
   review: REVIEW_REQUIRED,
+  workflow: WORKFLOW_REQUIRED,
 };
 
 function isArchivedOrCleared(page: ParsedPage | RegistryData["pages"][number]): boolean {
@@ -310,7 +313,7 @@ function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIss
       continue;
     }
 
-    if (page.sourceIds.length === 0 && page.type !== "plan" && page.type !== "review") {
+    if (page.sourceIds.length === 0 && page.type !== "plan" && page.type !== "review" && page.type !== "workflow") {
       issues.push({
         kind: "coverage",
         severity: "warning",

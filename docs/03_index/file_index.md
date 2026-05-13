@@ -50,6 +50,8 @@
 - extensions/brain-wiki/src/slug.ts → Slugifies titles, generates source/page IDs, deduplicates slugs
 - extensions/brain-wiki/src/sync.ts → Bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json
 - extensions/brain-wiki/src/triage.ts → Read, add, suggest, flag stale items in LIST.md
+- extensions/brain-wiki/src/workflow.ts → Generate standardized workflow pages and workflow route metadata
+- extensions/brain-wiki/src/workflow.test.ts → Unit tests for workflow generation, duplicate detection, and route rendering
 - extensions/brain-wiki/src/types.ts → Shared TypeScript interfaces and type definitions
 
 ## scripts/

@@ -21,12 +21,14 @@ export function createDefaultConfig(title: string, domain = "General"): WikiConf
       topic: "pages/topics",
       plan: "pages/plans",
       review: "pages/reviews",
+      workflow: "pages/workflows",
     },
     templates: {
       summary: ".wiki/templates/summary.md",
       topic: ".wiki/templates/topic.md",
       plan: ".wiki/templates/plan.md",
       review: ".wiki/templates/review.md",
+      workflow: ".wiki/templates/workflow.md",
     },
     linkStyle: "wikilink-folder-qualified",
     citationStyle: "source-page-id-link",
@@ -39,6 +41,7 @@ export function createDefaultConfig(title: string, domain = "General"): WikiConf
       "meta/index.md",
       "meta/log.md",
       "meta/lint-report.md",
+      "meta/workflows.md",
     ],
     allowExternal: [
       "../LIST.md",

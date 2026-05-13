@@ -63,6 +63,7 @@ Workshop finishes      → Logs event, topics updated, Map can query them next t
 | `topic` | Knowledge map entry | Current understanding, Connections, Open questions |
 | `plan` | Orientation | Priorities, Timeboxed blocks, Dependencies |
 | `review` | Attention analysis | Activity clusters, Neglected areas, Emerging patterns |
+| `workflow` | Reusable agent procedure | Standard workflow YAML, Notes |
 
 ## Vault layout
 
@@ -75,8 +76,10 @@ Wiki/
 │   ├── summaries/
 │   ├── topics/
 │   ├── plans/
-│   └── reviews/
+│   ├── reviews/
+│   └── workflows/
 ├── meta/                   ← generated (guarded)
+│   └── workflows.md        ← short route page for active/draft workflows
 ├── archive/                ← retired pages
 └── .wiki/
     ├── config.json
@@ -99,6 +102,7 @@ Wiki/
 | `wiki_sync` | Scan PARA vault structure, update wiki topic pages |
 | `wiki_triage` | Read, add, suggest, or flag stale items in LIST.md |
 | `wiki_project_sync` | Scan projects, add research notes, suggest tasks |
+| `wiki_generate_workflow` | Create a standardized workflow page from approved structured inputs |
 
 ## PARA Integration
 

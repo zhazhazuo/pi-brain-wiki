@@ -123,6 +123,41 @@ updated: {{updated}}
 ## Recommendations
 `;
 
+export const DEFAULT_WORKFLOW_TEMPLATE = `---
+id: {{id}}
+type: workflow
+title: {{title}}
+status: draft
+updated: {{updated}}
+version: 1
+triggers: []
+aliases: []
+tags: []
+summary:
+---
+
+# {{title}}
+
+## Workflow YAML
+
+\`\`\`yaml
+version: 1
+id: {{id}}
+title: "{{title}}"
+status: draft
+triggers: []
+goal: |-
+  Describe what this workflow achieves.
+inputs: []
+steps: []
+output: |-
+  Describe the expected output.
+constraints: []
+\`\`\`
+
+## Notes
+`;
+
 // ── Schema ───────────────────────────────────────────────────
 
 export function defaultSchemaMarkdown(title: string, domain = "General"): string {
@@ -134,7 +169,7 @@ This wiki is maintained as a persistent LLM-authored knowledge base for **${doma
 
 1. **inbox/** - immutable source capture packets
 2. **pages/** - editable wiki pages (summaries, topics, plans, reviews)
-3. **meta/** - generated registry, backlinks, index, logs, and reports
+3. **meta/** - generated registry, backlinks, index, workflow routes, logs, and reports
 4. **schema** - this file and .wiki/config.json
 
 ## Non-negotiable rules
@@ -154,6 +189,7 @@ This wiki is maintained as a persistent LLM-authored knowledge base for **${doma
 - pages/topics/ = what the wiki knows about a subject
 - pages/plans/ = timeboxed plans with priorities
 - pages/reviews/ = attention analysis and activity review
+- pages/workflows/ = visible reusable agent workflows
 
 ## Summary-page standard
 
@@ -221,6 +257,12 @@ If a new source integrates into a consumed topic, the topic flips back to integr
 1. Run wiki_lint for structural issues.
 2. Then reason about semantic gaps, contradictions, and missing pages.
 3. Report tensions before resolving them.
+
+### Workflow learning
+1. Extract workflow candidates from conversation through a skill.
+2. Ask Walker to confirm the candidate.
+3. Use wiki_generate_workflow to write the standardized workflow page.
+4. Let generated meta/workflows.md route future agents to active workflows.
 `;
 }
 
@@ -244,6 +286,7 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
     join(root, "pages", "topics"),
     join(root, "pages", "plans"),
     join(root, "pages", "reviews"),
+    join(root, "pages", "workflows"),
     join(root, "meta"),
     join(root, "archive"),
     join(root, ".wiki", "templates"),
@@ -260,6 +303,7 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   await writeFile(join(root, config.templates.topic), DEFAULT_TOPIC_TEMPLATE, "utf8");
   await writeFile(join(root, config.templates.plan), DEFAULT_PLAN_TEMPLATE, "utf8");
   await writeFile(join(root, config.templates.review), DEFAULT_REVIEW_TEMPLATE, "utf8");
+  await writeFile(join(root, config.templates.workflow), DEFAULT_WORKFLOW_TEMPLATE, "utf8");
 
   await writeFile(join(root, "WIKI_SCHEMA.md"), defaultSchemaMarkdown(title, domain), "utf8");
   await writeFile(metaPath(root, "registry.json"), `${JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), pages: [] }, null, 2)}\n`, "utf8");
@@ -268,6 +312,7 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   await writeFile(metaPath(root, "events.jsonl"), "", "utf8");
   await writeFile(metaPath(root, "log.md"), `# ${title} Log\n\n_No events yet._\n`, "utf8");
   await writeFile(metaPath(root, "lint-report.md"), `# Lint Report\n\n_No lint run yet._\n`, "utf8");
+  await writeFile(metaPath(root, "workflows.md"), `# Workflow Routes\n\n## Active\n\n| Trigger | Workflow | Use When |\n|---|---|---|\n|  | _None_ |  |\n\n## Draft\n\n| Trigger | Workflow | Use When |\n|---|---|---|\n|  | _None_ |  |\n`, "utf8");
   await writeFile(join(root, "discussions", "route.md"), defaultRouteMarkdown(), "utf8");
 
   return [toRelative(root, configPath), ...created.map((dir) => toRelative(root, dir))];

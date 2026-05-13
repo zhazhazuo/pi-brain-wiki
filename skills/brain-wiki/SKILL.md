@@ -16,7 +16,8 @@ Every wiki session starts by reading these files in order:
 3. **`Wiki/WIKI_SCHEMA.md`** — vault conventions, page types, naming rules
 4. **`Wiki/.wiki/config.json`** — directory paths, page types, protected paths
 5. **`Wiki/meta/index.md`** — current page catalog (or use `wiki_search` if index is large)
-6. **`LIST.md`** — the inbound command center: pending items, sources to capture, tasks, ideas
+6. **`Wiki/meta/workflows.md`** — active/draft workflow route page
+7. **`LIST.md`** — the inbound command center: pending items, sources to capture, tasks, ideas
 
 Never skip this. Never edit without re-orienting to current wiki state.
 
@@ -138,6 +139,7 @@ Maximum **2 direct quotes** per page. Pick the lines that hit hardest. Quotes ca
 | Topic | 5-20 lines | >30 |
 | Plan | 20-40 lines | >60 |
 | Review | 20-40 lines | >60 |
+| Workflow | 15-40 lines | >60 |
 | Minimum (any page) | 5 lines | — |
 
 Split signal: any page exceeding its threshold should be split into focused sub-pages.
@@ -218,6 +220,7 @@ captured → integrated → consumed → archived → cleared
 - `wiki_sync` — scan PARA vault structure, create/update wiki topic pages
 - `wiki_triage` — read/add/suggest/flag_stale in LIST.md
 - `wiki_project_sync` — scan/add_note/suggest_task in Project/
+- `wiki_generate_workflow` — create standardized workflow pages after Walker approves an extracted workflow
 
 ### LIST.md AI Content Rule
 
@@ -301,6 +304,24 @@ status: active
 period: 2026-W19
 updated: 2026-05-05
 ```
+
+### Workflow pages
+```yaml
+id: workflow-weekly-okr-report
+type: workflow
+title: "Weekly OKR Report"
+status: active
+updated: 2026-05-13
+version: 1
+triggers:
+  - summarize my week
+aliases:
+  - summarize my week
+tags: [okr, weekly]
+summary: Draft a weekly OKR report.
+```
+
+Workflow body must include a `## Workflow YAML` fenced `yaml` block. Do not hand-roll new workflow pages; use `wiki_generate_workflow` so the schema stays consistent.
 
 ## Guardrails
 

@@ -33,11 +33,14 @@ import { bootstrapVault, ensureCanonicalPage } from "./src/scaffold.ts";
 import { syncParaToWiki } from "./src/sync.ts";
 import { triageList } from "./src/triage.ts";
 import { syncProject } from "./src/project-sync.ts";
+import { createWorkflow, rebuildWorkflowRoutes } from "./src/workflow.ts";
 import type {
   ProjectSyncResult,
   RegistryData,
   StatusSummary,
   TriageResult,
+  WorkflowParams,
+  WorkflowResult,
   WikiConfig,
   WikiEvent,
   WikiPageType,
@@ -77,8 +80,10 @@ const PAGE_TYPE_ENUM = StringEnum([
   "topic",
   "plan",
   "review",
+  "workflow",
 ] as const);
 const CANONICAL_TYPE_ENUM = StringEnum(["topic"] as const);
+const WORKFLOW_STATUS_ENUM = StringEnum(["draft", "active", "archived"] as const);
 const LINT_MODE_ENUM = StringEnum([
   "links",
   "orphans",
@@ -94,6 +99,7 @@ const EVENT_KIND_ENUM = StringEnum([
   "query",
   "plan",
   "review",
+  "workflow",
   "lint",
   "refactor",
   "rebuild",
@@ -388,6 +394,83 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
 
         return {
           content: [{ type: "text", text: formatEnsurePage(result) }],
+          details: result,
+        };
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_generate_workflow",
+    label: "Wiki Generate Workflow",
+    description:
+      "Create a standardized workflow page from structured inputs so learned workflows follow the wiki workflow schema.",
+    promptSnippet:
+      "Generate a new workflow page after the user approves a proposed learned workflow",
+    promptGuidelines: [
+      "Use this tool only after proposing the extracted workflow and receiving user approval.",
+      "Pass concise triggers that future agents can match against user intent.",
+      "Use status='draft' unless the user explicitly approved activating the workflow.",
+    ],
+    parameters: Type.Object({
+      title: Type.String({ description: "Workflow title" }),
+      status: Type.Optional(WORKFLOW_STATUS_ENUM),
+      triggers: Type.Array(
+        Type.String({
+          description: "User phrasing that should route to this workflow",
+        }),
+      ),
+      goal: Type.String({
+        description: "What the workflow helps the user accomplish",
+      }),
+      inputs: Type.Array(
+        Type.String({
+          description: "Required input source, e.g. recent activity or OKR pages",
+        }),
+      ),
+      steps: Type.Array(
+        Type.String({ description: "Ordered workflow step instruction" }),
+      ),
+      output: Type.String({
+        description: "Expected final output format",
+      }),
+      constraints: Type.Optional(
+        Type.Array(Type.String({ description: "Workflow constraint" })),
+      ),
+      tags: Type.Optional(Type.Array(Type.String({ description: "Tag" }))),
+      summary: Type.Optional(
+        Type.String({ description: "Short route-page description" }),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const client = await requireObsidianClient(root);
+      return withRootLock(root, async () => {
+        const registry = await loadRegistry(root);
+        const result = await createWorkflow(
+          root,
+          registry,
+          params as WorkflowParams,
+          client,
+        );
+
+        if (result.created && result.path) {
+          await appendEvent(root, {
+            ts: new Date().toISOString(),
+            kind: "workflow",
+            title: `Generated workflow ${result.title}`,
+            pagePaths: [result.path],
+            actor: "extension",
+            notes: [
+              `status=${result.status}`,
+              `triggers=${params.triggers.join(", ")}`,
+            ],
+          }, client);
+          await rebuildAllGeneratedArtifacts(root);
+        }
+
+        return {
+          content: [{ type: "text", text: formatWorkflowResult(result) }],
           details: result,
         };
       });
@@ -801,9 +884,10 @@ async function rebuildAllGeneratedArtifacts(root: string): Promise<string[]> {
   const config = await loadConfig(root);
   const client = await getObsidianClient(root);
   const { rebuilt, registry } = await rebuildRegistryAndIndex(root, client);
+  const workflowRoutesPath = await rebuildWorkflowRoutes(root, registry);
   const logPath = await rebuildLog(root, config.title);
   const digestPath = await rebuildDigest(root, registry);
-  return [...rebuilt, logPath, digestPath];
+  return [...rebuilt, workflowRoutesPath, logPath, digestPath];
 }
 
 async function loadRegistry(root: string): Promise<RegistryData> {
@@ -825,6 +909,7 @@ async function buildStatus(root: string): Promise<StatusSummary> {
     topic: registry.pages.filter((page) => page.type === "topic").length,
     plan: registry.pages.filter((page) => page.type === "plan").length,
     review: registry.pages.filter((page) => page.type === "review").length,
+    workflow: registry.pages.filter((page) => page.type === "workflow").length,
   };
   const sources = registry.pages.filter((page) => page.type === "summary");
   const captured = sources.filter((page) => page.status === "captured").length;
@@ -900,6 +985,16 @@ function formatEnsurePage(result: {
   return `Resolved existing page: ${result.path}`;
 }
 
+function formatWorkflowResult(result: WorkflowResult): string {
+  if (result.conflict) {
+    return `Workflow conflict: existing workflow matched. Candidates: ${(result.candidates ?? []).map((candidate) => candidate.path).join(", ")}`;
+  }
+  if (result.created) {
+    return `Generated workflow: ${result.path}`;
+  }
+  return "No workflow generated.";
+}
+
 function formatLint(result: Awaited<ReturnType<typeof runLint>>): string {
   return [
     `Lint mode: ${result.mode}`,
@@ -912,7 +1007,7 @@ function formatLint(result: Awaited<ReturnType<typeof runLint>>): string {
 
 function formatStatus(status: StatusSummary): string {
   return [
-    `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review)`,
+    `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review, ${status.totals.workflow} workflow)`,
     `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.consumed} consumed, ${status.sources.archived} archived, ${status.sources.cleared} cleared`,
     ...(status.externalBacklinks ? [
       `Cross-vault backlinks: ${status.externalBacklinks.total} across ${status.externalBacklinks.pageCount} pages` +

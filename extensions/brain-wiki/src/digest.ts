@@ -27,8 +27,9 @@ export async function buildDigest(
     `Generated: ${now.toISOString()}`,
     "",
     "## Stats",
-    `- Topics: ${stats.topic} | Summaries: ${stats.summary} | Plans: ${stats.plan} | Reviews: ${stats.review}`,
+    `- Topics: ${stats.topic} | Summaries: ${stats.summary} | Plans: ${stats.plan} | Reviews: ${stats.review} | Workflows: ${stats.workflow}`,
     `- Sources: ${stats.captured} captured, ${stats.integrated} integrated, ${stats.consumed} consumed`,
+    `- Workflow routes: [[meta/workflows]]`,
     "",
   ];
 
@@ -92,6 +93,7 @@ interface StatCounts {
   summary: number;
   plan: number;
   review: number;
+  workflow: number;
   captured: number;
   integrated: number;
   consumed: number;
@@ -103,6 +105,7 @@ function buildStats(registry: RegistryData): StatCounts {
     summary: 0,
     plan: 0,
     review: 0,
+    workflow: 0,
     captured: 0,
     integrated: 0,
     consumed: 0,
@@ -113,6 +116,7 @@ function buildStats(registry: RegistryData): StatCounts {
     if (page.type === "summary") counts.summary++;
     if (page.type === "plan") counts.plan++;
     if (page.type === "review") counts.review++;
+    if (page.type === "workflow") counts.workflow++;
 
     if (page.type === "summary") {
       if (page.status === "captured") counts.captured++;

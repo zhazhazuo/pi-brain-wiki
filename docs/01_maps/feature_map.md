@@ -22,3 +22,4 @@
 - project-sync → extensions/brain-wiki/src/project-sync.ts — create weekly project notes, scan, add notes, suggest tasks for Project/ folders
 - sync → extensions/brain-wiki/src/sync.ts — bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json
 - triage → extensions/brain-wiki/src/triage.ts — read, add, suggest, flag stale in LIST.md through Obsidian IO when available
+- workflow-generation → ./06_features/workflow-generation.md — create standardized workflow pages and generated route metadata for learned workflows

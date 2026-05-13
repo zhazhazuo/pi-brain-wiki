@@ -56,7 +56,7 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 
 ## Features
 
-No features documented yet (06_features/ not populated).
+- [Workflow Generation](./06_features/workflow-generation.md)
 
 ---
 

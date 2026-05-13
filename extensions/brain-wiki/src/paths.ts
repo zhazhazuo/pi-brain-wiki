@@ -106,12 +106,13 @@ export function normalizeWikiLinkTarget(target: string): string | undefined {
   const clean = target.trim().replace(/\\/g, "/").replace(/\.md$/i, "");
   if (!clean) return undefined;
 
-  // Wiki-internal links: summaries/, topics/, plans/, reviews/
+  // Wiki-internal links: summaries/, topics/, plans/, reviews/, workflows/
   if (
     clean.startsWith("summaries/") ||
     clean.startsWith("topics/") ||
     clean.startsWith("plans/") ||
-    clean.startsWith("reviews/")
+    clean.startsWith("reviews/") ||
+    clean.startsWith("workflows/")
   ) {
     return `pages/${clean}.md`;
   }
@@ -139,6 +140,7 @@ export function generatedMetaFiles(root: string): string[] {
     metaPath(root, "index.md"),
     metaPath(root, "log.md"),
     metaPath(root, "lint-report.md"),
+    metaPath(root, "workflows.md"),
   ];
 }
 
@@ -206,7 +208,8 @@ export function resolveWikiLink(wikiRoot: string, link: string): string | null {
     normalized.startsWith("summaries/") ||
     normalized.startsWith("topics/") ||
     normalized.startsWith("plans/") ||
-    normalized.startsWith("reviews/")
+    normalized.startsWith("reviews/") ||
+    normalized.startsWith("workflows/")
   ) {
     return join(wikiRoot, "pages", normalized + ".md");
   }

@@ -1,4 +1,4 @@
-export const PAGE_TYPES = ["summary", "topic", "plan", "review"] as const;
+export const PAGE_TYPES = ["summary", "topic", "plan", "review", "workflow"] as const;
 export type WikiPageType = (typeof PAGE_TYPES)[number];
 
 export const CANONICAL_PAGE_TYPES = ["topic"] as const;
@@ -85,6 +85,7 @@ export type WikiEventKind =
   | "query"
   | "plan"
   | "review"
+  | "workflow"
   | "lint"
   | "refactor"
   | "rebuild"
@@ -202,6 +203,36 @@ export interface EnsurePageResult {
   }>;
 }
 
+export type WorkflowStatus = "draft" | "active" | "archived";
+
+export interface WorkflowParams {
+  title: string;
+  status?: WorkflowStatus;
+  triggers: string[];
+  goal: string;
+  inputs: string[];
+  steps: string[];
+  output: string;
+  constraints?: string[];
+  tags?: string[];
+  summary?: string;
+}
+
+export interface WorkflowResult {
+  created: boolean;
+  conflict: boolean;
+  path?: string;
+  id?: string;
+  title?: string;
+  status?: string;
+  candidates?: Array<{
+    id: string;
+    path: string;
+    title: string;
+    status?: string;
+  }>;
+}
+
 export interface SearchMatch {
   id: string;
   type: string;
@@ -225,6 +256,7 @@ export interface StatusSummary {
     topic: number;
     plan: number;
     review: number;
+    workflow: number;
   };
   sources: {
     captured: number;
@@ -327,4 +359,3 @@ export interface SearchHit {
   file: string;
   matches: Array<{ line: number; text: string }>;
 }
-
