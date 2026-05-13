@@ -83,6 +83,9 @@ export class ObsidianClient {
 
   async backlinks(file: string): Promise<BacklinkResult[]> {
     const raw = await this.exec(["backlinks"], { path: file, counts: true, format: "json" });
+    if (raw.trim() === "No backlinks found.") {
+      return [];
+    }
     const data = parseJsonArray(raw, `Obsidian backlinks failed for ${file}`);
     return data.map((entry: any) => ({
       file: String(entry.file),

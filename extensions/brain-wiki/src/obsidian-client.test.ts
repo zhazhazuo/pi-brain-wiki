@@ -141,6 +141,25 @@ describe("ObsidianClient", () => {
     ]);
   });
 
+  test("backlinks treats Obsidian no-backlinks response as empty", async () => {
+    await startMockServer((socket) => {
+      socket.on("data", (data) => {
+        const payload = JSON.parse(data.toString());
+        expect(payload.argv).toEqual([
+          "backlinks",
+          "path=Wiki/pages/topics/Unlinked.md",
+          "counts",
+          "format=json",
+        ]);
+        socket.write("No backlinks found.\n");
+        socket.end();
+      });
+    });
+
+    const client = new ObsidianClient({ socketPath, vaultCwd: "/v", timeout: 500 });
+    await expect(client.backlinks("Wiki/pages/topics/Unlinked.md")).resolves.toEqual([]);
+  });
+
   test("searchContext uses query= syntax and parses Obsidian JSON array response", async () => {
     await startMockServer((socket) => {
       socket.on("data", (data) => {
