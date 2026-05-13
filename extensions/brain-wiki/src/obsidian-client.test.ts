@@ -98,19 +98,21 @@ describe("ObsidianClient", () => {
     expect(result).toBe(false);
   });
 
-  test("backlinks parses Obsidian backlinks response", async () => {
+  test("backlinks uses file= syntax and parses Obsidian JSON array response", async () => {
     await startMockServer((socket) => {
       socket.on("data", (data) => {
         const payload = JSON.parse(data.toString());
-        expect(payload.argv[0]).toBe("backlinks");
-        socket.write(JSON.stringify({
-          ok: true,
-          data: [
-            { file: "Area/Math.md", count: 3 },
-            { file: "Wiki/pages/topics/Calculus.md", count: 1 },
-            { file: "Project/foo.md", count: 2 },
-          ]
-        }) + "\n");
+        expect(payload.argv).toEqual([
+          "backlinks",
+          "file=Wiki/pages/topics/Lambda.md",
+          "counts",
+          "format=json",
+        ]);
+        socket.write(JSON.stringify([
+          { file: "Area/Math.md", count: "3" },
+          { file: "Wiki/pages/topics/Calculus.md", count: "1" },
+          { file: "Project/foo.md", count: "2" },
+        ]) + "\n");
         socket.end();
       });
     });

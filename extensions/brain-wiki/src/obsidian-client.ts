@@ -80,12 +80,16 @@ export class ObsidianClient {
   }
 
   async backlinks(file: string): Promise<BacklinkResult[]> {
-    const raw = await this.exec(["backlinks", file]);
+    const raw = await this.exec(["backlinks"], { file, counts: true, format: "json" });
     const parsed = JSON.parse(raw);
-    if (!parsed?.ok || !Array.isArray(parsed.data)) {
+    const data = Array.isArray(parsed) ? parsed : parsed?.data;
+    if (!Array.isArray(data)) {
       throw new Error(`Obsidian backlinks failed for ${file}: ${raw}`);
     }
-    return parsed.data as BacklinkResult[];
+    return data.map((entry: any) => ({
+      file: String(entry.file),
+      count: Number(entry.count ?? 1),
+    }));
   }
 
   async searchContext(query: string, opts?: { path?: string; limit?: number }): Promise<SearchHit[]> {
