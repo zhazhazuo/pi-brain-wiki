@@ -62,10 +62,11 @@ describe("ObsidianClient", () => {
     expect(parsed.argv).toEqual(["search", "hello", "all", "limit=5", "path=Wiki"]);
   });
 
-  test("ping returns true on {ok:true} response", async () => {
+  test("ping uses the supported version command as its health check", async () => {
     await startMockServer((socket) => {
-      socket.on("data", () => {
-        socket.write(JSON.stringify({ ok: true, data: "alive" }) + "\n");
+      socket.on("data", (data) => {
+        receivedPayloads.push(data.toString());
+        socket.write("1.12.7 (installer 1.12.7)\n");
         socket.end();
       });
     });
@@ -73,6 +74,9 @@ describe("ObsidianClient", () => {
     const client = new ObsidianClient({ socketPath, vaultCwd: "/v", timeout: 500 });
     const result = await client.ping();
     expect(result).toBe(true);
+
+    const parsed = JSON.parse(receivedPayloads[0]);
+    expect(parsed.argv).toEqual(["version"]);
   });
 
   test("ping returns false on non-ok response", async () => {

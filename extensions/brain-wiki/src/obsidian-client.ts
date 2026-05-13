@@ -72,9 +72,8 @@ export class ObsidianClient {
 
   async ping(): Promise<boolean> {
     try {
-      const raw = await this.exec(["ping"]);
-      const parsed = JSON.parse(raw);
-      return parsed?.ok === true;
+      const raw = await this.exec(["version"]);
+      return /^\d+\.\d+\.\d+/.test(raw.trim());
     } catch {
       return false;
     }
