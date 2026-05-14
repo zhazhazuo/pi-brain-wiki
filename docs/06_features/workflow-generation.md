@@ -11,12 +11,14 @@ Adds workflows as indexed wiki pages and regenerates `meta/workflows.md` as the 
 
 ```mermaid
 flowchart LR
-    Skill[workflow-learning skill] --> Tool[wiki_generate_workflow]
+    Extract[workflow-extract skill] --> Tool[wiki_generate_workflow]
     Tool --> Generator[createWorkflow]
     Generator --> Page[pages/workflows/<slug>.md]
     Page --> Registry[rebuildRegistryAndIndex]
     Registry --> Routes[meta/workflows.md]
     Registry --> Digest[meta/wiki-digest.md]
+    Invoke[workflow-invoke skill] --> Routes
+    Invoke --> Page
 ```
 
 ---
@@ -28,6 +30,8 @@ flowchart LR
 | `extensions/brain-wiki/index.ts` | Registers `wiki_generate_workflow`, logs workflow events, rebuilds route metadata |
 | `extensions/brain-wiki/src/workflow.ts` | Creates workflow pages, renders workflow YAML, rebuilds workflow route page |
 | `extensions/brain-wiki/src/workflow.test.ts` | Covers generation, conflict detection, and route rendering |
+| `skills/workflow-extract/SKILL.md` | Extracts structured workflow proposals and approval gate instructions |
+| `skills/workflow-invoke/SKILL.md` | Routes user requests through generated workflow routes and selected workflow pages |
 | `extensions/brain-wiki/src/types.ts` | Adds `workflow` page type and workflow request/result contracts |
 | `extensions/brain-wiki/src/config.ts` | Adds workflow page directory and template defaults |
 | `extensions/brain-wiki/src/scaffold.ts` | Bootstraps workflow template, workflow directory, and empty route page |
@@ -46,7 +50,8 @@ flowchart LR
 - The body contains a fenced `yaml` block to keep the operational workflow spec visible and standard.
 - Duplicate protection checks existing workflow titles and trigger aliases before writing a new page.
 - `meta/workflows.md` is generated from the registry, not hand-maintained.
-- `wiki_generate_workflow` requires user-approved structured input; extraction remains skill-owned.
+- `workflow-extract` owns extraction and requires user approval before calling `wiki_generate_workflow`.
+- `workflow-invoke` owns learned workflow routing and reads the selected workflow page before acting.
 
 ---
 
@@ -57,3 +62,4 @@ flowchart LR
 - `indexer` → discovers workflow pages through configured page types
 - `log` → records `workflow` events
 - `digest` → exposes the route-page pointer to future agents
+- `skills` → provides separate extraction and invocation behavior

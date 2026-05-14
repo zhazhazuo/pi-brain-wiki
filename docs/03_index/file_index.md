@@ -19,6 +19,8 @@
 
 - extensions/brain-wiki/index.ts → Main pi extension entry point: registers tools, lifecycle hooks, and tool definitions
 - skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
+- skills/workflow-extract/SKILL.md → Agent skill: extract repeatable session patterns into approved workflow specs
+- skills/workflow-invoke/SKILL.md → Agent skill: route matching requests through generated workflow pages
 - skills/recall/SKILL.md → Agent skill: compare wiki sources against PKB entries
 - skills/wiki-intel/SKILL.md → Agent skill: synthesize wiki activity patterns and periodic review
 - skills/wiki-map/SKILL.md → Agent skill: orient to current wiki knowledge state

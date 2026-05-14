@@ -115,6 +115,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       join(skillDir, "wiki-map", "SKILL.md"),
       join(skillDir, "wiki-workshop", "SKILL.md"),
       join(skillDir, "wiki-intel", "SKILL.md"),
+      join(skillDir, "workflow-extract", "SKILL.md"),
+      join(skillDir, "workflow-invoke", "SKILL.md"),
       join(skillDir, "recall", "SKILL.md"),
     ],
   }));

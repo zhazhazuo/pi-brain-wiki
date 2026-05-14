@@ -259,10 +259,10 @@ If a new source integrates into a consumed topic, the topic flips back to integr
 3. Report tensions before resolving them.
 
 ### Workflow learning
-1. Extract workflow candidates from conversation through a skill.
-2. Ask Walker to confirm the candidate.
+1. Use the workflow-extract skill to extract workflow candidates from conversation.
+2. Ask Walker to confirm the structured candidate.
 3. Use wiki_generate_workflow to write the standardized workflow page.
-4. Let generated meta/workflows.md route future agents to active workflows.
+4. Use the workflow-invoke skill to route future requests through generated meta/workflows.md and the selected workflow page.
 `;
 }
 

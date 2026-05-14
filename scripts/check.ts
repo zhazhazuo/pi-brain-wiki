@@ -42,6 +42,8 @@ const expectedSkills = [
   "wiki-intel",
   "wiki-map",
   "wiki-workshop",
+  "workflow-extract",
+  "workflow-invoke",
 ];
 const skillsResult = loadSkills({
   cwd: process.cwd(),

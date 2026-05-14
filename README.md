@@ -6,17 +6,19 @@
 A Pi-native implementation of the LLM Wiki pattern, adapted for personal knowledge management over a PARA + Johnny Decimal vault.
 
 - **Pi extension** for deterministic operations, guardrails, and generated metadata
-- **Three agent skills** (Map, Workshop, Intelligence) for wiki workflows
+- **Agent skills** for map, workshop, intelligence, recall, and learned workflow routing
 - **PARA integration** — Wiki as knowledge graph layer over your vault
 - A markdown vault structure (`Wiki/`) that accumulates knowledge over time
 
 ## Why this package exists
 
-Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates a persistent comprehension layer — the `Wiki/` folder — where sources are captured, summarized, and interlinked. Three specialized agents maintain it:
+Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates a persistent comprehension layer — the `Wiki/` folder — where sources are captured, summarized, and interlinked. Specialized agents maintain it:
 
 - **Map agent** — queries what the wiki knows, progressive disclosure
 - **Workshop agent** — supervised source ingest and integration
 - **Intelligence agent** — activity analysis, plans, and reviews
+- **Workflow Extract skill** — proposes reusable workflow specs from repeated patterns
+- **Workflow Invoke skill** — routes user requests through learned workflow pages
 
 ## When to use each agent
 
