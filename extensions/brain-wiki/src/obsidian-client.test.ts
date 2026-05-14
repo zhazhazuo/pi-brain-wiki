@@ -183,6 +183,20 @@ describe("ObsidianClient", () => {
     ]);
   });
 
+  test("searchContext treats Obsidian no-match text as an empty result", async () => {
+    await startMockServer((socket) => {
+      socket.on("data", (data) => {
+        const payload = JSON.parse(data.toString());
+        expect(payload.argv).toEqual(["search:context", "query=missing", "path=Wiki", "limit=3", "format=json"]);
+        socket.write("No matches found.\n");
+        socket.end();
+      });
+    });
+
+    const client = new ObsidianClient({ socketPath, vaultCwd: "/v", timeout: 500 });
+    await expect(client.searchContext("missing", { path: "Wiki", limit: 3 })).resolves.toEqual([]);
+  });
+
   test("readFile uses exact path syntax and returns raw file content", async () => {
     await startMockServer((socket) => {
       socket.on("data", (data) => {

@@ -100,6 +100,9 @@ export class ObsidianClient {
     params.format = "json";
 
     const raw = await this.exec(["search:context"], params);
+    if (raw.trim() === "No matches found.") {
+      return [];
+    }
     return parseJsonArray(raw, `Obsidian search:context failed for "${query}"`) as SearchHit[];
   }
 
