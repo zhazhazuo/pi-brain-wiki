@@ -6,6 +6,8 @@ import type { ProjectSyncAction, ProjectSyncResult } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
 
 const AI_INDICATOR = "> 🤖 [AI]";
+const PROJECTS_CONTROL_FILE = "PROJECTS.md";
+const PROJECT_MAIN_CANDIDATES = ["index.md", "PROJECT.md", "README.md"];
 
 export async function syncProject(
   root: string,
@@ -28,6 +30,8 @@ export async function syncProject(
     case "suggest_task":
       if (!content) throw new Error("content required for suggest_task");
       return suggestTask(root, content, client);
+    case "review":
+      return reviewProjects(projRoot, client);
     default:
       throw new Error(`Unknown project sync action: ${action}`);
   }
@@ -37,37 +41,31 @@ async function scanProjects(projRoot: string, client?: ObsidianClient | null): P
   const projects: ProjectSyncResult["projects"] = [];
 
   const entries = client
-    ? (await client.listDir(toObsidianPath(client, projRoot))).map((entry) => ({ ...entry, isDirectory: () => entry.isDir }))
+    ? (await client.listDir(toObsidianPath(client, projRoot))).map((entry) => ({
+      name: entry.name,
+      isDir: entry.isDir,
+    }))
     : await readdir(projRoot, { withFileTypes: true }).catch(() => []);
 
   for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
+    if (isProjectDirEntry(entry)) {
+      const projectPath = join(projRoot, entry.name);
+      const mainFile = await readProjectMainFile(projectPath, entry.name, client);
+      projects.push(projectRecordFromFrontmatter(projRoot, entry.name, projectPath, mainFile));
+      continue;
+    }
 
-    const projectPath = join(projRoot, entry.name);
-    const indexPath = join(projectPath, "index.md");
-
-    try {
-      const content = client ? await readMarkdown(client, indexPath) : await readFile(indexPath, "utf8");
-      const frontmatter = parseFrontmatter(content);
-
-      projects.push({
-        path: relative(projRoot, projectPath),
-        title: frontmatter.title ?? entry.name,
-        status: frontmatter.status ?? "unknown",
-        priority: frontmatter.priority ?? "medium",
-        deadline: frontmatter.deadline ?? null,
-        lastAction: frontmatter.last_action ?? null,
-      });
-    } catch {
-      // No index.md or unreadable
-      projects.push({
-        path: relative(projRoot, projectPath),
-        title: entry.name,
-        status: "unknown",
-        priority: "medium",
-        deadline: null,
-        lastAction: null,
-      });
+    if (isProjectMarkdownFile(entry)) {
+      const filePath = join(projRoot, entry.name);
+      try {
+        const content = client ? await readMarkdown(client, filePath) : await readFile(filePath, "utf8");
+        projects.push(projectRecordFromFrontmatter(projRoot, entry.name.replace(/\.md$/i, ""), filePath, {
+          path: filePath,
+          content,
+        }));
+      } catch {
+        projects.push(projectRecordFromFrontmatter(projRoot, entry.name.replace(/\.md$/i, ""), filePath, null));
+      }
     }
   }
 
@@ -81,13 +79,18 @@ async function createProject(
 ): Promise<ProjectSyncResult> {
   const title = formatProjectTitleForWeek(projectTitle);
   const absolutePath = join(projRoot, title, `${title}.md`);
+  const date = new Date().toISOString().slice(0, 10);
   const frontmatter = {
+    type: "project",
     title,
+    project: projectTitle.trim(),
     status: "active",
+    date,
     priority: "medium",
-    created: new Date().toISOString().slice(0, 10),
+    deadline: "",
+    next_action: "",
   };
-  const body = `# ${title}\n\n## Goal\n\n## Notes\n\n## Tasks\n`;
+  const body = `# ${title}\n\n## Outcome\n\n## Next Action\n\n## Notes\n\n## Tasks\n`;
 
   if (client) {
     await writeMarkdownPage(client, absolutePath, frontmatter, body);
@@ -192,6 +195,111 @@ async function suggestTask(root: string, content: string, client?: ObsidianClien
   }
 
   return { taskSuggested: true };
+}
+
+async function reviewProjects(projRoot: string, client?: ObsidianClient | null): Promise<ProjectSyncResult> {
+  const { projects = [] } = await scanProjects(projRoot, client);
+  const counts = {
+    active: 0,
+    waiting: 0,
+    complete: 0,
+    archived: 0,
+    unknown: 0,
+  };
+  const noNextAction: NonNullable<ProjectSyncResult["review"]>["noNextAction"] = [];
+  const archiveCandidates: NonNullable<ProjectSyncResult["review"]>["archiveCandidates"] = [];
+
+  for (const project of projects) {
+    const status = normalizeProjectStatus(project.status);
+    counts[status]++;
+
+    if ((status === "active" || status === "waiting") && !project.nextAction) {
+      noNextAction.push({
+        path: project.path,
+        title: project.title,
+        status: project.status,
+      });
+    }
+
+    if (status === "complete") {
+      archiveCandidates.push({
+        path: project.path,
+        title: project.title,
+        status: project.status,
+      });
+    }
+  }
+
+  return {
+    projects,
+    review: {
+      counts,
+      noNextAction,
+      archiveCandidates,
+    },
+  };
+}
+
+function isProjectDirEntry(entry: { name: string; isDir?: boolean; isDirectory?: () => boolean }): boolean {
+  return typeof entry.isDirectory === "function" ? entry.isDirectory() : entry.isDir === true;
+}
+
+function isProjectMarkdownFile(entry: { name: string; isDir?: boolean; isFile?: () => boolean }): boolean {
+  const isFile = typeof entry.isFile === "function" ? entry.isFile() : entry.isDir === false;
+  return isFile && entry.name.endsWith(".md") && entry.name !== PROJECTS_CONTROL_FILE;
+}
+
+async function readProjectMainFile(
+  projectPath: string,
+  projectName: string,
+  client?: ObsidianClient | null,
+): Promise<{ path: string; content: string } | null> {
+  const candidates = [`${projectName}.md`, ...PROJECT_MAIN_CANDIDATES];
+  for (const candidate of candidates) {
+    const candidatePath = join(projectPath, candidate);
+    try {
+      const content = client ? await readMarkdown(client, candidatePath) : await readFile(candidatePath, "utf8");
+      return { path: candidatePath, content };
+    } catch {
+      // Try the next conventional project main file.
+    }
+  }
+  return null;
+}
+
+function projectRecordFromFrontmatter(
+  projRoot: string,
+  fallbackTitle: string,
+  projectPath: string,
+  mainFile: { path: string; content: string } | null,
+): NonNullable<ProjectSyncResult["projects"]>[number] {
+  const frontmatter = mainFile ? parseFrontmatter(mainFile.content) : {};
+  const title = normalizeOptionalString(frontmatter.project ?? frontmatter.title) ?? fallbackTitle;
+  const nextAction = normalizeOptionalString(frontmatter.next_action ?? frontmatter.last_action);
+  return {
+    path: relative(projRoot, projectPath).replace(/\\/g, "/"),
+    mainPath: mainFile ? relative(projRoot, mainFile.path).replace(/\\/g, "/") : undefined,
+    title,
+    status: normalizeOptionalString(frontmatter.status) ?? "unknown",
+    priority: normalizeOptionalString(frontmatter.priority) ?? "medium",
+    deadline: normalizeOptionalString(frontmatter.deadline),
+    nextAction,
+    lastAction: normalizeOptionalString(frontmatter.last_action) ?? nextAction,
+  };
+}
+
+function normalizeOptionalString(value: any): string | null {
+  if (value == null) return null;
+  const text = String(value).trim();
+  return text.length > 0 ? text : null;
+}
+
+function normalizeProjectStatus(status: string): "active" | "waiting" | "complete" | "archived" | "unknown" {
+  if (status === "active") return "active";
+  if (status === "waiting") return "waiting";
+  if (status === "complete") return "complete";
+  if (status === "archived") return "archived";
+  return "unknown";
 }
 
 function parseFrontmatter(content: string): Record<string, any> {

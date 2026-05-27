@@ -324,17 +324,38 @@ export interface TriageResult {
   suggestions?: string[];
 }
 
-export type ProjectSyncAction = "scan" | "create_project" | "add_note" | "suggest_task";
+export type ProjectSyncAction = "scan" | "create_project" | "add_note" | "suggest_task" | "review";
 
 export interface ProjectSyncResult {
   projects?: Array<{
     path: string;
+    mainPath?: string;
     title: string;
     status: string;
     priority: string;
     deadline: string | null;
+    nextAction: string | null;
     lastAction: string | null;
   }>;
+  review?: {
+    counts: {
+      active: number;
+      waiting: number;
+      complete: number;
+      archived: number;
+      unknown: number;
+    };
+    noNextAction: Array<{
+      path: string;
+      title: string;
+      status: string;
+    }>;
+    archiveCandidates: Array<{
+      path: string;
+      title: string;
+      status: string;
+    }>;
+  };
   projectCreated?: boolean;
   projectPath?: string;
   projectTitle?: string;

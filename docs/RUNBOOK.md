@@ -56,6 +56,7 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 
 ## Features
 
+- [Future Mode Project Review](./06_features/future-mode-project-review.md)
 - [Workflow Generation](./06_features/workflow-generation.md)
 
 ---

@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { formatProjectTitleForWeek, syncProject } from "./project-sync.ts";
 
 describe("syncProject Obsidian IO", () => {
@@ -23,7 +26,111 @@ describe("syncProject Obsidian IO", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].args[0]).toBe(`Project/${weeklyTitle}/${weeklyTitle}.md`);
     expect(String(calls[0].args[1])).toContain(`title: ${weeklyTitle}`);
+    expect(String(calls[0].args[1])).toContain(`type: project`);
+    expect(String(calls[0].args[1])).toContain(`project: Project Title`);
+    expect(String(calls[0].args[1])).toContain(`next_action:`);
     expect(String(calls[0].args[1])).toContain(`# ${weeklyTitle}`);
+  });
+
+  test("scans same-named project files and reports future-mode next actions", async () => {
+    const vaultRoot = await mkdtemp(join(tmpdir(), "brain-wiki-project-"));
+    const wikiRoot = join(vaultRoot, "Wiki");
+    const projectDir = join(vaultRoot, "Project", "Sales Tool Data Center");
+    await mkdir(projectDir, { recursive: true });
+    await writeFile(
+      join(projectDir, "Sales Tool Data Center.md"),
+      [
+        "---",
+        "type: project",
+        "status: active",
+        "date: 2026-05-27",
+        "project: Sales Tool Data Center",
+        "priority: high",
+        "deadline: 2026-05-29",
+        "next_action: Prepare showcase script",
+        "---",
+        "# Sales Tool Data Center",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const result = await syncProject(wikiRoot, "scan");
+
+    expect(result.projects).toEqual([
+      {
+        path: "Sales Tool Data Center",
+        mainPath: "Sales Tool Data Center/Sales Tool Data Center.md",
+        title: "Sales Tool Data Center",
+        status: "active",
+        priority: "high",
+        deadline: "2026-05-29",
+        nextAction: "Prepare showcase script",
+        lastAction: "Prepare showcase script",
+      },
+    ]);
+  });
+
+  test("reviews projects using future-mode weekly control questions", async () => {
+    const vaultRoot = await mkdtemp(join(tmpdir(), "brain-wiki-project-review-"));
+    const wikiRoot = join(vaultRoot, "Wiki");
+    const projectRoot = join(vaultRoot, "Project");
+    await mkdir(join(projectRoot, "Active Without Action"), { recursive: true });
+    await mkdir(join(projectRoot, "Completed Work"), { recursive: true });
+    await writeFile(
+      join(projectRoot, "Active Without Action", "Active Without Action.md"),
+      [
+        "---",
+        "type: project",
+        "status: active",
+        "date: 2026-05-27",
+        "project: Active Without Action",
+        "priority: medium",
+        "---",
+        "# Active Without Action",
+      ].join("\n"),
+      "utf8",
+    );
+    await writeFile(
+      join(projectRoot, "Completed Work", "Completed Work.md"),
+      [
+        "---",
+        "type: project",
+        "status: complete",
+        "date: 2026-05-27",
+        "project: Completed Work",
+        "priority: low",
+        "next_action: Archive project",
+        "---",
+        "# Completed Work",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const result = await syncProject(wikiRoot, "review");
+
+    expect(result.review).toEqual({
+      counts: {
+        active: 1,
+        waiting: 0,
+        complete: 1,
+        archived: 0,
+        unknown: 0,
+      },
+      noNextAction: [
+        {
+          path: "Active Without Action",
+          title: "Active Without Action",
+          status: "active",
+        },
+      ],
+      archiveCandidates: [
+        {
+          path: "Completed Work",
+          title: "Completed Work",
+          status: "complete",
+        },
+      ],
+    });
   });
 
   test("does not overwrite existing notes when CLI append fails", async () => {

@@ -44,7 +44,8 @@
 - extensions/brain-wiki/src/obsidian-io.test.ts → Unit tests for CLI-backed markdown/property IO
 - extensions/brain-wiki/src/obsidian-fs.ts → New: file operations via obsidian create/move/rename/delete
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths, resolves wikilinks to absolute paths
-- extensions/brain-wiki/src/project-sync.ts → Create weekly project notes, scan/add notes/suggest tasks for Project/ folders
+- extensions/brain-wiki/src/project-sync.ts → Create weekly project notes, scan/review future-mode project metadata, add notes/suggest tasks for Project/ folders
+- extensions/brain-wiki/src/project-sync.test.ts → Unit tests for project sync, future-mode metadata scan, and review gaps
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure (incl. discussions/, drafts/), templates, and metadata files
 - extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking (planned: delegate to obsidian search:context)

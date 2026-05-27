@@ -757,18 +757,21 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_project_sync",
     label: "Wiki Project Sync",
     description:
-      "Sync with Project/ folders — scan, add notes, suggest tasks.",
+      "Sync with Project/ folders — scan, review, add notes, suggest tasks.",
     promptSnippet:
-      "Read project status, add research notes, or suggest tasks in LIST.md",
+      "Read project status, run the weekly project review for Project/PROJECTS.md, add research notes, or suggest tasks in LIST.md",
     promptGuidelines: [
       "Use this tool to participate in project workflows.",
-      "scan returns all active projects with status.",
+      "Organize for retrieval: expose type, time, topic, and status through project metadata.",
+      "scan returns projects with status, priority, deadline, and next_action metadata.",
+      "review answers the future-mode weekly control questions: what is active, waiting, complete, archivable, or missing a next action.",
       "create_project creates Project/wNN-Title/wNN-Title.md using the current ISO week.",
+      "create_project seeds type, status, date, project, priority, deadline, and next_action frontmatter.",
       "add_note appends research to project/notes.md.",
       "suggest_task adds to LIST.md with AI indicator.",
     ],
     parameters: Type.Object({
-      action: StringEnum(["scan", "create_project", "add_note", "suggest_task"] as const),
+      action: StringEnum(["scan", "create_project", "add_note", "suggest_task", "review"] as const),
       project: Type.Optional(
         Type.String({ description: "Project title or folder name" }),
       ),
@@ -1153,9 +1156,20 @@ function formatProjectSyncResult(action: string, result: ProjectSyncResult): str
       `Projects (${result.projects.length}):`,
       ...result.projects.map(
         (p) =>
-          `- ${p.title} [${p.status}] ${p.priority}${p.deadline ? ` (due: ${p.deadline})` : ""}`,
+          `- ${p.title} [${p.status}] ${p.priority}${p.deadline ? ` (due: ${p.deadline})` : ""}${p.nextAction ? ` — next: ${p.nextAction}` : ""}`,
       ),
     ].join("\n");
+  }
+  if (action === "review" && result.review) {
+    const review = result.review;
+    const lines = [
+      `Project review: active=${review.counts.active} waiting=${review.counts.waiting} complete=${review.counts.complete} archived=${review.counts.archived} unknown=${review.counts.unknown}`,
+      `Missing next action: ${review.noNextAction.length}`,
+      ...review.noNextAction.slice(0, 5).map((p) => `- ${p.title} [${p.status}]`),
+      `Archive candidates: ${review.archiveCandidates.length}`,
+      ...review.archiveCandidates.slice(0, 5).map((p) => `- ${p.title} [${p.status}]`),
+    ];
+    return lines.join("\n");
   }
   if (action === "add_note" && result.noteAdded) {
     return "Research note added to project.";

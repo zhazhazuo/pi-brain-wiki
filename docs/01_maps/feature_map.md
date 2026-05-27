@@ -19,7 +19,8 @@
 - obsidian-io → extensions/brain-wiki/src/obsidian-io.ts — markdown/property IO boundary on top of ObsidianClient
 - obsidian-fs → extensions/brain-wiki/src/obsidian-fs.ts **(proposed)** — file operations via obsidian create/move/rename/delete
 - properties → extensions/brain-wiki/src/properties.ts **(proposed)** — lifecycle state management via obsidian property:*
-- project-sync → extensions/brain-wiki/src/project-sync.ts — create weekly project notes, scan, add notes, suggest tasks for Project/ folders
+- project-sync → extensions/brain-wiki/src/project-sync.ts — create weekly project notes, scan/review future-mode metadata, add notes, suggest tasks for Project/ folders
 - sync → extensions/brain-wiki/src/sync.ts — bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json
 - triage → extensions/brain-wiki/src/triage.ts — read, add, suggest, flag stale in LIST.md through Obsidian IO when available
+- future-mode-project-review → ./06_features/future-mode-project-review.md — future-mode project metadata scan and weekly review gaps
 - workflow-generation → ./06_features/workflow-generation.md — create standardized workflow pages and generated route metadata for learned workflows

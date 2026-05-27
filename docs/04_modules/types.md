@@ -36,6 +36,14 @@ Defines all shared TypeScript interfaces, types, and enums used across the exten
 | `ListItem` | `date`, `text`, `done`, `inProgress`, `category`, `agentNotes[]`, `daysSinceCreation` |
 | `ListMdData` | `items[]`, `unprocessedItems[]`, `oldestUnprocessedDate`, `unprocessedSourceUrls[]` |
 
+## Project Sync Types
+
+| Type | Fields |
+|------|--------|
+| `ProjectSyncAction` | includes `scan`, `review`, `create_project`, `add_note`, `suggest_task` |
+| `ProjectSyncResult.projects[]` | adds `mainPath`, `nextAction`, keeps `lastAction` fallback |
+| `ProjectSyncResult.review` | status counts, missing next actions, archive candidates |
+
 ## Scope Table
 
 | Layer | Item | Description |
