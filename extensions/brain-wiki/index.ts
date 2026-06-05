@@ -37,6 +37,7 @@ import { createWorkflow, rebuildWorkflowRoutes } from "./src/workflow.ts";
 import type {
   ProjectSyncResult,
   RegistryData,
+  ScanProposal,
   StatusSummary,
   TriageResult,
   WorkflowParams,
@@ -45,6 +46,10 @@ import type {
   WikiEvent,
   WikiPageType,
 } from "./src/types.ts";
+import { taskExec, taskExport } from "./src/task-cli.ts";
+import { validatePromotion } from "./src/task-validator.ts";
+import { renderWeekMd, writeWeekMd } from "./src/wiki-week.ts";
+import { scanVaultForTasks } from "./src/task-scan.ts";
 
 const baseDir = dirname(fileURLToPath(import.meta.url));
 const skillDir = resolve(baseDir, "..", "..", "skills");
@@ -107,6 +112,8 @@ const EVENT_KIND_ENUM = StringEnum([
   "archived",
   "cleared",
 ] as const);
+
+const priorityMap: Record<string, "H" | "M" | "L"> = { IU: "H", I: "M", U: "L" };
 
 export default function brainWikiExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", () => ({
@@ -802,6 +809,87 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "wiki_task",
+    label: "Wiki Task",
+    description:
+      "Create, annotate, or complete Taskwarrior tasks with validation. Extension enforces rules; agent uses direct CLI for safe reads.",
+    promptSnippet:
+      "Promote LIST.md items into validated Taskwarrior tasks, annotate existing tasks, or mark tasks complete",
+    promptGuidelines: [
+      "Use promote action when creating new tasks from LIST.md or scan proposals.",
+      "Use annotate action to add wiki links or context notes to existing tasks.",
+      "Use done action to mark a task complete.",
+    ],
+    parameters: Type.Object({
+      action: StringEnum(["promote", "annotate", "done"] as const),
+      description: Type.Optional(Type.String()),
+      project: Type.Optional(Type.String()),
+      scheduled: Type.Optional(Type.String()),
+      priority: Type.Optional(StringEnum(["IU", "I", "U"] as const)),
+      estimate: Type.Optional(Type.Number()),
+      tags: Type.Optional(Type.Array(Type.String())),
+      due: Type.Optional(Type.String()),
+      recur: Type.Optional(Type.String()),
+      dependsOn: Type.Optional(Type.Array(Type.String())),
+      wikiLinks: Type.Optional(Type.Array(Type.String())),
+      dryRun: Type.Optional(Type.Boolean({ default: false })),
+      taskId: Type.Optional(Type.Number()),
+      text: Type.Optional(Type.String()),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
+      const root = await resolveWikiRoot(_ctx.cwd);
+      return handleWikiTaskAction(pi, params, root) as any;
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_task_scan",
+    label: "Wiki Task Scan",
+    description:
+      "Analyze vault state and propose Taskwarrior tasks automatically.",
+    promptSnippet:
+      "Scan LIST.md, projects, and wiki meta for items that could become Taskwarrior tasks",
+    parameters: Type.Object({
+      scope: Type.Optional(StringEnum(["list_md", "projects", "wiki_meta", "all"] as const)),
+      since: Type.Optional(Type.String({ description: "ISO date for staleness threshold (default: 7 days ago)" })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const registry = await loadRegistry(root);
+      const proposals = await scanVaultForTasks(root, registry, {
+        scope: params.scope ?? "all",
+        since: params.since,
+      });
+      return {
+        content: [{ type: "text", text: formatScanResult(proposals) }],
+        details: { proposals },
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_week",
+    label: "Wiki Week",
+    description:
+      "Regenerate WEEK.md from current Taskwarrior state.",
+    promptSnippet:
+      "Refresh the weekly task dashboard from Taskwarrior queries",
+    parameters: Type.Object({}),
+    async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const vaultRoot = resolve(root, "..");
+      const runner = { exec: (command: string, args?: string[], options?: unknown) => pi.exec(command, args, options) };
+      const records = await taskExport(runner, "status:pending or status:completed");
+      const md = renderWeekMd(records);
+      const path = await writeWeekMd(vaultRoot, md);
+      return {
+        content: [{ type: "text", text: `WEEK.md refreshed at ${path}` }],
+        details: { path, text: md },
+      };
+    },
+  });
+
   pi.registerCommand("wiki-status", {
     description: "Show a short brain-wiki status summary",
     handler: async (_args, ctx) => {
@@ -1181,4 +1269,139 @@ function formatProjectSyncResult(action: string, result: ProjectSyncResult): str
     return "Task suggestion added to LIST.md.";
   }
   return "Done.";
+}
+
+function buildTaskAddArgs(payload: { description: string; project: string; scheduled: string; priority: "H" | "M" | "L"; estimate: number; tags: string[]; due?: string; recur?: string }): string[] {
+  const args: string[] = [
+    payload.description,
+    `project:${payload.project}`,
+    `scheduled:${payload.scheduled}`,
+    `priority:${payload.priority}`,
+    `estimate:${payload.estimate}`,
+    ...payload.tags.map((t) => `+${t}`),
+  ];
+  if (payload.due) args.push(`due:${payload.due}`);
+  if (payload.recur) args.push(`recur:${payload.recur}`);
+  return args;
+}
+
+function formatScanResult(proposals: ScanProposal[]): string {
+  if (proposals.length === 0) return "No task proposals found.";
+  const lines = proposals.map((p, i) =>
+    `${i + 1}. ${p.description}\n   project: ${p.project} | estimate: ${p.estimate} | priority: ${p.priority} | scheduled: ${p.scheduled}\n   reason: ${p.reason} | source: ${p.source}`,
+  );
+  return `Found ${proposals.length} proposals:\n\n${lines.join("\n\n")}`;
+}
+
+async function handleWikiTaskAction(
+  pi: ExtensionAPI,
+  params: Record<string, unknown>,
+  _root: string,
+) {
+  const runner = { exec: (command: string, args?: string[], options?: unknown) => pi.exec(command, args, options) };
+
+  if (params.action === "promote") {
+    if (!params.description || !params.project || !params.scheduled || !params.priority || params.estimate == null || !params.tags) {
+      return {
+        content: [{ type: "text", text: "Missing required fields for promote action." }],
+        details: { success: false, errors: ["Description, project, scheduled, priority, estimate, and tags are required."] },
+      };
+    }
+
+    const payload = {
+      description: String(params.description),
+      project: String(params.project),
+      scheduled: String(params.scheduled),
+      priority: priorityMap[String(params.priority)]!,
+      estimate: Number(params.estimate),
+      tags: params.tags as string[],
+      due: params.due ? String(params.due) : undefined,
+      recur: params.recur ? String(params.recur) : undefined,
+      dependsOn: params.dependsOn as string[] | undefined,
+    };
+
+    const validation = validatePromotion(payload);
+    if (!validation.valid) {
+      return {
+        content: [{ type: "text", text: `Validation failed:\n${validation.errors.map((e) => `- ${e.field}: ${e.message}`).join("\n")}` }],
+        details: { success: false, validationResult: validation },
+      };
+    }
+
+    if (params.dryRun) {
+      const cmd = "task add " + buildTaskAddArgs(payload).join(" ");
+      return {
+        content: [{ type: "text", text: `Dry-run command:\n${cmd}` }],
+        details: { success: true, dryRun: true, command: cmd },
+      };
+    }
+
+    // Create task
+    const addArgs = buildTaskAddArgs(payload);
+    const addResult = await taskExec(runner, ["add", ...addArgs]);
+    if (!addResult.success) {
+      return {
+        content: [{ type: "text", text: `Task add failed: ${addResult.errors?.join(", ") ?? addResult.stderr}` }],
+        details: { success: false, errors: addResult.errors },
+      };
+    }
+
+    // Find the newly created task by filtering for matching description + project
+    const exportResult = await taskExport(runner, `status:pending project:${payload.project}`);
+    const newTask = exportResult.find((t) => t.description === payload.description);
+    const taskId = newTask?.id;
+
+    // Add dependencies
+    if (taskId && payload.dependsOn?.length) {
+      for (const depUuid of payload.dependsOn) {
+        await taskExec(runner, [String(taskId), "modify", `depends:${depUuid}`]);
+      }
+    }
+
+    // Annotate wiki links
+    if (taskId && params.wikiLinks) {
+      const links = params.wikiLinks as string[];
+      for (const link of links) {
+        await taskExec(runner, [String(taskId), "annotate", `Wiki: [[${link}]]`]);
+      }
+    }
+
+    return {
+      content: [{ type: "text", text: `Created task ${taskId ?? "?"}: ${payload.description}` }],
+      details: { success: true, taskId },
+    };
+  }
+
+  if (params.action === "annotate") {
+    if (!params.taskId || !params.text) {
+      return {
+        content: [{ type: "text", text: "TaskId and text are required for annotate action." }],
+        details: { success: false, errors: ["TaskId and text are required."] },
+      };
+    }
+    const result = await taskExec(runner, [String(params.taskId), "annotate", String(params.text)]);
+    return {
+      content: [{ type: "text", text: result.success ? `Annotated task ${params.taskId}` : `Failed: ${result.errors?.join(", ")}` }],
+      details: { success: result.success },
+    };
+  }
+
+  if (params.action === "done") {
+    if (!params.taskId) {
+      return {
+        content: [{ type: "text", text: "TaskId is required for done action." }],
+        details: { success: false, errors: ["TaskId is required."] },
+      };
+    }
+    const result = await taskExec(runner, [String(params.taskId), "done"]);
+    return {
+      content: [{ type: "text", text: result.success ? `Completed task ${params.taskId}` : `Failed: ${result.errors?.join(", ")}` }],
+      details: { success: result.success },
+    };
+  }
+
+  return {
+    content: [{ type: "text", text: "Unknown action." }],
+    details: { success: false },
+  };
 }

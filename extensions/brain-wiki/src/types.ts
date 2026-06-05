@@ -380,3 +380,80 @@ export interface SearchHit {
   file: string;
   matches: Array<{ line: number; text: string }>;
 }
+
+// ── Taskwarrior Integration Types ───────────────────────────────
+
+export interface TaskCliResult {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  parsed?: unknown;
+}
+
+export interface TaskExportRecord {
+  id: number;
+  uuid: string;
+  description: string;
+  project?: string;
+  status: string;
+  priority?: string;
+  tags?: string[];
+  due?: string;
+  scheduled?: string;
+  start?: string;
+  end?: string;
+  urgency: number;
+  depends?: string[];
+  annotations?: Array<{ entry: string; description: string }>;
+  recur?: string;
+  rtype?: string;
+  parent?: string;
+  estimate?: number;
+}
+
+export interface TaskValidationResult {
+  valid: boolean;
+  errors: TaskValidationError[];
+}
+
+export interface TaskValidationError {
+  field: string;
+  code: string;
+  message: string;
+}
+
+export interface PromotionPayload {
+  description: string;
+  project: string;
+  scheduled: string;
+  priority: "H" | "M" | "L";
+  estimate: number;
+  tags: string[];
+  due?: string;
+  recur?: string;
+  dependsOn?: string[];
+}
+
+export interface WeekMdSection {
+  heading: string;
+  rows: Array<Record<string, string | number>>;
+}
+
+export interface WeekMdData {
+  weekNumber: number;
+  weekRange: string;
+  refreshedAt: string;
+  sections: WeekMdSection[];
+}
+
+export interface ScanProposal {
+  description: string;
+  project: string;
+  scheduled: string;
+  priority: "H" | "M" | "L";
+  estimate: number;
+  tags: string[];
+  reason: string;
+  source: string;
+}

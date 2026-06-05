@@ -329,3 +329,57 @@ Workflow body must include a `## Workflow YAML` fenced `yaml` block. Do not hand
 - Flag contradictions during ingest; surface to user, don't silently reconcile
 - When uncertain about JD placement, propose with reasoning — don't assume
 - After any wiki mutation, the extension auto-rebuilds `meta/` — trust this, don't manual-edit those files
+
+## Taskwarrior Protocol
+
+Taskwarrior is the shared temporal task database. Both human and agent use the `task` CLI.
+
+### Task Creation Rules
+
+Every promoted task must have:
+- **Project**: `Domain.SpecificOutcome` format (e.g., `AI.TypeSystems-Research`). Concrete deliverable, not broad domain.
+- **Description**: `TYPE: Short imperative description` (max 8 words after prefix)
+  - Valid TYPEs: `BUG:`, `FEAT:`, `RD:`, `REVIEW:`, `SETUP:`, `PLAN:`, `MEETING:`
+- **Priority**: `IU`→`H`, `I`→`M`, `U`→`L`. Agent suggests; Walker confirms.
+- **Estimate**: 0.5, 1, 1.5, 2, 2.5, or 3 days. Maximum 3 — split larger work.
+- **Scheduled**: Always required. No unscheduled tasks.
+- **Due**: Only if there's a real deadline.
+- **Tags**: At least one. Valid: `BUG`, `FEAT`, `RD`, `CONCEPT`, `REVIEW`, `SOURCE`, `INFRA`.
+
+### Agent Write Rules
+
+| Action | Allowed? | How |
+|--------|----------|-----|
+| `task add` | ✅ | Only via `wiki_task` tool with `promote` action |
+| `task annotate` | ✅ | Via `wiki_task` tool or direct `pi.exec` |
+| `task done` | ✅ | Via `wiki_task` tool or direct `pi.exec` |
+| `task modify` core fields | ❌ | Never without Walker's explicit instruction |
+| `task delete` | ❌ | Never |
+| `task modify status:pending` | ❌ | Never un-complete |
+
+### LIST.md Draining Protocol
+
+1. Call `wiki_task_scan` at session start
+2. Identify unprocessed LIST.md items (`[ ]`, `[>]`)
+3. Propose promotion with all required fields
+4. On Walker approval, call `wiki_task` with `promote` action
+5. Append agent line to LIST.md: `A 2026-06-05T10:00 → Promoted to TW #20 [AI] estimate:1`
+6. Toggle `[ ]` → `[x]` in LIST.md
+
+### WEEK.md Refresh
+
+- Call `wiki_week` at session start
+- Use direct `task export` for real-time queries during session
+- WEEK.md is a human convenience, not the source of truth
+
+### Dependency Chaining
+
+- Split tasks: always chain with `depends:` unless Walker says otherwise
+- Present chain to Walker: "RD → CONCEPT → FEAT → REVIEW"
+- Create all tasks first, then link by UUID
+
+### Bidirectional Linking
+
+- Task side: `task <id> annotate "Wiki: [[topics/foo]]"`
+- Wiki side: add `## Tasks` section to topic page with task references
+- Maintain both sides
