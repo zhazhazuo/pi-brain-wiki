@@ -23,6 +23,18 @@ describe("scanListMdItems", () => {
     const items = scanListMdItems(content, "2026-06-10");
     expect(items.length).toBe(0);
   });
+
+  test("ignores promoted items (marked with [>])", () => {
+    const content = `
+**2026-05-20**
+- [ ] Unprocessed item
+- [>] Promoted item
+- [x] Done item
+`;
+    const items = scanListMdItems(content, "2026-06-10");
+    expect(items.length).toBe(1);
+    expect(items[0].description).toContain("Unprocessed item");
+  });
 });
 
 describe("scanVaultForTasks", () => {

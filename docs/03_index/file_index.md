@@ -25,6 +25,9 @@
 - skills/wiki-intel/SKILL.md → Agent skill: synthesize wiki activity patterns and periodic review
 - skills/wiki-map/SKILL.md → Agent skill: orient to current wiki knowledge state
 - skills/wiki-workshop/SKILL.md → Agent skill: ingest sources and refine wiki topics
+- skills/taskwarrior/SKILL.md → Agent skill manifest for taskwarrior integration triggers and tool reference
+- skills/taskwarrior/instructions/creation-rules.md → Task creation validation rules, naming conventions, and agent write permissions
+- skills/taskwarrior/instructions/session-workflow.md → Session workflow and LIST.md draining protocol with bidirectional linking
 
 ## extensions/brain-wiki/src/
 
@@ -55,7 +58,17 @@
 - extensions/brain-wiki/src/triage.ts → Read, add, suggest, flag stale items in LIST.md
 - extensions/brain-wiki/src/workflow.ts → Generate standardized workflow pages and workflow route metadata
 - extensions/brain-wiki/src/workflow.test.ts → Unit tests for workflow generation, duplicate detection, and route rendering
+- extensions/brain-wiki/src/task-cli.ts → Taskwarrior CLI execution wrapper and error parsing
+- extensions/brain-wiki/src/task-cli.test.ts → Unit tests for task CLI wrapper and error parsing
+- extensions/brain-wiki/src/task-scan.ts → Vault scanner for stale LIST.md items and task promotion proposals
+- extensions/brain-wiki/src/task-scan.test.ts → Unit tests for LIST.md staleness scanner
+- extensions/brain-wiki/src/task-validator.ts → Promotion payload validation engine enforcing creation rules
+- extensions/brain-wiki/src/task-validator.test.ts → Unit tests for promotion validation rules
+- extensions/brain-wiki/src/task-sync.ts → Bidirectional LIST.md ↔ Taskwarrior sync logic
+- extensions/brain-wiki/src/task-sync.test.ts → Unit tests for sync, marking, and completion
 - extensions/brain-wiki/src/types.ts → Shared TypeScript interfaces and type definitions
+- extensions/brain-wiki/src/wiki-week.ts → Weekly dashboard rendering and task summary generation
+- extensions/brain-wiki/src/wiki-week.test.ts → Unit tests for weekly dashboard rendering
 
 ## scripts/
 

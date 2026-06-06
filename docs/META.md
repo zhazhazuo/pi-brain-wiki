@@ -5,9 +5,9 @@
 ```
 schema_version:  1
 generated:       2026-05-05
-last_synced:     2026-05-27
-last_commit:     12c6be0
-docs_tree_hash:  3da05fc9ce5568b7f29a0d4cf0e4acd909fde695
+last_synced:     2026-06-07
+last_commit:     0fbc4e5
+docs_tree_hash:  22748537500204c93a107a1c43ebcec8872ba8b0
 ```
 
 ---

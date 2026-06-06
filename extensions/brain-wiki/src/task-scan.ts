@@ -18,9 +18,9 @@ export function scanListMdItems(content: string, sinceIso: string): ScanProposal
     const taskMatch = line.match(/^-\s*\[([ x>])\]\s*(.+)/);
     if (taskMatch && currentDate) {
       itemIndex++;
-      const done = taskMatch[1] === "x";
+      const state = taskMatch[1];
       const text = taskMatch[2].trim();
-      if (done) continue;
+      if (state === "x" || state === ">") continue;
 
       const itemDate = new Date(currentDate);
       const daysSince = Math.floor((since.getTime() - itemDate.getTime()) / 86_400_000);

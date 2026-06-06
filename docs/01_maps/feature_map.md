@@ -24,3 +24,5 @@
 - triage → extensions/brain-wiki/src/triage.ts — read, add, suggest, flag stale in LIST.md through Obsidian IO when available
 - future-mode-project-review → ./06_features/future-mode-project-review.md — future-mode project metadata scan and weekly review gaps
 - workflow-generation → ./06_features/workflow-generation.md — create standardized workflow pages and generated route metadata for learned workflows
+- taskwarrior → ./06_features/taskwarrior.md — integrate Taskwarrior CLI with validated promotion and bidirectional wiki linking
+- task-sync → extensions/brain-wiki/src/task-sync.ts — bidirectional LIST.md ↔ Taskwarrior sync
