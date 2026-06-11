@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { StringEnum } from "@mariozechner/pi-ai";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -27,7 +27,7 @@ import {
   resolveWikiRoot,
   toRelative,
 } from "./src/paths.ts";
-import { searchRegistry, searchViaObsidian } from "./src/search.ts";
+import { type searchRegistry, searchViaObsidian } from "./src/search.ts";
 import { ObsidianClient } from "./src/obsidian-client.ts";
 import { bootstrapVault, ensureCanonicalPage } from "./src/scaffold.ts";
 import { syncParaToWiki } from "./src/sync.ts";
@@ -50,7 +50,10 @@ import { taskExec, taskExport } from "./src/task-cli.ts";
 import { validatePromotion } from "./src/task-validator.ts";
 import { renderWeekMd, writeWeekMd } from "./src/wiki-week.ts";
 import { scanVaultForTasks } from "./src/task-scan.ts";
-import { markListItemPromoted, syncCompletedTasksToList } from "./src/task-sync.ts";
+import {
+  markListItemPromoted,
+  syncCompletedTasksToList,
+} from "./src/task-sync.ts";
 
 const baseDir = dirname(fileURLToPath(import.meta.url));
 const skillDir = resolve(baseDir, "..", "..", "skills");
@@ -76,7 +79,9 @@ async function getObsidianClient(root: string): Promise<ObsidianClient | null> {
 async function requireObsidianClient(root: string): Promise<ObsidianClient> {
   const client = await getObsidianClient(root);
   if (!client) {
-    throw new Error("Obsidian CLI is required for this wiki vault operation. Start Obsidian with CLI support enabled and try again.");
+    throw new Error(
+      "Obsidian CLI is required for this wiki vault operation. Start Obsidian with CLI support enabled and try again.",
+    );
   }
   return client;
 }
@@ -89,7 +94,11 @@ const PAGE_TYPE_ENUM = StringEnum([
   "workflow",
 ] as const);
 const CANONICAL_TYPE_ENUM = StringEnum(["topic"] as const);
-const WORKFLOW_STATUS_ENUM = StringEnum(["draft", "active", "archived"] as const);
+const WORKFLOW_STATUS_ENUM = StringEnum([
+  "draft",
+  "active",
+  "archived",
+] as const);
 const LINT_MODE_ENUM = StringEnum([
   "links",
   "orphans",
@@ -114,7 +123,11 @@ const EVENT_KIND_ENUM = StringEnum([
   "cleared",
 ] as const);
 
-const priorityMap: Record<string, "H" | "M" | "L"> = { IU: "H", I: "M", U: "L" };
+const priorityMap: Record<string, "H" | "M" | "L"> = {
+  IU: "H",
+  I: "M",
+  U: "L",
+};
 
 export default function brainWikiExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", () => ({
@@ -149,10 +162,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         .map((path) => toRelative(root, path))
         .join(", ");
       if (ctx.hasUI)
-        ctx.ui.notify(
-          `Blocked protected path(s): ${protectedList}`,
-          "warning",
-        );
+        ctx.ui.notify(`Blocked protected path(s): ${protectedList}`, "warning");
       return {
         block: true,
         reason: `brain-wiki protects Area/ from agent writes: ${protectedList}`,
@@ -280,17 +290,21 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           client,
         );
 
-        await appendEvent(root, {
-          ts: new Date().toISOString(),
-          kind: "capture",
-          title: `Captured ${result.title}`,
-          sourceIds: [result.sourceId],
-          pagePaths: result.sourcePagePath
-            ? [result.sourcePagePath]
-            : undefined,
-          actor: "extension",
-          notes: [`inputType=${params.inputType}`],
-        }, client);
+        await appendEvent(
+          root,
+          {
+            ts: new Date().toISOString(),
+            kind: "capture",
+            title: `Captured ${result.title}`,
+            sourceIds: [result.sourceId],
+            pagePaths: result.sourcePagePath
+              ? [result.sourcePagePath]
+              : undefined,
+            actor: "extension",
+            notes: [`inputType=${params.inputType}`],
+          },
+          client,
+        );
 
         await rebuildAllGeneratedArtifacts(root);
 
@@ -325,7 +339,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       ),
       includeArchived: Type.Optional(
         Type.Boolean({
-          description: "Include archived and cleared entries in results (default: false)",
+          description:
+            "Include archived and cleared entries in results (default: false)",
         }),
       ),
     }),
@@ -345,7 +360,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         excludeStatuses,
       );
       return {
-        content: [{ type: "text", text: formatSearch(result) }],
+        content: [{ type: "text", text: formatSearch(result, ctx.cwd, root) }],
         details: result,
       };
     },
@@ -387,24 +402,36 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const client = await requireObsidianClient(root);
       return withRootLock(root, async () => {
         const registry = await loadRegistry(root);
-        const result = await ensureCanonicalPage(root, config, registry, {
-          ...params,
-          createIfMissing: params.createIfMissing ?? true,
-        }, client);
+        const result = await ensureCanonicalPage(
+          root,
+          config,
+          registry,
+          {
+            ...params,
+            createIfMissing: params.createIfMissing ?? true,
+          },
+          client,
+        );
 
         if (result.created && result.path) {
-          await appendEvent(root, {
-            ts: new Date().toISOString(),
-            kind: "refactor",
-            title: `Created ${result.type} page ${result.title}`,
-            pagePaths: [result.path],
-            actor: "extension",
-          }, client);
+          await appendEvent(
+            root,
+            {
+              ts: new Date().toISOString(),
+              kind: "refactor",
+              title: `Created ${result.type} page ${result.title}`,
+              pagePaths: [result.path],
+              actor: "extension",
+            },
+            client,
+          );
           await rebuildAllGeneratedArtifacts(root);
         }
 
         return {
-          content: [{ type: "text", text: formatEnsurePage(result) }],
+          content: [
+            { type: "text", text: formatEnsurePage(result, ctx.cwd, root) },
+          ],
           details: result,
         };
       });
@@ -436,7 +463,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       }),
       inputs: Type.Array(
         Type.String({
-          description: "Required input source, e.g. recent activity or OKR pages",
+          description:
+            "Required input source, e.g. recent activity or OKR pages",
         }),
       ),
       steps: Type.Array(
@@ -466,22 +494,28 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         );
 
         if (result.created && result.path) {
-          await appendEvent(root, {
-            ts: new Date().toISOString(),
-            kind: "workflow",
-            title: `Generated workflow ${result.title}`,
-            pagePaths: [result.path],
-            actor: "extension",
-            notes: [
-              `status=${result.status}`,
-              `triggers=${params.triggers.join(", ")}`,
-            ],
-          }, client);
+          await appendEvent(
+            root,
+            {
+              ts: new Date().toISOString(),
+              kind: "workflow",
+              title: `Generated workflow ${result.title}`,
+              pagePaths: [result.path],
+              actor: "extension",
+              notes: [
+                `status=${result.status}`,
+                `triggers=${params.triggers.join(", ")}`,
+              ],
+            },
+            client,
+          );
           await rebuildAllGeneratedArtifacts(root);
         }
 
         return {
-          content: [{ type: "text", text: formatWorkflowResult(result) }],
+          content: [
+            { type: "text", text: formatWorkflowResult(result, ctx.cwd, root) },
+          ],
           details: result,
         };
       });
@@ -518,7 +552,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         client,
       );
       return {
-        content: [{ type: "text", text: formatLint(result) }],
+        content: [{ type: "text", text: formatLint(result, ctx.cwd, root) }],
         details: result,
       };
     },
@@ -592,26 +626,51 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         };
         await appendEvent(root, event);
         if (params.kind === "integrate" && params.sourceIds?.length) {
-          const requiredClient = client ?? await requireObsidianClient(root);
-          await markSourcesIntegrated(root, params.sourceIds, ts, requiredClient);
+          const requiredClient = client ?? (await requireObsidianClient(root));
+          await markSourcesIntegrated(
+            root,
+            params.sourceIds,
+            ts,
+            requiredClient,
+          );
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "consumed" && params.pagePaths?.length) {
-          const pkbRefs = (params.notes ?? []).filter((n) => n.startsWith("pkb:")).map((n) => n.slice(4));
-          const requiredClient = client ?? await requireObsidianClient(root);
-          await markPageStatus(root, params.pagePaths, "consumed", {
-            consumed_at: ts,
-            pkb_refs: pkbRefs.length > 0 ? pkbRefs : undefined,
-          }, requiredClient);
+          const pkbRefs = (params.notes ?? [])
+            .filter((n) => n.startsWith("pkb:"))
+            .map((n) => n.slice(4));
+          const requiredClient = client ?? (await requireObsidianClient(root));
+          await markPageStatus(
+            root,
+            params.pagePaths,
+            "consumed",
+            {
+              consumed_at: ts,
+              pkb_refs: pkbRefs.length > 0 ? pkbRefs : undefined,
+            },
+            requiredClient,
+          );
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "archived" && params.pagePaths?.length) {
-          const requiredClient = client ?? await requireObsidianClient(root);
-          await markPageStatus(root, params.pagePaths, "archived", {}, requiredClient);
+          const requiredClient = client ?? (await requireObsidianClient(root));
+          await markPageStatus(
+            root,
+            params.pagePaths,
+            "archived",
+            {},
+            requiredClient,
+          );
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "cleared" && params.pagePaths?.length) {
-          const requiredClient = client ?? await requireObsidianClient(root);
-          await markPageStatus(root, params.pagePaths, "cleared", {
-            cleared_at: new Date().toISOString(),
-          }, requiredClient);
+          const requiredClient = client ?? (await requireObsidianClient(root));
+          await markPageStatus(
+            root,
+            params.pagePaths,
+            "cleared",
+            {
+              cleared_at: new Date().toISOString(),
+            },
+            requiredClient,
+          );
           await rebuildAllGeneratedArtifacts(root);
         } else {
           await rebuildLog(root, config.title);
@@ -699,18 +758,28 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const client = await requireObsidianClient(root);
       return withRootLock(root, async () => {
         const registry = await loadRegistry(root);
-        const result = await syncParaToWiki(root, config, registry, params.scope, client);
+        const result = await syncParaToWiki(
+          root,
+          config,
+          registry,
+          params.scope,
+          client,
+        );
 
-        await appendEvent(root, {
-          ts: new Date().toISOString(),
-          kind: "refactor",
-          title: `Synced ${params.scope} PARA folders to wiki`,
-          actor: "extension",
-          notes: [
-            `created=${result.topicsCreated}`,
-            `updated=${result.topicsUpdated}`,
-          ],
-        }, client);
+        await appendEvent(
+          root,
+          {
+            ts: new Date().toISOString(),
+            kind: "refactor",
+            title: `Synced ${params.scope} PARA folders to wiki`,
+            actor: "extension",
+            notes: [
+              `created=${result.topicsCreated}`,
+              `updated=${result.topicsUpdated}`,
+            ],
+          },
+          client,
+        );
 
         await rebuildAllGeneratedArtifacts(root);
 
@@ -748,7 +817,12 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const client = await requireObsidianClient(root);
-      const result = await triageList(root, params.action, params.content, client);
+      const result = await triageList(
+        root,
+        params.action,
+        params.content,
+        client,
+      );
 
       return {
         content: [
@@ -780,7 +854,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "suggest_task adds to LIST.md with AI indicator.",
     ],
     parameters: Type.Object({
-      action: StringEnum(["scan", "create_project", "add_note", "suggest_task", "review"] as const),
+      action: StringEnum([
+        "scan",
+        "create_project",
+        "add_note",
+        "suggest_task",
+        "review",
+      ] as const),
       project: Type.Optional(
         Type.String({ description: "Project title or folder name" }),
       ),
@@ -835,7 +915,11 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       recur: Type.Optional(Type.String()),
       dependsOn: Type.Optional(Type.Array(Type.String())),
       wikiLinks: Type.Optional(Type.Array(Type.String())),
-      source: Type.Optional(Type.String({ description: "Source reference, e.g. LIST.md:2026-06-01:item-3" })),
+      source: Type.Optional(
+        Type.String({
+          description: "Source reference, e.g. LIST.md:2026-06-01:item-3",
+        }),
+      ),
       dryRun: Type.Optional(Type.Boolean({ default: false })),
       taskId: Type.Optional(Type.Number()),
       text: Type.Optional(Type.String()),
@@ -855,13 +939,22 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     promptSnippet:
       "Scan LIST.md, projects, and wiki meta for items that could become Taskwarrior tasks",
     parameters: Type.Object({
-      scope: Type.Optional(StringEnum(["list_md", "projects", "wiki_meta", "all"] as const)),
-      since: Type.Optional(Type.String({ description: "ISO date for staleness threshold (default: 7 days ago)" })),
+      scope: Type.Optional(
+        StringEnum(["list_md", "projects", "wiki_meta", "all"] as const),
+      ),
+      since: Type.Optional(
+        Type.String({
+          description: "ISO date for staleness threshold (default: 7 days ago)",
+        }),
+      ),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const client = await getObsidianClient(root);
-      const runner = { exec: (command: string, args?: string[], options?: unknown) => pi.exec(command, args, options) };
+      const runner = {
+        exec: (command: string, args?: string[], options?: unknown) =>
+          pi.exec(command, args, options),
+      };
       const syncResult = await syncCompletedTasksToList(root, runner, client);
       const registry = await loadRegistry(root);
       const proposals = await scanVaultForTasks(root, registry, {
@@ -869,7 +962,9 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         since: params.since,
       });
       return {
-        content: [{ type: "text", text: formatScanResult(proposals, syncResult) }],
+        content: [
+          { type: "text", text: formatScanResult(proposals, syncResult) },
+        ],
         details: { proposals, syncResult },
       };
     },
@@ -878,22 +973,31 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "wiki_week",
     label: "Wiki Week",
-    description:
-      "Regenerate WEEK.md from current Taskwarrior state.",
-    promptSnippet:
-      "Refresh the weekly task dashboard from Taskwarrior queries",
+    description: "Regenerate WEEK.md from current Taskwarrior state.",
+    promptSnippet: "Refresh the weekly task dashboard from Taskwarrior queries",
     parameters: Type.Object({}),
     async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const vaultRoot = resolve(root, "..");
       const client = await getObsidianClient(root);
-      const runner = { exec: (command: string, args?: string[], options?: unknown) => pi.exec(command, args, options) };
+      const runner = {
+        exec: (command: string, args?: string[], options?: unknown) =>
+          pi.exec(command, args, options),
+      };
       const syncResult = await syncCompletedTasksToList(root, runner, client);
-      const records = await taskExport(runner, "status:pending or status:completed");
+      const records = await taskExport(
+        runner,
+        "status:pending or status:completed",
+      );
       const md = renderWeekMd(records);
       const path = await writeWeekMd(vaultRoot, md);
       return {
-        content: [{ type: "text", text: `WEEK.md refreshed at ${path}${syncResult.markedDone > 0 ? ` (${syncResult.markedDone} LIST.md items synced)` : ""}` }],
+        content: [
+          {
+            type: "text",
+            text: `WEEK.md refreshed at ${path}${syncResult.markedDone > 0 ? ` (${syncResult.markedDone} LIST.md items synced)` : ""}`,
+          },
+        ],
         details: { path, text: md, syncResult },
       };
     },
@@ -916,7 +1020,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const mode = (args?.trim() || "all") as Parameters<typeof runLint>[1];
       const result = await runLint(root, mode, true, 50, client);
       ctx.ui.notify(
-        formatLint(result),
+        formatLint(result, ctx.cwd, root),
         result.counts.total === 0 ? "info" : "warning",
       );
     },
@@ -953,18 +1057,28 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
 
       return withRootLock(root, async () => {
         const ts = new Date().toISOString();
-        await appendEvent(root, {
-          ts,
-          kind: "consumed",
-          title: `Consumed ${pagePath}`,
-          pagePaths: [pagePath],
-          notes: pkbRefs.map((ref) => `pkb:${ref}`),
-          actor: "user",
-        }, client);
-        await markPageStatus(root, [pagePath], "consumed", {
-          consumed_at: ts,
-          pkb_refs: pkbRefs,
-        }, client);
+        await appendEvent(
+          root,
+          {
+            ts,
+            kind: "consumed",
+            title: `Consumed ${pagePath}`,
+            pagePaths: [pagePath],
+            notes: pkbRefs.map((ref) => `pkb:${ref}`),
+            actor: "user",
+          },
+          client,
+        );
+        await markPageStatus(
+          root,
+          [pagePath],
+          "consumed",
+          {
+            consumed_at: ts,
+            pkb_refs: pkbRefs,
+          },
+          client,
+        );
         await rebuildAllGeneratedArtifacts(root);
         ctx.ui.notify(
           `Marked ${pagePath} as consumed (PKB: ${pkbRefs.join(", ")})`,
@@ -1022,22 +1136,44 @@ async function buildStatus(root: string): Promise<StatusSummary> {
   const archived = sources.filter((page) => page.status === "archived").length;
   const cleared = sources.filter((page) => page.status === "cleared").length;
 
-  const integratedEntries = sources.filter((page) => page.status === "integrated" && page.updated);
-  const oldestIntegrated = integratedEntries.length > 0
-    ? integratedEntries.reduce((oldest, entry) => entry.updated! < oldest ? entry.updated! : oldest, integratedEntries[0].updated!)
-    : undefined;
+  const integratedEntries = sources.filter(
+    (page) => page.status === "integrated" && page.updated,
+  );
+  const oldestIntegrated =
+    integratedEntries.length > 0
+      ? integratedEntries.reduce(
+          (oldest, entry) =>
+            entry.updated! < oldest ? entry.updated! : oldest,
+          integratedEntries[0].updated!,
+        )
+      : undefined;
 
-  const pagesWithExternal = registry.pages.filter(p => p.externalBacklinks > 0);
-  const externalTotal = pagesWithExternal.reduce((sum, p) => sum + p.externalBacklinks, 0);
-  const topPage = pagesWithExternal.length > 0
-    ? pagesWithExternal.reduce((best, p) => p.externalBacklinks > best.externalBacklinks ? p : best, pagesWithExternal[0])
-    : undefined;
+  const pagesWithExternal = registry.pages.filter(
+    (p) => p.externalBacklinks > 0,
+  );
+  const externalTotal = pagesWithExternal.reduce(
+    (sum, p) => sum + p.externalBacklinks,
+    0,
+  );
+  const topPage =
+    pagesWithExternal.length > 0
+      ? pagesWithExternal.reduce(
+          (best, p) =>
+            p.externalBacklinks > best.externalBacklinks ? p : best,
+          pagesWithExternal[0],
+        )
+      : undefined;
 
-  const externalBacklinks = externalTotal > 0 ? {
-    total: externalTotal,
-    pageCount: pagesWithExternal.length,
-    topPage: topPage ? { title: topPage.title, count: topPage.externalBacklinks } : undefined,
-  } : undefined;
+  const externalBacklinks =
+    externalTotal > 0
+      ? {
+          total: externalTotal,
+          pageCount: pagesWithExternal.length,
+          topPage: topPage
+            ? { title: topPage.title, count: topPage.externalBacklinks }
+            : undefined,
+        }
+      : undefined;
 
   return {
     totals,
@@ -1057,8 +1193,24 @@ async function buildStatus(root: string): Promise<StatusSummary> {
   };
 }
 
+/**
+ * Convert a wiki-relative path (e.g. pages/topics/foo.md) to a vault-relative
+ * path (e.g. Wiki/pages/topics/foo.md) so the agent can resolve it from cwd.
+ */
+function vaultRelative(
+  cwd: string,
+  wikiRoot: string,
+  wikiPath: string,
+): string {
+  const prefix = relative(cwd, wikiRoot);
+  if (prefix === "" || prefix === ".") return wikiPath;
+  return `${prefix}/${wikiPath}`;
+}
+
 function formatSearch(
   result: Awaited<ReturnType<typeof searchRegistry>>,
+  cwd: string,
+  wikiRoot: string,
 ): string {
   if (result.matches.length === 0)
     return `No wiki matches for: ${result.query}`;
@@ -1066,44 +1218,60 @@ function formatSearch(
     `Top matches for: ${result.query}`,
     ...result.matches.map(
       (match) =>
-        `- [${match.score}] ${match.title} (${match.type}) — ${match.path}`,
+        `- [${match.score}] ${match.title} (${match.type}) — ${vaultRelative(cwd, wikiRoot, match.path)}`,
     ),
   ].join("\n");
 }
 
-function formatEnsurePage(result: {
-  resolved: boolean;
-  created: boolean;
-  conflict: boolean;
-  path?: string;
-  title?: string;
-  candidates?: Array<{ path: string; title: string }>;
-}): string {
+function formatEnsurePage(
+  result: {
+    resolved: boolean;
+    created: boolean;
+    conflict: boolean;
+    path?: string;
+    title?: string;
+    candidates?: Array<{ path: string; title: string }>;
+  },
+  cwd: string,
+  wikiRoot: string,
+): string {
+  const vp = (p: string) => vaultRelative(cwd, wikiRoot, p);
   if (result.conflict) {
-    return `Conflict: multiple pages matched. Candidates: ${(result.candidates ?? []).map((candidate) => candidate.path).join(", ")}`;
+    return `Conflict: multiple pages matched. Candidates: ${(result.candidates ?? []).map((candidate) => vp(candidate.path)).join(", ")}`;
   }
   if (!result.resolved) return "No matching page found.";
-  if (result.created) return `Created page: ${result.path}`;
-  return `Resolved existing page: ${result.path}`;
+  if (result.created) return `Created page: ${vp(result.path!)}`;
+  return `Resolved existing page: ${vp(result.path!)}`;
 }
 
-function formatWorkflowResult(result: WorkflowResult): string {
+function formatWorkflowResult(
+  result: WorkflowResult,
+  cwd: string,
+  wikiRoot: string,
+): string {
+  const vp = (p: string) => vaultRelative(cwd, wikiRoot, p);
   if (result.conflict) {
-    return `Workflow conflict: existing workflow matched. Candidates: ${(result.candidates ?? []).map((candidate) => candidate.path).join(", ")}`;
+    return `Workflow conflict: existing workflow matched. Candidates: ${(result.candidates ?? []).map((candidate) => vp(candidate.path!)).join(", ")}`;
   }
   if (result.created) {
-    return `Generated workflow: ${result.path}`;
+    return `Generated workflow: ${vp(result.path!)}`;
   }
   return "No workflow generated.";
 }
 
-function formatLint(result: Awaited<ReturnType<typeof runLint>>): string {
+function formatLint(
+  result: Awaited<ReturnType<typeof runLint>>,
+  cwd: string,
+  wikiRoot: string,
+): string {
   return [
     `Lint mode: ${result.mode}`,
     `Total issues: ${result.counts.total}`,
     `brokenLinks=${result.counts.brokenLinks} orphans=${result.counts.orphans} frontmatter=${result.counts.frontmatter}`,
     `duplicates=${result.counts.duplicates} coverage=${result.counts.coverage} staleness=${result.counts.staleness}`,
-    ...(result.reportPath ? [`Report: ${result.reportPath}`] : []),
+    ...(result.reportPath
+      ? [`Report: ${vaultRelative(cwd, wikiRoot, result.reportPath)}`]
+      : []),
   ].join("\n");
 }
 
@@ -1111,13 +1279,17 @@ function formatStatus(status: StatusSummary): string {
   return [
     `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review, ${status.totals.workflow} workflow)`,
     `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.consumed} consumed, ${status.sources.archived} archived, ${status.sources.cleared} cleared`,
-    ...(status.externalBacklinks ? [
-      `Cross-vault backlinks: ${status.externalBacklinks.total} across ${status.externalBacklinks.pageCount} pages` +
-        (status.externalBacklinks.topPage
-          ? ` (top: ${status.externalBacklinks.topPage.title} — ${status.externalBacklinks.topPage.count} external)`
-          : ""),
-    ] : []),
-    ...(status.oldestIntegrated ? [`Oldest unintegrated: ${status.oldestIntegrated}`] : []),
+    ...(status.externalBacklinks
+      ? [
+          `Cross-vault backlinks: ${status.externalBacklinks.total} across ${status.externalBacklinks.pageCount} pages` +
+            (status.externalBacklinks.topPage
+              ? ` (top: ${status.externalBacklinks.topPage.title} — ${status.externalBacklinks.topPage.count} external)`
+              : ""),
+        ]
+      : []),
+    ...(status.oldestIntegrated
+      ? [`Oldest unintegrated: ${status.oldestIntegrated}`]
+      : []),
     ...(status.lastCapture ? [`Last capture: ${status.lastCapture}`] : []),
     ...(status.lastEvent ? [`Last event: ${status.lastEvent}`] : []),
   ].join("\n");
@@ -1177,9 +1349,13 @@ function formatActivity(
     }
 
     if (listMd.unprocessedSourceUrls.length > 0) {
-      lines.push(`  Un-captured source URLs: ${listMd.unprocessedSourceUrls.length}`);
+      lines.push(
+        `  Un-captured source URLs: ${listMd.unprocessedSourceUrls.length}`,
+      );
       for (const item of listMd.unprocessedSourceUrls.slice(0, 3)) {
-        lines.push(`    - ${item.text.slice(0, 80)}${item.text.length > 80 ? "..." : ""}`);
+        lines.push(
+          `    - ${item.text.slice(0, 80)}${item.text.length > 80 ? "..." : ""}`,
+        );
       }
     }
   }
@@ -1207,18 +1383,29 @@ function formatActivity(
   if (result.lifecycle) {
     lines.push(`\nLifecycle backlog:`);
     if (result.lifecycle.integratedAwaitingRecall.length > 0) {
-      lines.push(`  Awaiting Recall: ${result.lifecycle.integratedAwaitingRecall.length} entries`);
-      for (const entry of result.lifecycle.integratedAwaitingRecall.slice(0, 5)) {
-        lines.push(`    - ${entry.title} (${entry.daysSinceIntegration}d since integration)`);
+      lines.push(
+        `  Awaiting Recall: ${result.lifecycle.integratedAwaitingRecall.length} entries`,
+      );
+      for (const entry of result.lifecycle.integratedAwaitingRecall.slice(
+        0,
+        5,
+      )) {
+        lines.push(
+          `    - ${entry.title} (${entry.daysSinceIntegration}d since integration)`,
+        );
       }
     } else {
       lines.push(`  Awaiting Recall: none`);
     }
     if (result.lifecycle.consumedReactivated.length > 0) {
-      lines.push(`  Reactivated (consumed with new sources): ${result.lifecycle.consumedReactivated.length} entries`);
+      lines.push(
+        `  Reactivated (consumed with new sources): ${result.lifecycle.consumedReactivated.length} entries`,
+      );
     }
     if (result.lifecycle.clearableCandidates.length > 0) {
-      lines.push(`  Clearable: ${result.lifecycle.clearableCandidates.length} archived entries`);
+      lines.push(
+        `  Clearable: ${result.lifecycle.clearableCandidates.length} archived entries`,
+      );
     } else {
       lines.push(`  Clearable: none`);
     }
@@ -1246,7 +1433,10 @@ function formatTriageResult(action: string, result: TriageResult): string {
   return "Done.";
 }
 
-function formatProjectSyncResult(action: string, result: ProjectSyncResult): string {
+function formatProjectSyncResult(
+  action: string,
+  result: ProjectSyncResult,
+): string {
   if (action === "scan" && result.projects) {
     if (result.projects.length === 0) return "No projects found.";
     return [
@@ -1262,9 +1452,13 @@ function formatProjectSyncResult(action: string, result: ProjectSyncResult): str
     const lines = [
       `Project review: active=${review.counts.active} waiting=${review.counts.waiting} complete=${review.counts.complete} archived=${review.counts.archived} unknown=${review.counts.unknown}`,
       `Missing next action: ${review.noNextAction.length}`,
-      ...review.noNextAction.slice(0, 5).map((p) => `- ${p.title} [${p.status}]`),
+      ...review.noNextAction
+        .slice(0, 5)
+        .map((p) => `- ${p.title} [${p.status}]`),
       `Archive candidates: ${review.archiveCandidates.length}`,
-      ...review.archiveCandidates.slice(0, 5).map((p) => `- ${p.title} [${p.status}]`),
+      ...review.archiveCandidates
+        .slice(0, 5)
+        .map((p) => `- ${p.title} [${p.status}]`),
     ];
     return lines.join("\n");
   }
@@ -1280,7 +1474,16 @@ function formatProjectSyncResult(action: string, result: ProjectSyncResult): str
   return "Done.";
 }
 
-function buildTaskAddArgs(payload: { description: string; project: string; scheduled: string; priority: "H" | "M" | "L"; estimate: number; tags: string[]; due?: string; recur?: string }): string[] {
+function buildTaskAddArgs(payload: {
+  description: string;
+  project: string;
+  scheduled: string;
+  priority: "H" | "M" | "L";
+  estimate: number;
+  tags: string[];
+  due?: string;
+  recur?: string;
+}): string[] {
   const args: string[] = [
     payload.description,
     `project:${payload.project}`,
@@ -1294,7 +1497,10 @@ function buildTaskAddArgs(payload: { description: string; project: string; sched
   return args;
 }
 
-function formatScanResult(proposals: ScanProposal[], syncResult?: { markedDone: number; errors: string[] }): string {
+function formatScanResult(
+  proposals: ScanProposal[],
+  syncResult?: { markedDone: number; errors: string[] },
+): string {
   const parts: string[] = [];
   if (syncResult && syncResult.markedDone > 0) {
     parts.push(`Synced ${syncResult.markedDone} completed task(s) to LIST.md.`);
@@ -1307,8 +1513,9 @@ function formatScanResult(proposals: ScanProposal[], syncResult?: { markedDone: 
     return parts.join("\n");
   }
   parts.push(`Found ${proposals.length} proposals:`);
-  const lines = proposals.map((p, i) =>
-    `${i + 1}. ${p.description}\n   project: ${p.project} | estimate: ${p.estimate} | priority: ${p.priority} | scheduled: ${p.scheduled}\n   reason: ${p.reason} | source: ${p.source}`,
+  const lines = proposals.map(
+    (p, i) =>
+      `${i + 1}. ${p.description}\n   project: ${p.project} | estimate: ${p.estimate} | priority: ${p.priority} | scheduled: ${p.scheduled}\n   reason: ${p.reason} | source: ${p.source}`,
   );
   parts.push(lines.join("\n\n"));
   return parts.join("\n\n");
@@ -1320,13 +1527,30 @@ async function handleWikiTaskAction(
   _root: string,
   client: ObsidianClient | null,
 ) {
-  const runner = { exec: (command: string, args?: string[], options?: unknown) => pi.exec(command, args, options) };
+  const runner = {
+    exec: (command: string, args?: string[], options?: unknown) =>
+      pi.exec(command, args, options),
+  };
 
   if (params.action === "promote") {
-    if (!params.description || !params.project || !params.scheduled || !params.priority || params.estimate == null || !params.tags) {
+    if (
+      !params.description ||
+      !params.project ||
+      !params.scheduled ||
+      !params.priority ||
+      params.estimate == null ||
+      !params.tags
+    ) {
       return {
-        content: [{ type: "text", text: "Missing required fields for promote action." }],
-        details: { success: false, errors: ["Description, project, scheduled, priority, estimate, and tags are required."] },
+        content: [
+          { type: "text", text: "Missing required fields for promote action." },
+        ],
+        details: {
+          success: false,
+          errors: [
+            "Description, project, scheduled, priority, estimate, and tags are required.",
+          ],
+        },
       };
     }
 
@@ -1345,7 +1569,12 @@ async function handleWikiTaskAction(
     const validation = validatePromotion(payload);
     if (!validation.valid) {
       return {
-        content: [{ type: "text", text: `Validation failed:\n${validation.errors.map((e) => `- ${e.field}: ${e.message}`).join("\n")}` }],
+        content: [
+          {
+            type: "text",
+            text: `Validation failed:\n${validation.errors.map((e) => `- ${e.field}: ${e.message}`).join("\n")}`,
+          },
+        ],
         details: { success: false, validationResult: validation },
       };
     }
@@ -1363,20 +1592,34 @@ async function handleWikiTaskAction(
     const addResult = await taskExec(runner, ["add", ...addArgs]);
     if (!addResult.success) {
       return {
-        content: [{ type: "text", text: `Task add failed: ${addResult.errors?.join(", ") ?? addResult.stderr}` }],
+        content: [
+          {
+            type: "text",
+            text: `Task add failed: ${addResult.errors?.join(", ") ?? addResult.stderr}`,
+          },
+        ],
         details: { success: false, errors: addResult.errors },
       };
     }
 
     // Find the newly created task by filtering for matching description + project
-    const exportResult = await taskExport(runner, `status:pending project:${payload.project}`);
-    const newTask = exportResult.find((t) => t.description === payload.description);
+    const exportResult = await taskExport(
+      runner,
+      `status:pending project:${payload.project}`,
+    );
+    const newTask = exportResult.find(
+      (t) => t.description === payload.description,
+    );
     const taskId = newTask?.id;
 
     // Add dependencies
     if (taskId && payload.dependsOn?.length) {
       for (const depUuid of payload.dependsOn) {
-        await taskExec(runner, [String(taskId), "modify", `depends:${depUuid}`]);
+        await taskExec(runner, [
+          String(taskId),
+          "modify",
+          `depends:${depUuid}`,
+        ]);
       }
     }
 
@@ -1384,7 +1627,11 @@ async function handleWikiTaskAction(
     if (taskId && params.wikiLinks) {
       const links = params.wikiLinks as string[];
       for (const link of links) {
-        await taskExec(runner, [String(taskId), "annotate", `Wiki: [[${link}]]`]);
+        await taskExec(runner, [
+          String(taskId),
+          "annotate",
+          `Wiki: [[${link}]]`,
+        ]);
       }
     }
 
@@ -1395,12 +1642,22 @@ async function handleWikiTaskAction(
       const match = source.match(/^LIST\.md:(\d{4}-\d{2}-\d{2}):item-(\d+)$/);
       if (match) {
         const [, date, itemIndexStr] = match;
-        await markListItemPromoted(_root, date, parseInt(itemIndexStr, 10), client);
+        await markListItemPromoted(
+          _root,
+          date,
+          parseInt(itemIndexStr, 10),
+          client,
+        );
       }
     }
 
     return {
-      content: [{ type: "text", text: `Created task ${taskId ?? "?"}: ${payload.description}` }],
+      content: [
+        {
+          type: "text",
+          text: `Created task ${taskId ?? "?"}: ${payload.description}`,
+        },
+      ],
       details: { success: true, taskId },
     };
   }
@@ -1408,13 +1665,29 @@ async function handleWikiTaskAction(
   if (params.action === "annotate") {
     if (!params.taskId || !params.text) {
       return {
-        content: [{ type: "text", text: "TaskId and text are required for annotate action." }],
+        content: [
+          {
+            type: "text",
+            text: "TaskId and text are required for annotate action.",
+          },
+        ],
         details: { success: false, errors: ["TaskId and text are required."] },
       };
     }
-    const result = await taskExec(runner, [String(params.taskId), "annotate", String(params.text)]);
+    const result = await taskExec(runner, [
+      String(params.taskId),
+      "annotate",
+      String(params.text),
+    ]);
     return {
-      content: [{ type: "text", text: result.success ? `Annotated task ${params.taskId}` : `Failed: ${result.errors?.join(", ")}` }],
+      content: [
+        {
+          type: "text",
+          text: result.success
+            ? `Annotated task ${params.taskId}`
+            : `Failed: ${result.errors?.join(", ")}`,
+        },
+      ],
       details: { success: result.success },
     };
   }
@@ -1422,13 +1695,22 @@ async function handleWikiTaskAction(
   if (params.action === "done") {
     if (!params.taskId) {
       return {
-        content: [{ type: "text", text: "TaskId is required for done action." }],
+        content: [
+          { type: "text", text: "TaskId is required for done action." },
+        ],
         details: { success: false, errors: ["TaskId is required."] },
       };
     }
     const result = await taskExec(runner, [String(params.taskId), "done"]);
     return {
-      content: [{ type: "text", text: result.success ? `Completed task ${params.taskId}` : `Failed: ${result.errors?.join(", ")}` }],
+      content: [
+        {
+          type: "text",
+          text: result.success
+            ? `Completed task ${params.taskId}`
+            : `Failed: ${result.errors?.join(", ")}`,
+        },
+      ],
       details: { success: result.success },
     };
   }
