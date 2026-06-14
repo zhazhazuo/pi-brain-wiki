@@ -25,6 +25,7 @@ export async function scanWikiPages(root: string): Promise<ParsedPage[]> {
 export function buildRegistry(pages: ParsedPage[]): RegistryData {
   const entries: RegistryEntry[] = pages.map((page) => {
     const type = String(page.frontmatter.type || inferTypeFromPath(page.relativePath)) as WikiPageType;
+    const pkbRefs = arrayOfStrings(page.frontmatter.pkb_refs);
     return {
       id: String(page.frontmatter.id ?? page.relativePath),
       type,
@@ -37,7 +38,7 @@ export function buildRegistry(pages: ParsedPage[]): RegistryData {
       updated: typeof page.frontmatter.updated === "string" ? page.frontmatter.updated : undefined,
       sourceIds: arrayOfStrings(page.frontmatter.source_ids),
       consumedAt: typeof page.frontmatter.consumed_at === "string" && page.frontmatter.consumed_at ? page.frontmatter.consumed_at : undefined,
-      pkbRefs: arrayOfStrings(page.frontmatter.pkb_refs).length > 0 ? arrayOfStrings(page.frontmatter.pkb_refs) : undefined,
+      pkbRefs: pkbRefs.length > 0 ? pkbRefs : undefined,
       linksOut: [...new Set(page.normalizedLinks)],
       headings: page.headings,
       wordCount: page.wordCount,
@@ -177,7 +178,7 @@ async function walkMarkdownFiles(dir: string): Promise<string[]> {
   }
 }
 
-function arrayOfStrings(value: unknown): string[] {
+export function arrayOfStrings(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 

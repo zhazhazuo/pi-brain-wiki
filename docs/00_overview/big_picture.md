@@ -10,7 +10,7 @@ pi agent session → wiki tools (capture/search/lint/ensure) → Obsidian CLI fo
 
 - `wiki_capture_source` — preserves a URL/file/text as an immutable packet in inbox/, creates a summary page in pages/summaries/
 - `wiki_search` — queries Obsidian search context, then maps hits to the compiled registry
-- `wiki_lint` — runs Obsidian graph checks for links/orphans plus wiki-specific frontmatter/coverage/staleness checks
+- `wiki_lint` — runs Obsidian graph checks for links/orphans plus wiki-specific frontmatter (including page-type conformance), coverage, and staleness checks
 - `wiki_ensure_page` — creates canonical topic pages with deduplication through the Obsidian CLI
 - `wiki_bootstrap` — initializes the vault directory structure, config, and templates
 - Guard hooks — block `write`/`edit` on protected paths (inbox/, meta/), trigger auto-rebuild of generated metadata on agent end

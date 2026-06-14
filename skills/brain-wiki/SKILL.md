@@ -59,7 +59,7 @@ Full rules in `instructions/writing-standards.md`. Key points:
 | `wiki_triage` | Read/add/suggest/flag_stale in LIST.md |
 | `wiki_project_sync` | Scan/add_note/suggest_task in Project/ |
 | `wiki_generate_workflow` | Create standardized workflow pages |
-| `wiki_lint` | Structural lint: links, orphans, frontmatter, duplicates |
+| `wiki_lint` | Run deterministic health checks, including page-type conformance rules |
 | `wiki_scan_activity` | Scan vault and wiki activity |
 | `wiki_rebuild_meta` | Force rescan and rebuild metadata |
 | `wiki_task` | Taskwarrior: promote/annotate/done (load `taskwarrior` skill) |

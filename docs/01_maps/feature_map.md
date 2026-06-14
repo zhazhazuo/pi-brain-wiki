@@ -6,7 +6,7 @@
 - scaffold → extensions/brain-wiki/src/scaffold.ts — bootstrap vault directory structure (incl. discussions/, drafts/), templates, and metadata files
 - frontmatter → extensions/brain-wiki/src/frontmatter.ts — parse/render YAML frontmatter and delegate page/property writes to Obsidian IO when available
 - indexer → extensions/brain-wiki/src/indexer.ts — build and persist registry.json, backlinks.json, and index.md
-- lint → extensions/brain-wiki/src/lint.ts — run structural checks (links, orphans, frontmatter, duplicates, coverage, staleness, stale sync)
+- lint → extensions/brain-wiki/src/lint.ts — run structural and conformance checks (links, orphans, frontmatter/conformance, duplicates, coverage, staleness, stale sync)
 - search → extensions/brain-wiki/src/search.ts — query Obsidian search context and map results to the compiled registry
 - log → extensions/brain-wiki/src/log.ts — append structured events to events.jsonl and regenerate log.md
 - activity → extensions/brain-wiki/src/activity.ts — scan vault and wiki activity for a time period; parses LIST.md into typed items with category detection and agent notes

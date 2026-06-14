@@ -526,9 +526,9 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_lint",
     label: "Wiki Lint",
     description:
-      "Run deterministic structural lint checks over the wiki, including links, orphans, frontmatter, duplicates, coverage, and staleness.",
+      "Run deterministic health checks, including page-type conformance rules, over the wiki: links, orphans, frontmatter, duplicates, coverage, and staleness.",
     promptSnippet:
-      "Run deterministic health checks over wiki structure and generated metadata",
+      "Run deterministic health checks, including page-type conformance rules, over wiki structure and generated metadata",
     promptGuidelines: [
       "Use this tool before a semantic audit when you want a mechanical health report of the wiki.",
     ],

@@ -96,7 +96,7 @@ Wiki/
 | `wiki_capture_source` | Capture a source into inbox + summary page |
 | `wiki_search` | Search the generated wiki registry |
 | `wiki_ensure_page` | Resolve or safely create pages |
-| `wiki_lint` | Run deterministic health checks |
+| `wiki_lint` | Run deterministic health checks, including page-type conformance rules |
 | `wiki_status` | Show counts, source states, recent activity |
 | `wiki_log_event` | Append structured events |
 | `wiki_rebuild_meta` | Force a full metadata rebuild |

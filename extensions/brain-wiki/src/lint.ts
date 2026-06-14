@@ -1,6 +1,6 @@
 import { stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { buildBacklinks, buildRegistry, scanWikiPages } from "./indexer.ts";
+import { arrayOfStrings, buildBacklinks, buildRegistry, scanWikiPages } from "./indexer.ts";
 import { GRACE_PERIODS } from "./lifecycle.ts";
 import { metaPath, normalizeWikiLinkTarget, vaultRoot } from "./paths.ts";
 import type { BacklinksData, LintIssue, LintRun, ParsedPage, RegistryData } from "./types.ts";
@@ -17,6 +17,7 @@ const SUMMARY_REQUIRED = [
   "manifest_path",
   "raw_path",
   "source_ids",
+  "summary",
 ] as const;
 
 const TOPIC_REQUIRED = ["id", "type", "title", "status", "updated", "source_ids", "summary"] as const;
@@ -34,6 +35,18 @@ const FRONTMATTER_REQUIRED: Record<string, readonly string[]> = {
   review: REVIEW_REQUIRED,
   workflow: WORKFLOW_REQUIRED,
 };
+
+const VALID_STATUS: Record<string, readonly string[]> = {
+  summary: ["captured", "integrated", "consumed", "archived", "cleared"],
+  topic: ["draft", "integrated", "consumed", "archived", "cleared"],
+  plan: ["active", "completed", "archived"],
+  review: ["active", "completed", "archived"],
+  workflow: ["draft", "active", "archived"],
+};
+
+function hasOwn(frontmatter: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(frontmatter, key);
+}
 
 function isArchivedOrCleared(page: ParsedPage | RegistryData["pages"][number]): boolean {
   const status = ("frontmatter" in page ? page.frontmatter.status : page.status) ?? "";
@@ -54,6 +67,7 @@ export async function runLint(
   const allIssues: LintIssue[] = [];
 
   if (mode === "links" || mode === "all") {
+    allIssues.push(...lintInboxLinks(pages));
     if (client) {
       allIssues.push(...await lintLinksViaCLI(root, client));
     } else {
@@ -132,9 +146,31 @@ export function renderLintReport(run: LintRun): string {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+function lintInboxLinks(pages: ParsedPage[]): LintIssue[] {
+  const issues: LintIssue[] = [];
+  const reported = new Set<string>();
+
+  for (const page of pages) {
+    if (isArchivedOrCleared(page)) continue;
+    for (const rawLink of page.rawLinks) {
+      if (!rawLink.startsWith("inbox/")) continue;
+      const key = `${page.relativePath}::${rawLink}`;
+      if (reported.has(key)) continue;
+      reported.add(key);
+      issues.push({
+        kind: "broken-link",
+        severity: "error",
+        path: page.relativePath,
+        message: `Wiki pages must not link to inbox packets directly: [[${rawLink}]]`,
+      });
+    }
+  }
+
+  return issues;
+}
+
 function lintLinks(pages: ParsedPage[], registry: RegistryData): LintIssue[] {
   const known = new Set(registry.pages.filter((p) => !isArchivedOrCleared(p)).map((page) => page.path));
-  const hiddenSet = new Set(registry.pages.filter((p) => isArchivedOrCleared(p)).map((page) => page.path));
   const issues: LintIssue[] = [];
 
   for (const page of pages) {
@@ -150,6 +186,9 @@ function lintLinks(pages: ParsedPage[], registry: RegistryData): LintIssue[] {
       ) {
         continue;
       }
+
+      // Skip inbox links — lintInboxLinks() owns this prohibition
+      if (rawLink.startsWith("inbox/")) continue;
 
       const normalized = normalizeWikiLinkTarget(rawLink);
       if (!normalized) {
@@ -198,6 +237,13 @@ function lintOrphans(registry: RegistryData, backlinks: BacklinksData): LintIssu
 
 function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
   const issues: LintIssue[] = [];
+  const summaryIds = new Set(
+    pages
+      .filter((entry) => String(entry.frontmatter.type) === "summary")
+      .map((entry) => String(entry.frontmatter.id || ""))
+      .filter(Boolean)
+  );
+
   for (const page of pages) {
     if (isArchivedOrCleared(page)) continue;
     const pageType = String(page.frontmatter.type || "");
@@ -212,7 +258,7 @@ function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
       continue;
     }
     for (const field of required) {
-      if (!Object.prototype.hasOwnProperty.call(page.frontmatter, field)) {
+      if (!hasOwn(page.frontmatter, field)) {
         issues.push({
           kind: "frontmatter",
           severity: "error",
@@ -222,9 +268,62 @@ function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
       }
     }
 
+    if (hasOwn(page.frontmatter, "status")) {
+      const status = String(page.frontmatter.status || "");
+      const validStatuses = VALID_STATUS[pageType];
+      if (!validStatuses?.includes(status)) {
+        issues.push({
+          kind: "frontmatter",
+          severity: "error",
+          path: page.relativePath,
+          message: `Invalid status "${status}" for page type: ${pageType}`,
+        });
+      }
+    }
+
+    if (pageType === "summary" && hasOwn(page.frontmatter, "source_ids")) {
+      const sourceIds = arrayOfStrings(page.frontmatter.source_ids);
+      if (sourceIds.length === 0) {
+        issues.push({
+          kind: "frontmatter",
+          severity: "error",
+          path: page.relativePath,
+          message: "summary.source_ids must be non-empty",
+        });
+      }
+    }
+
+    if (pageType === "topic") {
+      for (const sourceId of [...new Set(arrayOfStrings(page.frontmatter.source_ids))]) {
+        if (!summaryIds.has(sourceId)) {
+          issues.push({
+            kind: "frontmatter",
+            severity: "error",
+            path: page.relativePath,
+            message: "topic.source_ids must resolve to existing summary pages",
+          });
+        }
+      }
+    }
+
+    const integratedAt = page.frontmatter.integrated_at;
+    const integratedAtStr = integratedAt instanceof Date ? integratedAt.toISOString() : integratedAt;
+    if (
+      pageType === "summary" &&
+      String(page.frontmatter.status) === "integrated" &&
+      (!hasOwn(page.frontmatter, "integrated_at") || typeof integratedAtStr !== "string" || integratedAtStr.trim() === "")
+    ) {
+      issues.push({
+        kind: "frontmatter",
+        severity: "error",
+        path: page.relativePath,
+        message: "integrated summary pages must set integrated_at",
+      });
+    }
+
     // Validate consumed pages have consumed_at and pkb_refs
     if (String(page.frontmatter.status) === "consumed") {
-      if (!Object.prototype.hasOwnProperty.call(page.frontmatter, "consumed_at")) {
+      if (!hasOwn(page.frontmatter, "consumed_at")) {
         issues.push({
           kind: "frontmatter",
           severity: "error",
@@ -232,7 +331,7 @@ function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {
           message: "Consumed page is missing consumed_at field.",
         });
       }
-      if (!Object.prototype.hasOwnProperty.call(page.frontmatter, "pkb_refs") || !Array.isArray(page.frontmatter.pkb_refs) || page.frontmatter.pkb_refs.length === 0) {
+      if (!hasOwn(page.frontmatter, "pkb_refs") || !Array.isArray(page.frontmatter.pkb_refs) || page.frontmatter.pkb_refs.length === 0) {
         issues.push({
           kind: "frontmatter",
           severity: "error",
@@ -427,6 +526,7 @@ async function lintLinksViaCLI(root: string, client: ObsidianClient): Promise<Li
 
   for (const entry of unresolved) {
     if (typeof entry === "object" && entry.link && entry.sources) {
+      if (String(entry.link).startsWith("inbox/")) continue;
       for (const source of entry.sources) {
         issues.push({
           kind: "broken-link",

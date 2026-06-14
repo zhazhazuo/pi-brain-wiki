@@ -263,6 +263,31 @@ If a new source integrates into a consumed topic, the topic flips back to integr
 2. Ask Walker to confirm the structured candidate.
 3. Use wiki_generate_workflow to write the standardized workflow page.
 4. Use the workflow-invoke skill to route future requests through generated meta/workflows.md and the selected workflow page.
+
+## Conformance
+
+Lint enforces page-type contracts:
+
+- \`summary\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`captured_at\`, \`origin_type\`, \`origin_value\`, \`manifest_path\`, \`raw_path\`, \`source_ids\`, and \`summary\`
+- \`topic\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`updated\`, \`source_ids\`, and \`summary\`
+- \`plan\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`date\`, and \`updated\`
+- \`review\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`period\`, and \`updated\`
+- \`workflow\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`updated\`, \`version\`, \`triggers\`, and \`summary\`
+
+Allowed statuses:
+
+- \`summary\`: \`captured\`, \`integrated\`, \`consumed\`, \`archived\`, \`cleared\`
+- \`topic\`: \`draft\`, \`integrated\`, \`consumed\`, \`archived\`, \`cleared\`
+- \`plan\`: \`active\`, \`completed\`, \`archived\`
+- \`review\`: \`active\`, \`completed\`, \`archived\`
+- \`workflow\`: \`draft\`, \`active\`, \`archived\`
+
+Additional rules:
+
+- Summary pages must keep \`source_ids\` non-empty
+- Topic \`source_ids\` must point at existing summary pages when present
+- Integrated summary pages must set \`integrated_at\`
+- Wiki pages must not link directly to \`inbox/**\`
 `;
 }
 

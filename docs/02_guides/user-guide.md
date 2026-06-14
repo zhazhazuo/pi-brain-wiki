@@ -141,7 +141,7 @@ Then it responds to your question.
 | `wiki_capture_source` | When you find a URL/file/text to ingest |
 | `wiki_search` | Before reading — find relevant pages |
 | `wiki_ensure_page` | Before creating — avoid duplicates |
-| `wiki_lint` | Periodic health check — structural issues |
+| `wiki_lint` | Periodic health check — structural issues and page-type conformance |
 | `wiki_scan_activity` | Intelligence sessions — what's happening |
 | `wiki_rebuild_meta` | Force rebuild if meta feels stale |
 | `wiki_triage` | Manage LIST.md — add items, flag stale |
