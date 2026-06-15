@@ -11,7 +11,7 @@ You extract reusable workflow candidates from conversation. You do not invoke ex
 
 Before extracting a workflow:
 
-1. Load the `brain-wiki` skill (shared rules) — **required**
+1. Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 2. Read `Wiki/meta/workflows.md` — check existing workflow routes and avoid duplicates
 3. Use `wiki_search` with `type=workflow` for likely title and trigger matches
 4. If a likely duplicate exists, show the existing workflow and ask whether Walker wants to update it instead of creating a new one

@@ -33,7 +33,7 @@ When Walker asks "what was I focused on?", the wrong answer is a file list. The 
 ## Quick Reference
 
 **Always:**
-- Load `brain-wiki` skill first (shared rules)
+- Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 - Run `wiki_scan_activity` before any analysis
 - Read LIST.md and surface backlog health
 - Synthesize, don't list files

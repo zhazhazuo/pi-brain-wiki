@@ -3,11 +3,29 @@ import { mkdir, readdir, readFile, stat, writeFile, copyFile } from "node:fs/pro
 import { basename, extname, join } from "node:path";
 import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
 import { buildEnsurePageGraphTerms, findGraphContext, renderPkbContextBlock } from "./graph.ts";
-import { writeMarkdown } from "./obsidian-io.ts";
 import { resolveFrom, sourcePacketDir, sourcePagePath, toRelative } from "./paths.ts";
 import { dedupeSlug, makeSourceId, slugifyTitle } from "./slug.ts";
 import type { CaptureParams, CaptureResult, SourceManifest, WikiConfig } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
+
+export interface CaptureState {
+  version: 1;
+  sourceId: string;
+  status: "capturing" | "captured" | "integration_pending" | "integrating" | "integrated" | "failed";
+  origin: {
+    type: CaptureParams["inputType"];
+    value: string;
+  };
+  capturedAt: string;
+  title?: string;
+  kind?: string;
+  manifestPath?: string;
+  extractedPath?: string;
+  sourcePagePath?: string;
+  integratedAt?: string;
+  targetPagePaths?: string[];
+  error?: string;
+}
 
 export interface CommandRunner {
   exec(command: string, args: string[], options?: { signal?: AbortSignal; timeout?: number }): Promise<{
@@ -50,7 +68,7 @@ export async function captureSource(
   client?: ObsidianClient | null,
 ): Promise<CaptureResult> {
   const existingIds = await listExistingSourceIds(root);
-  const sourceId = makeSourceId(existingIds);
+  const sourceId = (await findRecoverableSourceId(root, params)) ?? makeSourceId(existingIds);
   const packetDir = sourcePacketDir(root, sourceId);
   const originalDir = join(packetDir, "original");
   const attachmentsDir = join(packetDir, "attachments");
@@ -58,81 +76,116 @@ export async function captureSource(
   await mkdir(attachmentsDir, { recursive: true });
 
   const capturedAt = new Date().toISOString();
-  const captured = await materializeInput(packetDir, cwd, params, runner, signal);
-  const title = params.title?.trim() || inferTitle(params, captured) || sourceId;
-  const kind = params.kind ?? inferKind(params, captured.mimeType, captured.originalPath);
   const manifestPath = join(packetDir, "manifest.json");
   const extractedPath = join(packetDir, "extracted.md");
-  const extractedHash = sha256(captured.extractedMarkdown);
-
-  if (client) {
-    await writeMarkdown(client, extractedPath, captured.extractedMarkdown);
-  } else {
-    await writeFile(extractedPath, ensureTrailingNewline(captured.extractedMarkdown), "utf8");
-  }
-
-  const manifest: SourceManifest = {
-    version: 1,
-    sourceId,
-    title,
-    kind,
+  const statePath = join(packetDir, "capture.state.json");
+    await writeCaptureStateFile(statePath, {
+      version: 1,
+      sourceId,
+      status: "capturing",
     origin: {
       type: params.inputType,
       value: params.value,
     },
     capturedAt,
-    mimeType: captured.mimeType,
-    hash: captured.originalHash,
-    originalFiles: [
-      {
-        path: toRelative(packetDir, captured.originalPath),
-        size: captured.originalSize,
-        sha256: captured.originalHash.replace(/^sha256:/, ""),
-      },
-    ],
-    extracted: {
-      path: "extracted.md",
-      converter: captured.converter,
-      sha256: extractedHash.replace(/^sha256:/, ""),
-    },
-    attachments: [],
-    status: "captured",
-  };
+  });
 
-  if (client) {
-    await writeMarkdown(client, manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-  } else {
-    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-  }
+  try {
+    const captured = await materializeInput(packetDir, cwd, params, runner, signal);
+    const title = params.title?.trim() || inferTitle(params, captured) || sourceId;
+    const kind = params.kind ?? inferKind(params, captured.mimeType, captured.originalPath);
+    const extractedHash = sha256(captured.extractedMarkdown);
 
-  let sourcePage: string | undefined;
-  if (params.createSourcePage !== false) {
-    const contextBlock = client
-      ? await buildSourceContextBlock(client, title, inferSummary(captured.extractedMarkdown))
-      : "";
-    sourcePage = await createSourcePageStub(root, config, {
+    await writeFile(extractedPath, ensureTrailingNewline(captured.extractedMarkdown), "utf8");
+
+    const manifest: SourceManifest = {
+      version: 1,
       sourceId,
       title,
       kind,
+      origin: {
+        type: params.inputType,
+        value: params.value,
+      },
       capturedAt,
-      originType: params.inputType,
-      originValue: params.value,
-      manifestPath: toRelative(root, manifestPath),
-      rawPath: toRelative(root, extractedPath),
-      tags: params.tags ?? [],
-      summary: inferSummary(captured.extractedMarkdown),
-    }, client, contextBlock);
-  }
+      mimeType: captured.mimeType,
+      hash: captured.originalHash,
+      originalFiles: [
+        {
+          path: toRelative(packetDir, captured.originalPath),
+          size: captured.originalSize,
+          sha256: captured.originalHash.replace(/^sha256:/, ""),
+        },
+      ],
+      extracted: {
+        path: "extracted.md",
+        converter: captured.converter,
+        sha256: extractedHash.replace(/^sha256:/, ""),
+      },
+      attachments: [],
+      status: "captured",
+    };
 
-  return {
-    sourceId,
-    packetDir: toRelative(root, packetDir),
-    manifestPath: toRelative(root, manifestPath),
-    extractedPath: toRelative(root, extractedPath),
-    sourcePagePath: sourcePage,
-    title,
-    status: "captured",
-  };
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+
+    let sourcePage: string | undefined;
+    if (params.createSourcePage !== false) {
+      const contextBlock = client
+        ? await buildSourceContextBlock(client, title, inferSummary(captured.extractedMarkdown))
+        : "";
+      sourcePage = await createSourcePageStub(root, config, {
+        sourceId,
+        title,
+        kind,
+        capturedAt,
+        originType: params.inputType,
+        originValue: params.value,
+        manifestPath: toRelative(root, manifestPath),
+        rawPath: toRelative(root, extractedPath),
+        tags: params.tags ?? [],
+        summary: inferSummary(captured.extractedMarkdown),
+      }, client, contextBlock);
+    }
+
+    await writeCaptureStateFile(statePath, {
+      version: 1,
+      sourceId,
+      status: "integration_pending",
+      origin: {
+        type: params.inputType,
+        value: params.value,
+      },
+      capturedAt,
+      title: params.title?.trim() || inferTitle(params, captured) || sourceId,
+      kind: params.kind ?? inferKind(params, captured.mimeType, captured.originalPath),
+      manifestPath: toRelative(root, manifestPath),
+      extractedPath: toRelative(root, extractedPath),
+      sourcePagePath: sourcePage,
+    });
+
+    return {
+      sourceId,
+      packetDir: toRelative(root, packetDir),
+      manifestPath: toRelative(root, manifestPath),
+      extractedPath: toRelative(root, extractedPath),
+      sourcePagePath: sourcePage,
+      title: params.title?.trim() || inferTitle(params, captured) || sourceId,
+      status: "captured",
+    };
+  } catch (error) {
+    await writeCaptureStateFile(statePath, {
+      version: 1,
+      sourceId,
+      status: "failed",
+      origin: {
+        type: params.inputType,
+        value: params.value,
+      },
+      capturedAt,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
 
 interface MaterializedInput {
@@ -344,6 +397,145 @@ async function listExistingSourceIds(root: string): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+async function findRecoverableSourceId(root: string, params: CaptureParams): Promise<string | undefined> {
+  const todayPrefix = `SRC-${new Date().toISOString().slice(0, 10)}-`;
+  const existingIds = (await listExistingSourceIds(root))
+    .filter((id) => id.startsWith(todayPrefix))
+    .sort((a, b) => b.localeCompare(a));
+
+  for (const sourceId of existingIds) {
+    const packetDir = sourcePacketDir(root, sourceId);
+    const state = await readCaptureState(root, sourceId);
+    if (state) {
+      if (
+        state.status !== "integrated" &&
+        state.origin.type === params.inputType &&
+        state.origin.value === params.value
+      ) {
+        return sourceId;
+      }
+      continue;
+    }
+
+    const manifest = await readCaptureManifest(join(packetDir, "manifest.json"));
+    if (manifest && manifest.status !== "integrated" && manifest.origin.type === params.inputType && manifest.origin.value === params.value) {
+      return sourceId;
+    }
+
+    if (!manifest && await hasLegacyPartialPacket(packetDir)) {
+      return sourceId;
+    }
+  }
+
+  return undefined;
+}
+
+async function hasLegacyPartialPacket(packetDir: string): Promise<boolean> {
+  try {
+    const entries = await readdir(packetDir, { withFileTypes: true });
+    return entries.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export async function readCaptureState(root: string, sourceId: string): Promise<CaptureState | undefined> {
+  return readCaptureStateFile(join(sourcePacketDir(root, sourceId), "capture.state.json"));
+}
+
+export async function listCaptureStates(root: string): Promise<CaptureState[]> {
+  const inboxDir = join(root, "inbox");
+  try {
+    const entries = await readdir(inboxDir, { withFileTypes: true });
+    const states: CaptureState[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const state = await readCaptureState(root, entry.name);
+      if (state) {
+        states.push(state);
+        continue;
+      }
+      const manifest = await readCaptureManifest(join(sourcePacketDir(root, entry.name), "manifest.json"));
+      if (manifest) {
+        states.push({
+          version: 1,
+          sourceId: manifest.sourceId,
+          status: manifest.status === "integrated" ? "integrated" : "captured",
+          origin: manifest.origin,
+          capturedAt: manifest.capturedAt,
+        });
+      }
+    }
+    return states.sort((a, b) => a.sourceId.localeCompare(b.sourceId));
+  } catch {
+    return [];
+  }
+}
+
+export async function updateCaptureState(
+  root: string,
+  sourceId: string,
+  patch: Partial<CaptureState> & { status: CaptureState["status"] },
+): Promise<CaptureState> {
+  const current = (await readCaptureState(root, sourceId)) ?? {
+    version: 1,
+    sourceId,
+    status: patch.status,
+    origin: { type: "text" as const, value: "" },
+    capturedAt: new Date().toISOString(),
+  };
+  const next: CaptureState = {
+    ...current,
+    ...patch,
+    origin: patch.origin ?? current.origin,
+    capturedAt: patch.capturedAt ?? current.capturedAt,
+  };
+  await writeCaptureStateFile(join(sourcePacketDir(root, sourceId), "capture.state.json"), next);
+  return next;
+}
+
+async function readCaptureStateFile(path: string): Promise<CaptureState | undefined> {
+  try {
+    const raw = await readFile(path, "utf8");
+    const parsed = JSON.parse(raw) as Partial<CaptureState>;
+    if (
+      parsed?.version === 1 &&
+      typeof parsed.sourceId === "string" &&
+      (parsed.status === "capturing" ||
+        parsed.status === "captured" ||
+        parsed.status === "integration_pending" ||
+        parsed.status === "integrating" ||
+        parsed.status === "integrated" ||
+        parsed.status === "failed") &&
+      parsed.origin &&
+      typeof parsed.origin.type === "string" &&
+      typeof parsed.origin.value === "string"
+    ) {
+      return parsed as CaptureState;
+    }
+  } catch {
+    // Ignore unreadable state files and treat them as absent.
+  }
+  return undefined;
+}
+
+async function readCaptureManifest(path: string): Promise<SourceManifest | undefined> {
+  try {
+    const raw = await readFile(path, "utf8");
+    const parsed = JSON.parse(raw) as SourceManifest;
+    if (parsed && typeof parsed.sourceId === "string" && typeof parsed.origin?.type === "string") {
+      return parsed;
+    }
+  } catch {
+    // Ignore unreadable manifests and treat them as absent.
+  }
+  return undefined;
+}
+
+async function writeCaptureStateFile(path: string, state: CaptureState): Promise<void> {
+  await writeFile(path, `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
 
 function inferTitle(params: CaptureParams, captured: MaterializedInput): string | undefined {

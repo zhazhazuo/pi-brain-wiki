@@ -296,6 +296,7 @@ export interface StatusSummary {
   };
   sources: {
     captured: number;
+    pendingIntegration: number;
     integrated: number;
     unintegrated: number;
     consumed: number;

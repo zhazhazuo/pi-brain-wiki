@@ -7,11 +7,12 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { withFileMutationQueue } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { scanActivity } from "./src/activity.ts";
-import { captureSource } from "./src/capture.ts";
+import { captureSource, listCaptureStates, updateCaptureState } from "./src/capture.ts";
 import { rebuildDigest } from "./src/digest.ts";
 import { loadConfig } from "./src/config.ts";
 import { analyzeToolMutation } from "./src/guards.ts";
 import { rebuildRegistryAndIndex } from "./src/indexer.ts";
+import { integrateCapturedSource } from "./src/integration.ts";
 import { runLint } from "./src/lint.ts";
 import {
   bridgeWikiPage,
@@ -33,6 +34,14 @@ import {
   resolveWikiRoot,
   toRelative,
 } from "./src/paths.ts";
+import {
+  clearGraphBridgeRequirement,
+  hasPendingGraphBridge,
+  markCaptureRequiresGraphBridge,
+  recordGraphDiscovery,
+  shouldBlockWikiPageCreate,
+  shouldBlockWikiMutation,
+} from "./src/workflow-gate.ts";
 import { type searchRegistry, searchViaObsidian } from "./src/search.ts";
 import { ObsidianClient } from "./src/obsidian-client.ts";
 import { bootstrapVault, ensureCanonicalPage } from "./src/scaffold.ts";
@@ -164,6 +173,21 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       ctx.cwd,
     );
 
+    const workflowBlock = shouldBlockWikiMutation(
+      root,
+      event.toolName,
+      event.input,
+      ctx.cwd,
+    );
+
+    if (workflowBlock.block) {
+      if (ctx.hasUI) ctx.ui.notify(workflowBlock.reason ?? "Blocked wiki mutation", "warning");
+      return {
+        block: true,
+        reason: workflowBlock.reason ?? "wiki graph bridge required before editing wiki pages",
+      };
+    }
+
     if (analysis.protectedPaths.length > 0) {
       const protectedList = analysis.protectedPaths
         .map((path) => toRelative(root, path))
@@ -254,10 +278,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     description:
       "Capture a URL, file, or pasted text into an immutable source packet and scaffold a source page.",
     promptSnippet:
-      "Capture a new source into inbox/ and create a summary page before integrating it into topic pages",
+      "Capture a new source into inbox/, then discover related pages with vault search and graph tools before integrating it",
     promptGuidelines: [
       "Use this tool when a user supplies a URL, local file, PDF, webpage, transcript, or pasted text that should become part of the wiki.",
-      "After capture, read the source page before updating canonical pages.",
+      "After capture, use the returned sourcePagePath directly. Do not use bash, find, or grep to rediscover captured artifacts.",
+      "Read the source page before updating canonical pages.",
+      "Before revising summary or topic pages, run wiki_search with scope=vault and then wiki_graph_find on the main terms.",
+      "Use wiki_graph_bridge or wiki_graph_traverse when a candidate page already exists.",
     ],
     parameters: Type.Object({
       inputType: StringEnum(["url", "file", "text"] as const),
@@ -297,6 +324,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           client,
         );
 
+        markCaptureRequiresGraphBridge(root);
+
         await appendEvent(
           root,
           {
@@ -319,7 +348,70 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           content: [
             {
               type: "text",
-              text: `Captured ${result.sourceId}: ${result.title}`,
+              text: [
+                `Captured ${result.sourceId}: ${result.title}`,
+                result.sourcePagePath
+                  ? `Source page: ${vaultRelative(ctx.cwd, root, result.sourcePagePath)}`
+                  : "Source page: not created",
+                "Next: open the source page, then run wiki_search scope=vault and wiki_graph_find before editing summary or topic pages.",
+                "Do not use bash, find, or grep to locate the captured packet or summary page.",
+              ].join("\n"),
+            },
+          ],
+          details: result,
+        };
+      });
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_integrate_source",
+    label: "Wiki Integrate Source",
+    description:
+      "Finalize a captured source after graph work by marking the source packet, summary page, and selected topic pages as integrated.",
+    promptSnippet:
+      "Integrate a captured source only after graph discovery or bridging has identified concrete target pages",
+    promptGuidelines: [
+      "Run wiki_search, wiki_graph_find, wiki_graph_traverse, or wiki_graph_bridge before calling this tool.",
+      "Provide the sourceId and at least one concrete target page path.",
+      "Use this tool to transition the source state from integration_pending to integrated.",
+    ],
+    parameters: Type.Object({
+      sourceId: Type.String({ description: "Captured source ID, e.g. SRC-2026-06-16-001" }),
+      pagePaths: Type.Array(
+        Type.String({
+          description: "Target page path to mark integrated, e.g. pages/topics/example.md",
+        }),
+        { minItems: 1 },
+      ),
+      notes: Type.Optional(
+        Type.Array(Type.String({ description: "Optional note for the integration event" })),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const client = await getObsidianClient(root);
+      return withRootLock(root, async () => {
+        const result = await integrateCapturedSource(root, params.sourceId, {
+          pagePaths: params.pagePaths,
+          notes: params.notes,
+          client,
+        });
+        await updateCaptureState(root, params.sourceId, {
+          status: "integrated",
+          integratedAt: result.integratedAt,
+          targetPagePaths: params.pagePaths,
+        });
+        await rebuildAllGeneratedArtifacts(root);
+        return {
+          content: [
+            {
+              type: "text",
+              text: [
+                `Integrated ${params.sourceId}`,
+                `Targets: ${params.pagePaths.join(", ")}`,
+                `Integrated at: ${result.integratedAt}`,
+              ].join("\n"),
             },
           ],
           details: result,
@@ -332,11 +424,14 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_search",
     label: "Wiki Search",
     description:
-      "Search the wiki registry or the full vault by title, alias, summary, headings, path, tags, and source ids.",
+      "Search the full vault first, or the wiki registry for exact wiki lookup, by title, alias, summary, headings, path, tags, and source ids.",
     promptSnippet:
-      "Search the wiki registry or vault for relevant pages before reading or editing markdown files directly",
+      "Search the full vault for entry points before reading or editing markdown files directly",
     promptGuidelines: [
-      "Use this tool first for query and integration workflows so you update existing pages instead of creating duplicates.",
+      "Default to scope=vault for discovery.",
+      "Use scope=wiki only when you need registry-only wiki lookup.",
+      "Use this tool before editing so you update existing pages instead of creating duplicates.",
+      "If a capture tool already returned a sourcePagePath, use that path directly instead of shell discovery.",
     ],
     parameters: Type.Object({
       query: Type.String({ description: "Search query" }),
@@ -366,7 +461,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         params.type as WikiPageType | undefined,
         params.limit,
         excludeStatuses,
-        params.scope ?? "wiki",
+        params.scope ?? "vault",
       );
       return {
         content: [{ type: "text", text: formatSearch(result, ctx.cwd, root) }],
@@ -382,6 +477,11 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Discover related wiki and PKB nodes across the vault before writing or revising knowledge.",
     promptSnippet:
       "Discover related wiki and PKB nodes across the vault before writing or revising knowledge",
+    promptGuidelines: [
+      "Use this after vault search to identify nearby nodes.",
+      "Use terms from the source title, summary, or topic query.",
+      "Do not use bash, find, or grep to locate candidate pages when search and graph tools can answer the question.",
+    ],
     parameters: Type.Object({
       query: Type.Optional(Type.String({ description: "Search query" })),
       terms: Type.Optional(
@@ -394,6 +494,10 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const client = await requireObsidianClient(root);
       const terms = (params.terms?.length ? params.terms : [params.query ?? ""]).filter(Boolean);
       const result = await findGraphContext(client, terms, params.limit ?? 12);
+      recordGraphDiscovery(
+        root,
+        result.wiki.length + result.pkb.length > 0,
+      );
       return {
         content: [{ type: "text", text: formatGraphFind(result) }],
         details: result,
@@ -408,6 +512,10 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Inspect the neighborhood of a vault node using backlinks and outgoing links.",
     promptSnippet:
       "Inspect the neighborhood of a vault node using backlinks and outgoing links",
+    promptGuidelines: [
+      "Use this when a candidate page already exists and you need nearby context.",
+      "Treat the returned page path as authoritative; do not rediscover it with shell commands.",
+    ],
     parameters: Type.Object({
       path: Type.String({ description: "Vault file path" }),
       hops: Type.Optional(Type.Number({ description: "Neighborhood depth" })),
@@ -416,6 +524,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const root = await resolveWikiRoot(ctx.cwd);
       const client = await requireObsidianClient(root);
       const result = await traverseNeighborhood(client, params.path, params.hops ?? 1);
+      clearGraphBridgeRequirement(root);
       return {
         content: [
           {
@@ -440,6 +549,10 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Find likely missing PKB or wiki connections for an existing wiki page.",
     promptSnippet:
       "Find likely missing PKB or wiki connections for an existing wiki page",
+    promptGuidelines: [
+      "Use this before editing a page to find what should be connected next.",
+      "Do not shell-search for the page or its neighbors; use the pagePath and graph output directly.",
+    ],
     parameters: Type.Object({
       pagePath: Type.String({ description: "Wiki page path" }),
       limit: Type.Optional(Type.Number({ description: "Maximum matches" })),
@@ -448,6 +561,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const root = await resolveWikiRoot(ctx.cwd);
       const client = await requireObsidianClient(root);
       const result = await bridgeWikiPage(client, params.pagePath, params.limit ?? 8);
+      clearGraphBridgeRequirement(root);
       return {
         content: [
           {
@@ -472,7 +586,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     promptSnippet:
       "Resolve or create canonical topic pages without duplicating titles or aliases",
     promptGuidelines: [
-      "Use this tool before creating a new canonical page in pages/topics.",
+      "Use search and graph discovery first, then resolve or create the canonical page.",
+      "Do not use shell discovery to find an existing canonical page when search or graph output already identified it.",
     ],
     parameters: Type.Object({
       type: CANONICAL_TYPE_ENUM,
@@ -500,16 +615,36 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const client = await requireObsidianClient(root);
       return withRootLock(root, async () => {
         const registry = await loadRegistry(root);
-        const result = await ensureCanonicalPage(
+        const resolveOnly = await ensureCanonicalPage(
           root,
           config,
           registry,
           {
             ...params,
-            createIfMissing: params.createIfMissing ?? true,
+            createIfMissing: false,
           },
           client,
         );
+
+        const pageWouldCreate = !resolveOnly.resolved && (params.createIfMissing ?? true);
+        const creationBlock = shouldBlockWikiPageCreate(root, pageWouldCreate);
+        if (creationBlock.block) {
+          throw new Error(creationBlock.reason ?? "wiki graph bridge required before creating new wiki pages");
+        }
+
+        const result =
+          resolveOnly.resolved || params.createIfMissing === false
+            ? resolveOnly
+            : await ensureCanonicalPage(
+                root,
+                config,
+                registry,
+                {
+                  ...params,
+                  createIfMissing: true,
+                },
+                client,
+              );
 
         if (result.created && result.path) {
           await appendEvent(
@@ -711,6 +846,12 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const config = await loadConfig(root);
       const client = await getObsidianClient(root);
       return withRootLock(root, async () => {
+        if (params.kind === "integrate" && hasPendingGraphBridge(root)) {
+          throw new Error(
+            "Run wiki_graph_traverse or wiki_graph_bridge before logging integration for a captured source.",
+          );
+        }
+
         const ts = new Date().toISOString();
         const event: WikiEvent = {
           ts,
@@ -730,6 +871,14 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
             params.sourceIds,
             ts,
             requiredClient,
+          );
+          await Promise.all(
+            params.sourceIds.map((sourceId) =>
+              updateCaptureState(root, sourceId, {
+                status: "integrated",
+                integratedAt: ts,
+              }),
+            ),
           );
           await rebuildAllGeneratedArtifacts(root);
         } else if (params.kind === "consumed" && params.pagePaths?.length) {
@@ -905,6 +1054,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Use this tool to participate in the human's task inbox.",
       "All AI content must use the '> 🤖 [AI]' prefix.",
       "Never mark items complete or delete items.",
+      "Treat LIST.md as an intake queue, not a substitute for graph discovery.",
     ],
     parameters: Type.Object({
       action: StringEnum(["read", "add", "suggest", "flag_stale"] as const),
@@ -943,6 +1093,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Read project status, run the weekly project review for Project/PROJECTS.md, add research notes, or suggest tasks in LIST.md",
     promptGuidelines: [
       "Use this tool to participate in project workflows.",
+      "Use vault search and graph discovery before creating project notes or task suggestions.",
       "Organize for retrieval: expose type, time, topic, and status through project metadata.",
       "scan returns projects with status, priority, deadline, and next_action metadata.",
       "review answers the future-mode weekly control questions: what is active, waiting, complete, archivable, or missing a next action.",
@@ -997,6 +1148,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     promptSnippet:
       "Promote LIST.md items into validated Taskwarrior tasks, annotate existing tasks, or mark tasks complete",
     promptGuidelines: [
+      "Use graph and vault search first when the task is derived from a source or wiki topic.",
       "Use promote action when creating new tasks from LIST.md or scan proposals.",
       "Use annotate action to add wiki links or context notes to existing tasks.",
       "Use done action to mark a task complete.",
@@ -1214,9 +1366,10 @@ async function loadRegistry(root: string): Promise<RegistryData> {
   }
 }
 
-async function buildStatus(root: string): Promise<StatusSummary> {
+export async function buildStatus(root: string): Promise<StatusSummary> {
   const registry = await loadRegistry(root);
   const events = await readEvents(root);
+  const captureStates = await listCaptureStates(root);
   const totals = {
     allPages: registry.pages.length,
     summary: registry.pages.filter((page) => page.type === "summary").length,
@@ -1227,6 +1380,9 @@ async function buildStatus(root: string): Promise<StatusSummary> {
   };
   const sources = registry.pages.filter((page) => page.type === "summary");
   const captured = sources.filter((page) => page.status === "captured").length;
+  const pendingIntegration = captureStates.filter(
+    (state) => state.status === "integration_pending" || state.status === "integrating",
+  ).length;
   const integrated = sources.filter(
     (page) => page.status === "integrated",
   ).length;
@@ -1277,8 +1433,9 @@ async function buildStatus(root: string): Promise<StatusSummary> {
     totals,
     sources: {
       captured,
+      pendingIntegration,
       integrated,
-      unintegrated: captured,
+      unintegrated: captured + pendingIntegration,
       consumed,
       archived,
       cleared,
@@ -1376,7 +1533,7 @@ function formatLint(
 function formatStatus(status: StatusSummary): string {
   return [
     `Pages: ${status.totals.allPages} total (${status.totals.summary} summary, ${status.totals.topic} topic, ${status.totals.plan} plan, ${status.totals.review} review, ${status.totals.workflow} workflow)`,
-    `Sources: ${status.sources.captured} captured, ${status.sources.integrated} integrated, ${status.sources.consumed} consumed, ${status.sources.archived} archived, ${status.sources.cleared} cleared`,
+    `Sources: ${status.sources.captured} captured, ${status.sources.pendingIntegration} pending integration, ${status.sources.integrated} integrated, ${status.sources.consumed} consumed, ${status.sources.archived} archived, ${status.sources.cleared} cleared`,
     ...(status.externalBacklinks
       ? [
           `Cross-vault backlinks: ${status.externalBacklinks.total} across ${status.externalBacklinks.pageCount} pages` +

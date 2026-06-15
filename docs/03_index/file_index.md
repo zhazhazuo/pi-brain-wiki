@@ -32,7 +32,7 @@
 ## extensions/brain-wiki/src/
 
 - extensions/brain-wiki/src/activity.ts → Scans vault for recent changes across wiki and PARA folders; parses LIST.md into typed items
-- extensions/brain-wiki/src/capture.ts → Captures URL/file/text as immutable source packet and scaffolds summary page
+- extensions/brain-wiki/src/capture.ts → Captures URL/file/text as immutable source packet, scaffolds summary page, and returns sourcePagePath for follow-up
 - extensions/brain-wiki/src/config.ts → Loads, creates, and writes .wiki/config.json with defaults
 - extensions/brain-wiki/src/digest.ts → Builds meta/wiki-digest.md: agent entry point with stats, events, stale items, below-minimum topics
 - extensions/brain-wiki/src/frontmatter.ts → Parses/renders YAML frontmatter, extracts wiki links/headings, delegates CLI-backed writes when a client is provided
@@ -49,11 +49,11 @@
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths, resolves wikilinks to absolute paths
 - extensions/brain-wiki/src/project-sync.ts → Create weekly project notes, scan/review future-mode project metadata, add notes/suggest tasks for Project/ folders
 - extensions/brain-wiki/src/project-sync.test.ts → Unit tests for project sync, future-mode metadata scan, and review gaps
-- extensions/brain-wiki/src/graph.ts → Vault graph discovery: search, neighborhood traversal, and PKB bridging
+- extensions/brain-wiki/src/graph.ts → Vault graph discovery: search, neighborhood traversal, and PKB bridging through Obsidian CLI
 - extensions/brain-wiki/src/graph.test.ts → Unit tests for graph discovery, traversal, and bridge output
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure (incl. discussions/, drafts/), templates, and metadata files
-- extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking (planned: delegate to obsidian search:context)
+- extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking; scope=vault routes through Obsidian CLI search
 - extensions/brain-wiki/src/search.test.ts → Unit tests for registry search
 - extensions/brain-wiki/src/slug.ts → Slugifies titles, generates source/page IDs, deduplicates slugs
 - extensions/brain-wiki/src/sync.ts → Bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json

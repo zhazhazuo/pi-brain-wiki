@@ -118,14 +118,19 @@ export async function markSourcesIntegrated(
   for (const sourceId of sourceIds) {
     const manifestPath = join(sourcePacketDir(root, sourceId), "manifest.json");
     if (client) {
-      const manifestRaw = client
-        ? await readMarkdown(client, manifestPath)
-        : await readFile(manifestPath, "utf8");
-      const manifest = JSON.parse(manifestRaw) as Record<string, any>;
-      manifest.status = "integrated";
-      manifest.integratedAt = integratedAt;
-      const manifestContent = `${JSON.stringify(manifest, null, 2)}\n`;
-      await writeMarkdown(client, manifestPath, manifestContent);
+      try {
+        const manifestRaw = await readMarkdown(client, manifestPath);
+        const manifest = JSON.parse(manifestRaw) as Record<string, any>;
+        manifest.status = "integrated";
+        manifest.integratedAt = integratedAt;
+        const manifestContent = `${JSON.stringify(manifest, null, 2)}\n`;
+        await writeMarkdown(client, manifestPath, manifestContent);
+      } catch {
+        // Some sessions integrate a source after the packet was captured elsewhere
+        // or when the manifest is unavailable through the CLI boundary. The
+        // integration can continue because the summary page and event log are the
+        // canonical records.
+      }
     } else {
       try {
         const manifestRaw = await readFile(manifestPath, "utf8");
@@ -143,21 +148,25 @@ export async function markSourcesIntegrated(
     if (client) {
       const pages = await client.files({ folder: "Wiki/pages/summaries", ext: "md" });
       for (const pagePath of pages) {
-        const raw = await readMarkdown(client, pagePath);
-        const parsed = matter(raw);
-        const srcIds: string[] = Array.isArray(parsed.data.source_ids) ? parsed.data.source_ids : [];
-        if (srcIds.includes(sourceId)) {
-          await writePage(
-            pagePath,
-            {
-              ...parsed.data,
-              status: "integrated",
-              integrated_at: integratedAt,
-              updated: todayStamp(new Date(integratedAt)),
-            },
-            parsed.content,
-            client,
-          );
+        try {
+          const raw = await readMarkdown(client, pagePath);
+          const parsed = matter(raw);
+          const srcIds: string[] = Array.isArray(parsed.data.source_ids) ? parsed.data.source_ids : [];
+          if (srcIds.includes(sourceId)) {
+            await writePage(
+              pagePath,
+              {
+                ...parsed.data,
+                status: "integrated",
+                integrated_at: integratedAt,
+                updated: todayStamp(new Date(integratedAt)),
+              },
+              parsed.content,
+              client,
+            );
+          }
+        } catch {
+          // Skip missing or unreadable summary pages and continue scanning.
         }
       }
     } else {

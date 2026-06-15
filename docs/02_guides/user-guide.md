@@ -191,6 +191,19 @@ The agent:
 
 ---
 
+## Current Discovery Workflow
+
+The agent should now follow this order for source work:
+
+1. `wiki_capture_source`
+2. open the returned `sourcePagePath` directly
+3. `wiki_search scope=vault`
+4. `wiki_graph_find`
+5. `wiki_graph_traverse` or `wiki_graph_bridge` when a candidate page exists
+6. edit the topic page only after the neighborhood is clear
+
+---
+
 ## Discussion System
 
 Each significant conversation gets a record:

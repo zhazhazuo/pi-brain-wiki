@@ -31,10 +31,11 @@ Before synthesizing, orient to what the wiki already knows.
 
 ```
 1. Use wiki_search to find related topics
-2. Read matching topic summaries → understand current state
-3. Use wiki_search to find related summaries → understand what sources informed those topics
-4. Report to Walker: "Here's what we already know about [related areas]."
-5. Identify: does this source add new information, contradict existing knowledge, or reinforce it?
+2. Use wiki_graph_find to surface nearby wiki and PKB nodes
+3. Use wiki_graph_traverse or wiki_graph_bridge when a concrete target page exists
+4. Read matching topic summaries and source pages → understand current state
+5. Report to Walker: "Here's what we already know about [related areas] and the likely integration targets."
+6. Identify: does this source add new information, contradict existing knowledge, or reinforce it?
 ```
 
 ## Phase 3: Discuss Key Takeaways
@@ -44,15 +45,17 @@ This is the supervised part. Before writing anything:
 ```
 1. Present Walker with: "Here are the key takeaways I see from this source."
 2. Present Integration Targets: "This source should affect these topic pages: [list]"
-3. Ask Walker: "Does this match your understanding? Anything I'm missing?"
-4. Wait for confirmation before writing.
+3. If the source is additive and the targets are clear, state the intended edits and continue to write.
+4. If the source is contradictory, ambiguous, or implies a new topic, ask Walker for confirmation before writing.
+
+**Hard gate:** if the source produced concrete integration targets, you must complete `wiki_graph_traverse` or `wiki_graph_bridge` before editing any summary or topic page.
 ```
 
 **Never skip Phase 3.** The whole point of the workshop is supervised distillation. You're not filing — you're understanding together.
 
 ## Phase 4: Write
 
-Only after Walker confirms the takeaways and targets:
+After the takeaways and targets are clear, and after confirmation only when needed:
 
 ```
 1. Write or update the summary page (full content, including Integration Targets)

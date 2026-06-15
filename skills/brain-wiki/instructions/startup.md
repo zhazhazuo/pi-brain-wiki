@@ -12,6 +12,16 @@ Every wiki session starts by reading these files in order:
 
 Never skip this. Never edit without re-orienting to current wiki state.
 
+For source or integration work, follow this discovery order:
+
+1. `wiki_search` with `scope=vault`
+2. `wiki_graph_find` on the main terms
+3. `wiki_graph_traverse` or `wiki_graph_bridge` when a candidate page already exists
+4. `wiki_capture_source` or `wiki_ensure_page` only after the relevant pages are identified
+
+Do not use `bash`, `find`, or `grep` to locate wiki content or files when a native wiki tool can answer the question.
+If a capture tool already returned `sourcePagePath`, use that path directly. Do not rediscover the file with shell commands.
+
 ---
 
 ## LIST.md Protocol
@@ -83,4 +93,5 @@ The wiki maintains a discussion record in `Wiki/discussions/` for session contin
 | `archive` | Internalized into PKB |
 | `discord` | Started, then dropped |
 
-**No new tools for MVP.** The agent uses existing `read`/`write`/`edit` on markdown files.
+**Use the extension tools first.** Avoid shell `find`/`grep`/manual file spelunking for wiki-visible work when a native tool exists.
+Captured source packets and generated summary pages already come back with paths. Use those paths directly.

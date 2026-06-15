@@ -27,7 +27,7 @@ Load this skill when Walker says:
 ## Quick Reference
 
 **Always:**
-- Load `brain-wiki` skill first (shared rules)
+- Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 - Read both the wiki source AND the PKB entry before comparing
 - Produce a gap/drift/covered/enhancement list — this is the core value
 - Get Walker confirmation before editing PKB entries

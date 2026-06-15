@@ -5,9 +5,12 @@ When processing a new source, complete ALL of these steps:
 - [ ] `wiki_capture_source` → inbox packet created
 - [ ] Read extracted content → understand the source
 - [ ] `wiki_search` → find related topics and summaries
+- [ ] `wiki_graph_find` → surface nearby wiki and PKB nodes
+- [ ] `wiki_graph_traverse` or `wiki_graph_bridge` → concrete neighbors when available
+- [ ] If concrete targets exist, do not edit summary/topic pages until graph traversal or bridging is complete
 - [ ] Discuss key takeaways with Walker
 - [ ] Identify Integration Targets
-- [ ] Get Walker confirmation
+- [ ] Get Walker confirmation only if the source is contradictory, ambiguous, or introduces a new topic
 - [ ] Write/update summary page with full content
 - [ ] `wiki_ensure_page` for any new topics (concrete noun test!)
 - [ ] Re-read each target topic → then update it

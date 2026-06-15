@@ -2,7 +2,7 @@
 
 1. **Never directly edit `inbox/**` or `meta/**`.** These are code-guarded. Use `wiki_capture_source` for inbox and let the extension handle meta.
 2. **Every source → summary page first.** No source influences canonical topics before it has a summary page with Integration Targets.
-3. **Prefer updating existing pages over creating new ones.** Search first with `wiki_search`. Resolve or create safely with `wiki_ensure_page`.
+3. **Prefer updating existing pages over creating new ones.** Search first with `wiki_search scope=vault`, then use `wiki_graph_find` and `wiki_graph_bridge` before `wiki_ensure_page`.
 4. **Use folder-qualified wikilinks** for all wiki-internal references:
    - `[[topics/functional-programming]]` not `[[Functional Programming]]`
    - `[[summaries/2026-05-05-Backus-Turing-Award]]` not `[[Backus Turing Award]]`
@@ -57,6 +57,18 @@ All agent content in LIST.md must use:
 ### Obsidian CLI First
 
 Use Obsidian CLI for all supported operations (move, rename, create, read). Direct filesystem only for unsupported operations.
+
+### Graph-First Discovery
+
+Use `wiki_search scope=vault` for entry points, then graph tools for adjacency:
+
+- `wiki_graph_find` for related nodes
+- `wiki_graph_traverse` for neighborhood inspection
+- `wiki_graph_bridge` for missing connections
+- If a source has concrete integration targets, do not edit summary or topic pages until graph traversal or bridging is complete.
+
+Do not fall back to shell `find`/`grep` when a native wiki tool can answer the question.
+If `wiki_capture_source` already returned a `sourcePagePath`, use that path directly instead of locating it again.
 
 ### Legacy Rules
 

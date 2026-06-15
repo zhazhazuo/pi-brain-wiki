@@ -64,6 +64,37 @@ summary: concise
     expect(run.issues.some((issue) => issue.message.includes("source_ids must be non-empty"))).toBe(true);
   });
 
+  test("flags summaries with integration targets that are not cited by any topic page", async () => {
+    const root = await makeWikiRoot();
+    await writePage(
+      root,
+      "pages/summaries/source-targets.md",
+      `---
+id: SRC-TARGETS
+type: summary
+title: Source Targets
+status: captured
+captured_at: 2026-06-14
+origin_type: url
+origin_value: https://example.com/targets
+manifest_path: inbox/targets/manifest.json
+raw_path: inbox/targets/raw.md
+source_ids:
+  - SRC-TARGETS
+summary: concise
+---
+
+# Source Targets
+
+## Integration targets
+- [[topics/topic-a]]
+`
+    );
+
+    const run = await runLint(root, "coverage");
+    expect(run.issues.some((issue) => issue.message.includes("integration targets but no topic page cites it yet"))).toBe(true);
+  });
+
   test("flags topic pages that reference missing summary sources", async () => {
     const root = await makeWikiRoot();
     await writePage(

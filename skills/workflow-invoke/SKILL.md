@@ -11,7 +11,7 @@ You invoke existing learned workflows from the Brain Wiki. You do not extract ne
 
 Before deciding whether to invoke a workflow:
 
-1. Load the `brain-wiki` skill (shared rules) — **required**
+1. Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 2. Read `Wiki/meta/workflows.md` — active and draft workflow routes
 3. Match Walker's request against route triggers and summaries
 4. If the route table is stale or unclear, use `wiki_search` with `type=workflow`

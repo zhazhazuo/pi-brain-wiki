@@ -28,7 +28,7 @@ Load this skill when Walker says:
 ## Quick Reference
 
 **Always:**
-- Load `brain-wiki` skill first (shared rules)
+- Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 - Follow the absorption loop — re-read before editing
 - Discuss key takeaways with Walker before writing (Phase 3 is mandatory)
 - Include Integration Targets on every summary page

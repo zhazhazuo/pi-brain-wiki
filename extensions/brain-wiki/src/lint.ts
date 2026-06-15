@@ -63,6 +63,7 @@ export async function runLint(
   const pages = await scanWikiPages(root);
   const registry = buildRegistry(pages);
   const backlinks = buildBacklinks(registry);
+  const bodyByPath = new Map(pages.map((page) => [page.relativePath, page.body]));
 
   const allIssues: LintIssue[] = [];
 
@@ -85,7 +86,7 @@ export async function runLint(
 
   if (mode === "frontmatter" || mode === "all") allIssues.push(...lintFrontmatter(pages));
   if (mode === "duplicates" || mode === "all") allIssues.push(...lintDuplicates(registry));
-  if (mode === "coverage" || mode === "all") allIssues.push(...lintCoverage(registry, backlinks));
+  if (mode === "coverage" || mode === "all") allIssues.push(...lintCoverage(registry, backlinks, bodyByPath));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleness(registry));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleConsumed(registry, backlinks));
   if (mode === "staleness" || mode === "all") allIssues.push(...await lintStaleSync(root, registry));
@@ -395,14 +396,26 @@ function lintDuplicates(registry: RegistryData): LintIssue[] {
   return issues;
 }
 
-function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIssue[] {
+function lintCoverage(
+  registry: RegistryData,
+  backlinks: BacklinksData,
+  bodyByPath: Map<string, string>,
+): LintIssue[] {
   const issues: LintIssue[] = [];
   for (const page of registry.pages) {
     if (isArchivedOrCleared(page)) continue;
     if (page.type === "summary") {
       const inbound = backlinks.byPath[page.path]?.inbound ?? [];
       const citedByTopic = inbound.filter((path) => !path.includes("/summaries/") && path !== page.path);
-      if (citedByTopic.length === 0) {
+      const integrationTargets = extractSummaryIntegrationTargets(bodyByPath.get(page.path) ?? "");
+      if (integrationTargets.length > 0 && citedByTopic.length === 0) {
+        issues.push({
+          kind: "coverage",
+          severity: "warning",
+          path: page.path,
+          message: "Summary page has integration targets but no topic page cites it yet.",
+        });
+      } else if (citedByTopic.length === 0) {
         issues.push({
           kind: "coverage",
           severity: "info",
@@ -423,6 +436,27 @@ function lintCoverage(registry: RegistryData, backlinks: BacklinksData): LintIss
     }
   }
   return issues;
+}
+
+function extractSummaryIntegrationTargets(body: string): string[] {
+  const lines = body.split("\n");
+  const start = lines.findIndex((line) => /^##\s+Integration targets\s*$/i.test(line.trim()));
+  if (start < 0) return [];
+
+  const targetLinks = new Set<string>();
+  for (let index = start + 1; index < lines.length; index++) {
+    const line = lines[index].trim();
+    if (/^##\s+/.test(line)) break;
+
+    for (const match of line.matchAll(/\[\[([^\]]+)\]\]/g)) {
+      const normalized = normalizeWikiLinkTarget(match[1]);
+      if (!normalized) continue;
+      if (!normalized.startsWith("pages/topics/")) continue;
+      targetLinks.add(normalized);
+    }
+  }
+
+  return [...targetLinks];
 }
 
 function lintStaleness(registry: RegistryData): LintIssue[] {

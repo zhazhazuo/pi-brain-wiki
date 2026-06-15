@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Vault graph discovery: search, neighborhood traversal, and PKB bridging through Obsidian CLI.
+Vault graph discovery: search, neighborhood traversal, and PKB bridging through Obsidian CLI. This is the required follow-up after capture when the agent needs adjacency or a missing connection.
 
 ## Entry Points
 
@@ -16,6 +16,8 @@ Vault graph discovery: search, neighborhood traversal, and PKB bridging through 
 ## Constraints
 
 - Requires Obsidian CLI for search, backlinks, properties, links, and page reads
+- `findGraphContext` is literal vault keyword search, not semantic retrieval
+- Query terms must overlap with page text, metadata, or tags to surface results
 - `findGraphContext` splits results into `wiki` and `pkb` zones
 - `traverseNeighborhood` returns direct links/backlinks and optional second-hop neighbors
 - `bridgeWikiPage` filters already-linked candidates before returning bridge suggestions

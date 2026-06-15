@@ -27,7 +27,7 @@ Load this skill when Walker says:
 ## Quick Reference
 
 **Always:**
-- Load `brain-wiki` skill first (shared rules)
+- Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 - `wiki_search` before reading files directly
 - Read topic summaries before diving into Area/ (PKB)
 - Cite every factual claim with wikilinks
