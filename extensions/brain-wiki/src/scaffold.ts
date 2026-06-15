@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { createDefaultConfig, hasWikiConfig, writeDefaultConfig } from "./config.ts";
 import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
+import { buildEnsurePageGraphTerms, findGraphContext, renderPkbContextBlock } from "./graph.ts";
 import { canonicalPagePath, metaPath, toRelative } from "./paths.ts";
 import { dedupeSlug, makePageId, slugifyTitle, todayStamp } from "./slug.ts";
 import type { EnsurePageParams, EnsurePageResult, RegistryData, WikiConfig } from "./types.ts";
@@ -426,6 +427,9 @@ export async function ensureCanonicalPage(
     period: params.period ?? "",
   };
   const rendered = renderTemplate(template, templateValues);
+  const contextBlock = client
+    ? await buildEnsurePageContextBlock(client, params.title, params.summary)
+    : "";
 
   // Default status per type
   const defaultStatus = targetType === "topic" ? "draft" : "active";
@@ -456,8 +460,9 @@ export async function ensureCanonicalPage(
   const frontmatterStart = rendered.indexOf("---\n");
   const secondDelimiter = rendered.indexOf("\n---\n", frontmatterStart + 4);
   const body = secondDelimiter >= 0 ? rendered.slice(secondDelimiter + 5).trimStart() : rendered;
+  const bodyWithContext = contextBlock ? `${contextBlock}\n${body}` : body;
 
-  await writePage(absolutePath, parsed, body, client);
+  await writePage(absolutePath, parsed, bodyWithContext, client);
 
   return {
     resolved: true,
@@ -468,4 +473,17 @@ export async function ensureCanonicalPage(
     title: params.title,
     type: targetType,
   };
+}
+
+async function buildEnsurePageContextBlock(
+  client: ObsidianClient,
+  title: string,
+  summary?: string,
+): Promise<string> {
+  try {
+    const context = await findGraphContext(client, buildEnsurePageGraphTerms(title, summary), 5);
+    return renderPkbContextBlock(context.pkb.slice(0, 5));
+  } catch {
+    return "";
+  }
 }

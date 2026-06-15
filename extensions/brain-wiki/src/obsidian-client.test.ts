@@ -141,6 +141,23 @@ describe("ObsidianClient", () => {
     ]);
   });
 
+  test("links uses exact path syntax and parses newline list output", async () => {
+    await startMockServer((socket) => {
+      socket.on("data", (data) => {
+        const payload = JSON.parse(data.toString());
+        expect(payload.argv).toEqual(["links", "path=Wiki/pages/topics/Lambda.md"]);
+        socket.write("Wiki/pages/topics/Algebra.md\nArea/Math.md\n");
+        socket.end();
+      });
+    });
+
+    const client = new ObsidianClient({ socketPath, vaultCwd: "/v", timeout: 500 });
+    await expect(client.links("Wiki/pages/topics/Lambda.md")).resolves.toEqual([
+      "Wiki/pages/topics/Algebra.md",
+      "Area/Math.md",
+    ]);
+  });
+
   test("backlinks treats Obsidian no-backlinks response as empty", async () => {
     await startMockServer((socket) => {
       socket.on("data", (data) => {
@@ -231,6 +248,26 @@ describe("ObsidianClient", () => {
     const client = new ObsidianClient({ socketPath, vaultCwd: "/v", timeout: 500 });
     await expect(client.properties("Wiki/pages/topics/Foo.md", { format: "json" })).resolves.toEqual({ title: "Foo", status: "active" });
     await expect(client.propertyRead("Wiki/pages/topics/Foo.md", "title")).resolves.toBe("Foo");
+  });
+
+  test("outline uses exact path syntax and parses Obsidian JSON output", async () => {
+    await startMockServer((socket) => {
+      socket.on("data", (data) => {
+        const payload = JSON.parse(data.toString());
+        expect(payload.argv).toEqual(["outline", "path=Wiki/pages/topics/Foo.md", "format=json"]);
+        socket.write(JSON.stringify([
+          { level: 1, text: "What" },
+          { level: 2, text: "Idea" },
+        ]) + "\n");
+        socket.end();
+      });
+    });
+
+    const client = new ObsidianClient({ socketPath, vaultCwd: "/v", timeout: 500 });
+    await expect(client.outline("Wiki/pages/topics/Foo.md")).resolves.toEqual([
+      { level: 1, text: "What" },
+      { level: 2, text: "Idea" },
+    ]);
   });
 
   test("files, folders, orphans, and deadends parse newline-list outputs", async () => {

@@ -505,4 +505,39 @@ summary: concise
     );
     expect(conformanceIssues).toHaveLength(0);
   });
+
+  test("graph mode reports isolated wiki topics using Obsidian CLI", async () => {
+    const root = await makeWikiRoot();
+    await writePage(
+      root,
+      "pages/topics/orphan-topic.md",
+      `---
+id: orphan-topic
+type: topic
+title: Orphan Topic
+status: draft
+updated: 2026-06-14
+source_ids:
+  - SRC-1
+summary: concise
+---
+
+# Orphan Topic
+`
+    );
+
+    const client = new ObsidianClient({ vaultCwd: root });
+    client.unresolved = async () => [];
+    client.orphans = async () => [];
+    client.deadends = async () => [];
+    client.backlinks = async () => [];
+    client.links = async () => [];
+    client.properties = async () => ({});
+    client.search = async () => [];
+
+    const run = await runLint(root, "graph", false, undefined, client);
+
+    expect(run.issues.length).toBeGreaterThan(0);
+    expect(run.issues.some((issue) => issue.message.toLowerCase().includes("pkb"))).toBe(true);
+  });
 });

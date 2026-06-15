@@ -1,6 +1,6 @@
-import { mkdir, readFile, readdir, appendFile, writeFile } from "node:fs/promises";
-import { dirname, join, relative } from "node:path";
-import { appendMarkdown, readMarkdown, serializeMarkdownPage, toObsidianPath, writeMarkdownPage, writeMarkdown } from "./obsidian-io.ts";
+import { readFile, readdir } from "node:fs/promises";
+import { join, relative } from "node:path";
+import { appendMarkdown, readMarkdown, toObsidianPath, writeMarkdownPage, writeMarkdown } from "./obsidian-io.ts";
 import { projectRoot, listMdPath } from "./paths.ts";
 import type { ProjectSyncAction, ProjectSyncResult } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
@@ -77,6 +77,10 @@ async function createProject(
   projectTitle: string,
   client?: ObsidianClient | null,
 ): Promise<ProjectSyncResult> {
+  if (!client) {
+    throw new Error("Obsidian client required for project writes");
+  }
+
   const title = formatProjectTitleForWeek(projectTitle);
   const absolutePath = join(projRoot, title, `${title}.md`);
   const date = new Date().toISOString().slice(0, 10);
@@ -92,12 +96,7 @@ async function createProject(
   };
   const body = `# ${title}\n\n## Outcome\n\n## Next Action\n\n## Notes\n\n## Tasks\n`;
 
-  if (client) {
-    await writeMarkdownPage(client, absolutePath, frontmatter, body);
-  } else {
-    await mkdir(dirname(absolutePath), { recursive: true });
-    await writeFile(absolutePath, serializeMarkdownPage(frontmatter, body), "utf8");
-  }
+  await writeMarkdownPage(client, absolutePath, frontmatter, body);
 
   return {
     projectCreated: true,
@@ -112,34 +111,29 @@ async function addProjectNote(
   content: string,
   client?: ObsidianClient | null,
 ): Promise<ProjectSyncResult> {
+  if (!client) {
+    throw new Error("Obsidian client required for project writes");
+  }
+
   const projectDir = join(projRoot, project);
   const notesPath = join(projectDir, "notes.md");
 
   const today = new Date().toISOString().slice(0, 10);
   const entry = `\n### ${today}\n\n${AI_INDICATOR} ${content}\n`;
 
-  if (client) {
+  try {
+    await appendMarkdown(client, notesPath, entry);
+  } catch (error) {
     try {
-      await appendMarkdown(client, notesPath, entry);
-    } catch (error) {
-      try {
-        await readMarkdown(client, notesPath);
-        throw error;
-      } catch (readError) {
-        if (readError !== error) {
-          const header = `# ${project} Notes\n`;
-          await writeMarkdown(client, notesPath, header + entry);
-          return { noteAdded: true };
-        }
-        throw error;
+      await readMarkdown(client, notesPath);
+      throw error;
+    } catch (readError) {
+      if (readError !== error) {
+        const header = `# ${project} Notes\n`;
+        await writeMarkdown(client, notesPath, header + entry);
+        return { noteAdded: true };
       }
-    }
-  } else {
-    try {
-      await appendFile(notesPath, entry, "utf8");
-    } catch {
-      const header = `# ${project} Notes\n`;
-      await writeFile(notesPath, header + entry, "utf8");
+      throw error;
     }
   }
 
@@ -160,11 +154,15 @@ function isoWeekNumber(date: Date): number {
 }
 
 async function suggestTask(root: string, content: string, client?: ObsidianClient | null): Promise<ProjectSyncResult> {
+  if (!client) {
+    throw new Error("Obsidian client required for project writes");
+  }
+
   const listPath = listMdPath(root);
   const today = new Date().toISOString().slice(0, 10);
   const entry = `${AI_INDICATOR} Suggested task: ${content}`;
 
-  const current = client ? await readMarkdown(client, listPath) : await readFile(listPath, "utf8");
+  const current = await readMarkdown(client, listPath);
   const todaySection = `**${today}**`;
 
   if (current.includes(todaySection)) {
@@ -179,19 +177,11 @@ async function suggestTask(root: string, content: string, client?: ObsidianClien
         }
       }
       lines.splice(insertIndex, 0, `\n- [ ] ${entry}\n`);
-      if (client) {
-        await writeMarkdown(client, listPath, lines.join("\n"));
-      } else {
-        await writeFile(listPath, lines.join("\n"), "utf8");
-      }
+      await writeMarkdown(client, listPath, lines.join("\n"));
     }
   } else {
     const newSection = `\n---\n\n**${today}**\n\n- [ ] ${entry}\n`;
-    if (client) {
-      await appendMarkdown(client, listPath, newSection);
-    } else {
-      await appendFile(listPath, newSection, "utf8");
-    }
+    await appendMarkdown(client, listPath, newSection);
   }
 
   return { taskSuggested: true };

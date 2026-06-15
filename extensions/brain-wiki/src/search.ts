@@ -2,6 +2,10 @@ import { loadConfig } from "./config.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
 import type { RegistryData, RegistryEntry, SearchHit, SearchMatch, SearchResult, WikiPageType } from "./types.ts";
 
+export function resolveSearchScope(scope?: "wiki" | "vault"): "wiki" | "vault" {
+  return scope ?? "wiki";
+}
+
 export async function searchRegistry(
   root: string,
   registry: RegistryData,
@@ -79,7 +83,9 @@ export async function searchViaObsidian(
   type?: WikiPageType,
   limit?: number,
   excludeStatuses?: string[],
+  scope: "wiki" | "vault" = "wiki",
 ): Promise<SearchResult> {
+  const resolvedScope = resolveSearchScope(scope);
   const TYPE_DIR: Record<string, string> = {
     summary: "pages/summaries",
     topic: "pages/topics",
@@ -88,30 +94,62 @@ export async function searchViaObsidian(
     workflow: "pages/workflows",
   };
 
-  const scope = type ? `Wiki/${TYPE_DIR[type]}` : "Wiki";
-  const hits = await client.searchContext(query, { path: scope, limit: limit ?? 10 });
-
-  // Deduplicate by file — preserve first occurrence order
-  const seen = new Set<string>();
-  const dedupedHits: SearchHit[] = [];
-  for (const hit of hits) {
-    if (!seen.has(hit.file)) {
-      seen.add(hit.file);
-      dedupedHits.push(hit);
-    }
-  }
-
-  // Build lookup: vault-relative path → RegistryEntry
-  const byPath = new Map<string, RegistryEntry>();
-  for (const entry of registry.pages) {
-    byPath.set(`Wiki/${entry.path}`, entry);
-  }
-
   const excl = new Set(excludeStatuses ?? []);
+  const byPath = buildRegistryLookup(registry);
 
+  if (resolvedScope === "vault") {
+    const raw = await searchVault(client, query, limit ?? 10);
+    const matches: Array<SearchMatch | null> = await Promise.all(
+      dedupeSearchResults(raw).map(async (hit, index) => {
+        const entry = byPath.get(hit.file);
+        if (entry && excl.has(entry.status ?? "")) return null;
+
+        if (entry) {
+          return {
+            id: entry.id,
+            type: entry.type,
+            path: entry.path,
+            title: entry.title,
+            summary: entry.summary,
+            aliases: entry.aliases,
+            score: Math.max(0, 100 - index * 10),
+            sourceIds: entry.sourceIds,
+          } satisfies SearchMatch;
+        }
+
+        const props = await client.properties(hit.file, { format: "json" }).catch(() => ({} as Record<string, any>));
+        const title = typeof props.title === "string"
+          ? props.title
+          : inferTitleFromPath(hit.file);
+        const summary = typeof props.summary === "string" ? props.summary : undefined;
+        const aliases = Array.isArray(props.aliases) ? props.aliases.filter((item): item is string => typeof item === "string") : [];
+        const sourceIds = Array.isArray(props.source_ids) ? props.source_ids.filter((item): item is string => typeof item === "string") : [];
+        const status = typeof props.status === "string" ? props.status : undefined;
+
+        if (excl.has(status ?? "")) return null;
+
+        return {
+          id: hit.file,
+          type: inferTypeFromPath(hit.file, props.tags),
+          path: hit.file,
+          title,
+          summary,
+          aliases,
+          score: Math.max(0, 100 - index * 10),
+          sourceIds,
+        } satisfies SearchMatch;
+      })
+    );
+
+    return { query, matches: matches.filter((item): item is SearchMatch => item !== null) };
+  }
+
+  const wikiScope = type ? `Wiki/${TYPE_DIR[type]}` : "Wiki";
+  const hits = await client.searchContext(query, { path: wikiScope, limit: limit ?? 10 });
   const matches: SearchMatch[] = [];
-  for (let i = 0; i < dedupedHits.length; i++) {
-    const hit = dedupedHits[i];
+
+  for (let i = 0; i < dedupeSearchResults(hits).length; i++) {
+    const hit = dedupeSearchResults(hits)[i];
     const entry = byPath.get(hit.file);
     if (!entry) continue;
     if (excl.has(entry.status ?? "")) continue;
@@ -133,4 +171,51 @@ export async function searchViaObsidian(
 
 function tokenize(input: string): string[] {
   return [...new Set(input.split(/[^a-z0-9]+/).map((part) => part.trim()).filter(Boolean))];
+}
+
+async function searchVault(client: ObsidianClient, query: string, limit: number): Promise<Array<{ file: string } | string>> {
+  try {
+    const result = await client.search(query, { limit, format: "json" });
+    return Array.isArray(result) ? result : [];
+  } catch {
+    const result = await client.search(query, { limit });
+    return Array.isArray(result) ? result : [];
+  }
+}
+
+function dedupeSearchResults(hits: Array<SearchHit | { file: string } | string>): Array<{ file: string }> {
+  const seen = new Set<string>();
+  const deduped: Array<{ file: string }> = [];
+  for (const hit of hits) {
+    const file = typeof hit === "string" ? hit : hit.file;
+    if (!file || seen.has(file)) continue;
+    seen.add(file);
+    deduped.push({ file });
+  }
+  return deduped;
+}
+
+function buildRegistryLookup(registry: RegistryData): Map<string, RegistryEntry> {
+  const byPath = new Map<string, RegistryEntry>();
+  for (const entry of registry.pages) {
+    byPath.set(`Wiki/${entry.path}`, entry);
+    byPath.set(entry.path, entry);
+  }
+  return byPath;
+}
+
+function inferTitleFromPath(file: string): string {
+  const last = file.split("/").pop() ?? file;
+  return last.replace(/\.md$/i, "");
+}
+
+function inferTypeFromPath(file: string, tags: unknown): string {
+  if (file.startsWith("Wiki/")) return "wiki";
+  if (file.startsWith("Area/")) return "area";
+  if (file.startsWith("Project/")) return "project";
+  if (file.startsWith("Resource/")) return "resource";
+  if (Array.isArray(tags) && tags.some((tag) => typeof tag === "string" && tag.toUpperCase() === "RESOURCE")) {
+    return "resource";
+  }
+  return "pkb";
 }

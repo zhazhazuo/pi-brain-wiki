@@ -21,6 +21,7 @@ flowchart LR
   Sync[src/sync.ts]
   Triage[src/triage.ts]
   ProjectSync[src/project-sync.ts]
+  Graph[src/graph.ts]
   ObsidianIo[src/obsidian-io.ts]
 
   Index --> Capture
@@ -41,6 +42,7 @@ flowchart LR
   Index --> Sync
   Index --> Triage
   Index --> ProjectSync
+  Index --> Graph
   Index -.-> ObsidianClient[src/obsidian-client.ts]
   Index --> ObsidianIo
   ObsidianIo --> ObsidianClient
@@ -56,6 +58,7 @@ flowchart LR
   Scaffold -.-> ObsidianClient
   Activity -.-> ObsidianClient
   Sync -.-> ObsidianClient
+  Graph -.-> ObsidianClient
 
   classDef new stroke-dasharray: 5 5
   class ObsidianClient,ObsidianFs,Properties new
@@ -82,6 +85,7 @@ flowchart LR
 | sync | extensions/brain-wiki/src/sync.ts | current |
 | triage | extensions/brain-wiki/src/triage.ts | current |
 | project-sync | extensions/brain-wiki/src/project-sync.ts | current |
+| graph | extensions/brain-wiki/src/graph.ts | current |
 | obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | current |
 | obsidian-io | extensions/brain-wiki/src/obsidian-io.ts | current |
 | obsidian-fs | extensions/brain-wiki/src/obsidian-fs.ts | **proposed** |

@@ -93,6 +93,11 @@ export class ObsidianClient {
     }));
   }
 
+  async links(file: string): Promise<string[]> {
+    const raw = await this.exec(["links"], { path: file });
+    return parseLineList(raw, `Obsidian links failed for ${file}`);
+  }
+
   async searchContext(query: string, opts?: { path?: string; limit?: number }): Promise<SearchHit[]> {
     const params: Record<string, string | boolean> = { query };
     if (opts?.path) params.path = opts.path;
@@ -285,6 +290,22 @@ export class ObsidianClient {
       return parseJson(raw, `Obsidian search failed for "${query}"`);
     }
     return parseLineList(raw, `Obsidian search failed for "${query}"`);
+  }
+
+  async outline(file: string, options?: { format?: "json" | "text" }): Promise<Array<{ level: number; text: string }>> {
+    const params: Record<string, string | boolean> = { path: file, format: options?.format ?? "json" };
+
+    const raw = await this.exec(["outline"], params);
+    if ((options?.format ?? "json") === "json") {
+      return parseJsonArray(raw, `Obsidian outline failed for ${file}`).map((entry: any) => ({
+        level: Number(entry.level),
+        text: String(entry.text),
+      }));
+    }
+    return parseLineList(raw, `Obsidian outline failed for ${file}`).map((line) => ({
+      level: 1,
+      text: line,
+    }));
   }
 
   async templateRead(name: string, options?: {

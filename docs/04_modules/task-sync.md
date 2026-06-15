@@ -18,7 +18,7 @@ Bidirectional LIST.md ↔ Taskwarrior sync: mark promoted items, sync completed 
 - `findListItem` indexing must match `scanListMdItems` exactly (resets per date, counts every checkbox line)
 - `[>]` is the promoted marker; `[x]` is the done marker
 - `source:` annotation format must be `LIST.md:YYYY-MM-DD:item-N`
-- `markListItemPromoted` and `markListItemDone` use Obsidian IO when available, otherwise direct fs
+- `markListItemPromoted` and `markListItemDone` require Obsidian CLI for writes and fail closed without a client
 - `syncCompletedTasksToList` is safe to run repeatedly (idempotent: `[x]` is already `[x]`)
 
 ## Scope Table

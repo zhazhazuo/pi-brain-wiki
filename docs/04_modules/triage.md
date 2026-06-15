@@ -16,6 +16,7 @@ Manage LIST.md as shared routing center between human and agent.
 
 - All AI content must use `> 🤖 [AI]` prefix
 - Never mark items complete or delete items
+- `add` requires Obsidian CLI and fails closed without a client
 - Content required for add action
 - Parses date sections and task items from LIST.md
 

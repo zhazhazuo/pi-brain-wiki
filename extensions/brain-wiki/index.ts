@@ -14,6 +14,12 @@ import { analyzeToolMutation } from "./src/guards.ts";
 import { rebuildRegistryAndIndex } from "./src/indexer.ts";
 import { runLint } from "./src/lint.ts";
 import {
+  bridgeWikiPage,
+  findGraphContext,
+  formatGraphFind,
+  traverseNeighborhood,
+} from "./src/graph.ts";
+import {
   appendEvent,
   markPageStatus,
   markSourcesIntegrated,
@@ -106,6 +112,7 @@ const LINT_MODE_ENUM = StringEnum([
   "duplicates",
   "coverage",
   "staleness",
+  "graph",
   "all",
 ] as const);
 const EVENT_KIND_ENUM = StringEnum([
@@ -325,14 +332,15 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_search",
     label: "Wiki Search",
     description:
-      "Search the compiled wiki registry by title, alias, summary, headings, path, tags, and source ids.",
+      "Search the wiki registry or the full vault by title, alias, summary, headings, path, tags, and source ids.",
     promptSnippet:
-      "Search the wiki registry for relevant pages before reading or editing markdown files directly",
+      "Search the wiki registry or vault for relevant pages before reading or editing markdown files directly",
     promptGuidelines: [
       "Use this tool first for query and integration workflows so you update existing pages instead of creating duplicates.",
     ],
     parameters: Type.Object({
       query: Type.String({ description: "Search query" }),
+      scope: Type.Optional(StringEnum(["wiki", "vault"] as const)),
       type: Type.Optional(PAGE_TYPE_ENUM),
       limit: Type.Optional(
         Type.Number({ description: "Maximum number of matches to return" }),
@@ -358,9 +366,99 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         params.type as WikiPageType | undefined,
         params.limit,
         excludeStatuses,
+        params.scope ?? "wiki",
       );
       return {
         content: [{ type: "text", text: formatSearch(result, ctx.cwd, root) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_graph_find",
+    label: "Wiki Graph Find",
+    description:
+      "Discover related wiki and PKB nodes across the vault before writing or revising knowledge.",
+    promptSnippet:
+      "Discover related wiki and PKB nodes across the vault before writing or revising knowledge",
+    parameters: Type.Object({
+      query: Type.Optional(Type.String({ description: "Search query" })),
+      terms: Type.Optional(
+        Type.Array(Type.String({ description: "Query term" })),
+      ),
+      limit: Type.Optional(Type.Number({ description: "Maximum matches" })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const client = await requireObsidianClient(root);
+      const terms = (params.terms?.length ? params.terms : [params.query ?? ""]).filter(Boolean);
+      const result = await findGraphContext(client, terms, params.limit ?? 12);
+      return {
+        content: [{ type: "text", text: formatGraphFind(result) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_graph_traverse",
+    label: "Wiki Graph Traverse",
+    description:
+      "Inspect the neighborhood of a vault node using backlinks and outgoing links.",
+    promptSnippet:
+      "Inspect the neighborhood of a vault node using backlinks and outgoing links",
+    parameters: Type.Object({
+      path: Type.String({ description: "Vault file path" }),
+      hops: Type.Optional(Type.Number({ description: "Neighborhood depth" })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const client = await requireObsidianClient(root);
+      const result = await traverseNeighborhood(client, params.path, params.hops ?? 1);
+      return {
+        content: [
+          {
+            type: "text",
+            text: [
+              `Neighborhood for ${result.title}`,
+              `Backlinks: ${result.backlinks.length}`,
+              `Outgoing links: ${result.links.length}`,
+              `Second hop: ${result.secondHop.length}`,
+            ].join("\n"),
+          },
+        ],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_graph_bridge",
+    label: "Wiki Graph Bridge",
+    description:
+      "Find likely missing PKB or wiki connections for an existing wiki page.",
+    promptSnippet:
+      "Find likely missing PKB or wiki connections for an existing wiki page",
+    parameters: Type.Object({
+      pagePath: Type.String({ description: "Wiki page path" }),
+      limit: Type.Optional(Type.Number({ description: "Maximum matches" })),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const client = await requireObsidianClient(root);
+      const result = await bridgeWikiPage(client, params.pagePath, params.limit ?? 8);
+      return {
+        content: [
+          {
+            type: "text",
+            text: [
+              `Bridge candidates for ${result.title}`,
+              `Current links: ${result.currentLinks.length}`,
+              `Candidates: ${result.candidates.length}`,
+            ].join("\n"),
+          },
+        ],
         details: result,
       };
     },

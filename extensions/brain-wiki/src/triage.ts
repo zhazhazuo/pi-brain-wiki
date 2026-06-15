@@ -1,4 +1,4 @@
-import { readFile, appendFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { appendMarkdown, readMarkdown, writeMarkdown } from "./obsidian-io.ts";
 import { listMdPath } from "./paths.ts";
 import type { TriageAction, TriageResult } from "./types.ts";
@@ -48,11 +48,15 @@ async function readList(listPath: string, client?: ObsidianClient | null): Promi
 }
 
 async function addToList(listPath: string, content: string, client?: ObsidianClient | null): Promise<TriageResult> {
+  if (!client) {
+    throw new Error("Obsidian client required for LIST.md writes");
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   const entry = `\n${AI_INDICATOR} ${content}\n`;
 
   // Read current content to find today's section
-  const current = client ? await readMarkdown(client, listPath) : await readFile(listPath, "utf8");
+  const current = await readMarkdown(client, listPath);
   const todaySection = `**${today}**`;
 
   if (current.includes(todaySection)) {
@@ -69,20 +73,12 @@ async function addToList(listPath: string, content: string, client?: ObsidianCli
         }
       }
       lines.splice(insertIndex, 0, entry);
-      if (client) {
-        await writeMarkdown(client, listPath, lines.join("\n"));
-      } else {
-        await writeFile(listPath, lines.join("\n"), "utf8");
-      }
+      await writeMarkdown(client, listPath, lines.join("\n"));
     }
   } else {
     // Create new today section
     const newSection = `\n---\n\n**${today}**\n${entry}`;
-    if (client) {
-      await appendMarkdown(client, listPath, newSection);
-    } else {
-      await appendFile(listPath, newSection, "utf8");
-    }
+    await appendMarkdown(client, listPath, newSection);
   }
 
   return { added: true };

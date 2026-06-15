@@ -49,13 +49,16 @@
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths, resolves wikilinks to absolute paths
 - extensions/brain-wiki/src/project-sync.ts → Create weekly project notes, scan/review future-mode project metadata, add notes/suggest tasks for Project/ folders
 - extensions/brain-wiki/src/project-sync.test.ts → Unit tests for project sync, future-mode metadata scan, and review gaps
+- extensions/brain-wiki/src/graph.ts → Vault graph discovery: search, neighborhood traversal, and PKB bridging
+- extensions/brain-wiki/src/graph.test.ts → Unit tests for graph discovery, traversal, and bridge output
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure (incl. discussions/, drafts/), templates, and metadata files
 - extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking (planned: delegate to obsidian search:context)
 - extensions/brain-wiki/src/search.test.ts → Unit tests for registry search
 - extensions/brain-wiki/src/slug.ts → Slugifies titles, generates source/page IDs, deduplicates slugs
 - extensions/brain-wiki/src/sync.ts → Bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json
-- extensions/brain-wiki/src/triage.ts → Read, add, suggest, flag stale items in LIST.md
+- extensions/brain-wiki/src/triage.ts → Read, suggest, and flag stale LIST.md items; add action requires Obsidian CLI
+- extensions/brain-wiki/src/triage.test.ts → Unit tests for LIST.md add-path client requirement
 - extensions/brain-wiki/src/workflow.ts → Generate standardized workflow pages and workflow route metadata
 - extensions/brain-wiki/src/workflow.test.ts → Unit tests for workflow generation, duplicate detection, and route rendering
 - extensions/brain-wiki/src/task-cli.ts → Taskwarrior CLI execution wrapper and error parsing
@@ -64,7 +67,7 @@
 - extensions/brain-wiki/src/task-scan.test.ts → Unit tests for LIST.md staleness scanner
 - extensions/brain-wiki/src/task-validator.ts → Promotion payload validation engine enforcing creation rules
 - extensions/brain-wiki/src/task-validator.test.ts → Unit tests for promotion validation rules
-- extensions/brain-wiki/src/task-sync.ts → Bidirectional LIST.md ↔ Taskwarrior sync logic
+- extensions/brain-wiki/src/task-sync.ts → Bidirectional LIST.md ↔ Taskwarrior sync logic; LIST.md writes require Obsidian CLI
 - extensions/brain-wiki/src/task-sync.test.ts → Unit tests for sync, marking, and completion
 - extensions/brain-wiki/src/types.ts → Shared TypeScript interfaces and type definitions
 - extensions/brain-wiki/src/wiki-week.ts → Weekly dashboard rendering and task summary generation

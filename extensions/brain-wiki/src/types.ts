@@ -249,6 +249,42 @@ export interface SearchResult {
   matches: SearchMatch[];
 }
 
+export type GraphZone = "wiki" | "pkb";
+
+export interface GraphNodeCandidate {
+  path: string;
+  title: string;
+  summary?: string;
+  aliases: string[];
+  tags: string[];
+  sourceIds: string[];
+  zone: GraphZone;
+  score: number;
+  backlinks: number;
+}
+
+export interface GraphContextResult {
+  query: string;
+  wiki: GraphNodeCandidate[];
+  pkb: GraphNodeCandidate[];
+}
+
+export interface GraphNeighborhood {
+  path: string;
+  title: string;
+  backlinks: Array<{ file: string; count: number }>;
+  links: string[];
+  secondHop: Array<{ file: string; count: number }>;
+}
+
+export interface GraphBridgeResult {
+  pagePath: string;
+  title: string;
+  terms: string[];
+  currentLinks: string[];
+  candidates: GraphNodeCandidate[];
+}
+
 export interface StatusSummary {
   totals: {
     allPages: number;

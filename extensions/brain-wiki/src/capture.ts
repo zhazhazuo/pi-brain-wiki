@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, stat, writeFile, copyFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
+import { buildEnsurePageGraphTerms, findGraphContext, renderPkbContextBlock } from "./graph.ts";
 import { writeMarkdown } from "./obsidian-io.ts";
 import { resolveFrom, sourcePacketDir, sourcePagePath, toRelative } from "./paths.ts";
 import { dedupeSlug, makeSourceId, slugifyTitle } from "./slug.ts";
@@ -106,6 +107,9 @@ export async function captureSource(
 
   let sourcePage: string | undefined;
   if (params.createSourcePage !== false) {
+    const contextBlock = client
+      ? await buildSourceContextBlock(client, title, inferSummary(captured.extractedMarkdown))
+      : "";
     sourcePage = await createSourcePageStub(root, config, {
       sourceId,
       title,
@@ -117,7 +121,7 @@ export async function captureSource(
       rawPath: toRelative(root, extractedPath),
       tags: params.tags ?? [],
       summary: inferSummary(captured.extractedMarkdown),
-    }, client);
+    }, client, contextBlock);
   }
 
   return {
@@ -272,6 +276,7 @@ async function createSourcePageStub(
     summary: string;
   },
   client?: ObsidianClient | null,
+  contextBlock = "",
 ): Promise<string> {
   const template = await readTemplate(join(root, config.templates.summary));
   const rendered = renderTemplate(template, {
@@ -292,6 +297,7 @@ async function createSourcePageStub(
   const absolutePath = sourcePagePath(root, values.sourceId, summarySlug);
   const bodyStart = rendered.indexOf("\n---\n", 4);
   const body = bodyStart >= 0 ? rendered.slice(bodyStart + 5).trimStart() : rendered;
+  const bodyWithContext = contextBlock ? `${contextBlock}\n${body}` : body;
 
   await writePage(absolutePath, {
     id: values.sourceId,
@@ -309,7 +315,7 @@ async function createSourcePageStub(
     tags: values.tags,
     source_ids: [values.sourceId],
     summary: values.summary,
-  }, body, client);
+  }, bodyWithContext, client);
 
   return toRelative(root, absolutePath);
 }
@@ -474,6 +480,19 @@ function htmlToMarkdown(html: string): string {
 
 function ensureTrailingNewline(text: string): string {
   return text.endsWith("\n") ? text : `${text}\n`;
+}
+
+async function buildSourceContextBlock(
+  client: ObsidianClient,
+  title: string,
+  summary?: string,
+): Promise<string> {
+  try {
+    const context = await findGraphContext(client, buildEnsurePageGraphTerms(title, summary), 5);
+    return renderPkbContextBlock(context.pkb.slice(0, 5));
+  } catch {
+    return "";
+  }
 }
 
 function sha256(value: string | Buffer): string {

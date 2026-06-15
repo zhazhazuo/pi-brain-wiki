@@ -89,6 +89,7 @@ export async function runLint(
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleness(registry));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleConsumed(registry, backlinks));
   if (mode === "staleness" || mode === "all") allIssues.push(...await lintStaleSync(root, registry));
+  if (mode === "graph" || mode === "all") allIssues.push(...await lintGraphConnectivity(registry, client));
 
   const issues = typeof limit === "number" ? allIssues.slice(0, limit) : allIssues;
   const run: LintRun = {
@@ -483,6 +484,75 @@ function lintStaleConsumed(registry: RegistryData, backlinks: BacklinksData): Li
       });
     }
   }
+  return issues;
+}
+
+async function lintGraphConnectivity(
+  registry: RegistryData,
+  client?: ObsidianClient | null,
+): Promise<LintIssue[]> {
+  if (!client) {
+    throw new Error("graph lint mode requires Obsidian CLI");
+  }
+
+  const issues: LintIssue[] = [];
+
+  const unresolved = await client.unresolved({ format: "json" }).catch(() => []);
+  if (unresolved.length > 0) {
+    issues.push({
+      kind: "broken-link",
+      severity: "error",
+      path: "meta/lint-report.md",
+      message: `Graph lint found ${unresolved.length} unresolved wikilink(s).`,
+    });
+  }
+
+  const orphans = await client.orphans().catch(() => []);
+  if (orphans.length > 0) {
+    issues.push({
+      kind: "orphan",
+      severity: "warning",
+      path: "meta/lint-report.md",
+      message: `Graph lint found ${orphans.length} orphaned note(s).`,
+    });
+  }
+
+  const deadends = await client.deadends().catch(() => []);
+  if (deadends.length > 0) {
+    issues.push({
+      kind: "coverage",
+      severity: "warning",
+      path: "meta/lint-report.md",
+      message: `Graph lint found ${deadends.length} dead-end note(s).`,
+    });
+  }
+
+  for (const page of registry.pages) {
+    if (isArchivedOrCleared(page) || page.type !== "topic") continue;
+    const backlinks = await client.backlinks(`Wiki/${page.path}`).catch(() => []);
+    const links = await client.links(`Wiki/${page.path}`).catch(() => []);
+    const hasPkbOutbound = links.some((link) => !link.startsWith("Wiki/"));
+    const hasPkbInbound = backlinks.some((entry) => !entry.file.startsWith("Wiki/"));
+
+    if (!hasPkbOutbound) {
+      issues.push({
+        kind: "coverage",
+        severity: "info",
+        path: page.path,
+        message: "Topic page has no outbound PKB links.",
+      });
+    }
+
+    if (!hasPkbInbound) {
+      issues.push({
+        kind: "coverage",
+        severity: "info",
+        path: page.path,
+        message: "Topic page has no inbound PKB links.",
+      });
+    }
+  }
+
   return issues;
 }
 

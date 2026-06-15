@@ -1,4 +1,3 @@
-import { readFile, writeFile } from "node:fs/promises";
 import { listMdPath } from "./paths.ts";
 import { taskExport } from "./task-cli.ts";
 import { readMarkdown, writeMarkdown } from "./obsidian-io.ts";
@@ -45,10 +44,12 @@ export async function markListItemPromoted(
   itemIndex: number,
   client?: ObsidianClient | null,
 ): Promise<boolean> {
+  if (!client) {
+    throw new Error("Obsidian client required for LIST.md writes");
+  }
+
   const listPath = listMdPath(root);
-  const content = client
-    ? await readMarkdown(client, listPath)
-    : await readFile(listPath, "utf8");
+  const content = await readMarkdown(client, listPath);
   const lines = content.split("\n");
 
   const item = findListItem(content, date, itemIndex);
@@ -57,11 +58,7 @@ export async function markListItemPromoted(
   lines[item.lineIndex] = item.line.replace(/^-\s*\[ \]/, "- [>]");
 
   const newContent = lines.join("\n");
-  if (client) {
-    await writeMarkdown(client, listPath, newContent);
-  } else {
-    await writeFile(listPath, newContent, "utf8");
-  }
+  await writeMarkdown(client, listPath, newContent);
   return true;
 }
 
@@ -72,10 +69,12 @@ export async function markListItemDone(
   itemIndex: number,
   client?: ObsidianClient | null,
 ): Promise<boolean> {
+  if (!client) {
+    throw new Error("Obsidian client required for LIST.md writes");
+  }
+
   const listPath = listMdPath(root);
-  const content = client
-    ? await readMarkdown(client, listPath)
-    : await readFile(listPath, "utf8");
+  const content = await readMarkdown(client, listPath);
   const lines = content.split("\n");
 
   const item = findListItem(content, date, itemIndex);
@@ -84,11 +83,7 @@ export async function markListItemDone(
   lines[item.lineIndex] = item.line.replace(/^-\s*\[([ >])\]/, "- [x]");
 
   const newContent = lines.join("\n");
-  if (client) {
-    await writeMarkdown(client, listPath, newContent);
-  } else {
-    await writeFile(listPath, newContent, "utf8");
-  }
+  await writeMarkdown(client, listPath, newContent);
   return true;
 }
 

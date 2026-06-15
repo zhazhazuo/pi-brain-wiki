@@ -18,6 +18,7 @@ Obsidian-facing IO boundary for markdown reads/writes, page serialization writes
 - Vault-visible writes use ObsidianClient create/append/prepend/property:set
 - CLI errors propagate to callers instead of silently falling back to filesystem writes
 - Raw filesystem remains only for callers that omit a client, mainly tests or internal/non-vault paths
+- LIST/project/task mutation modules now treat missing clients as hard errors for vault-visible writes
 
 ## Scope Table
 

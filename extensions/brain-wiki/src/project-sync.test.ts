@@ -32,6 +32,12 @@ describe("syncProject Obsidian IO", () => {
     expect(String(calls[0].args[1])).toContain(`# ${weeklyTitle}`);
   });
 
+  test("rejects create_project without a client", async () => {
+    await expect(syncProject("/vault/Wiki", "create_project", "Project Title")).rejects.toThrow(
+      "Obsidian client required",
+    );
+  });
+
   test("scans same-named project files and reports future-mode next actions", async () => {
     const vaultRoot = await mkdtemp(join(tmpdir(), "brain-wiki-project-"));
     const wikiRoot = join(vaultRoot, "Wiki");
@@ -154,5 +160,17 @@ describe("syncProject Obsidian IO", () => {
       .rejects.toThrow("socket closed");
 
     expect(calls.some((call) => call.method === "create")).toBe(false);
+  });
+
+  test("rejects add_note without a client", async () => {
+    await expect(syncProject("/vault/Wiki", "add_note", "Project A", "new note")).rejects.toThrow(
+      "Obsidian client required",
+    );
+  });
+
+  test("rejects suggest_task without a client", async () => {
+    await expect(syncProject("/vault/Wiki", "suggest_task", undefined, "new task")).rejects.toThrow(
+      "Obsidian client required",
+    );
   });
 });

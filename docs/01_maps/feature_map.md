@@ -25,4 +25,5 @@
 - future-mode-project-review → ./06_features/future-mode-project-review.md — future-mode project metadata scan and weekly review gaps
 - workflow-generation → ./06_features/workflow-generation.md — create standardized workflow pages and generated route metadata for learned workflows
 - taskwarrior → ./06_features/taskwarrior.md — integrate Taskwarrior CLI with validated promotion and bidirectional wiki linking
+- graph-first architecture → ./06_features/graph-first-architecture.md — vault-wide graph discovery, neighborhood traversal, and PKB bridging through Obsidian CLI
 - task-sync → extensions/brain-wiki/src/task-sync.ts — bidirectional LIST.md ↔ Taskwarrior sync

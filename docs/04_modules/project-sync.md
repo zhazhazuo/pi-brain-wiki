@@ -21,6 +21,7 @@ Syncs with Project/ folders — create weekly project notes, scan/review future-
 - scan skips `Project/PROJECTS.md`
 - review action is read-only; reports status counts, missing `next_action`, completed archive candidates
 - `next_action` is preferred; `last_action` remains fallback-compatible
+- `create_project`, `add_note`, and `suggest_task` require Obsidian CLI and fail closed without a client
 - Requires project for create_project action
 - Requires project and content for add_note action
 - Requires content for suggest_task action

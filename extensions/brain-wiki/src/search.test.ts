@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { searchViaObsidian } from "./search.ts";
+import { resolveSearchScope, searchViaObsidian } from "./search.ts";
 import type { RegistryData, RegistryEntry, SearchHit } from "./types.ts";
 
 function makeRegistry(pages: Partial<RegistryEntry>[]): RegistryData {
@@ -33,6 +33,14 @@ function mockClient(hits: SearchHit[]) {
 }
 
 describe("searchViaObsidian", () => {
+  test("resolveSearchScope defaults to wiki", () => {
+    expect(resolveSearchScope(undefined)).toBe("wiki");
+  });
+
+  test("resolveSearchScope preserves explicit vault scope", () => {
+    expect(resolveSearchScope("vault")).toBe("vault");
+  });
+
   test("deduplicates hits by file, preserving first occurrence order", async () => {
     const registry = makeRegistry([
       { path: "pages/topics/Foo.md", title: "Foo" },
@@ -158,5 +166,37 @@ describe("searchViaObsidian", () => {
     const registry = makeRegistry([]);
     const result = await searchViaObsidian(mockClient([]), registry, "my query");
     expect(result.query).toBe("my query");
+  });
+
+  test("supports vault scope by calling client.search", async () => {
+    const registry = makeRegistry([
+      { path: "pages/topics/Agent.md", title: "Agent" },
+    ]);
+
+    const client = {
+      searchContext: async () => {
+        throw new Error("searchContext should not be called for vault scope");
+      },
+      search: async () => [
+        "Wiki/pages/topics/Agent.md",
+        "Area/1 CS/17 AI/Agent.md",
+      ],
+      properties: async (path: string) => ({
+        title: path.startsWith("Wiki/") ? "Agent" : "PKB Agent",
+        tags: path.startsWith("Wiki/") ? [] : ["RESOURCE"],
+        summary: path.startsWith("Wiki/") ? "Wiki page" : "PKB entry",
+        aliases: [],
+        source_ids: [],
+        status: "integrated",
+      }),
+    } as any;
+
+    const result = await searchViaObsidian(client, registry, "agent", undefined, 10, [], "vault");
+
+    expect(result.matches.map((match) => match.title)).toEqual(["Agent", "PKB Agent"]);
+    expect(result.matches.map((match) => match.path)).toEqual([
+      "pages/topics/Agent.md",
+      "Area/1 CS/17 AI/Agent.md",
+    ]);
   });
 });

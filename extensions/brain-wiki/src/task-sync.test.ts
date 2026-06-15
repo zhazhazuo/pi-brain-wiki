@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { findListItem, markListItemPromoted, markListItemDone, getTasksWithListSource, syncCompletedTasksToList } from "./task-sync.ts";
 import type { TaskExportRecord } from "./types.ts";
 
@@ -20,7 +22,17 @@ async function setupVault(root: string, listContent: string) {
   const listPath = `${vaultPath}/LIST.md`;
   await Bun.write(`${wikiPath}/.wiki/config.json`, "{}");
   await Bun.write(listPath, listContent);
-  return { wikiPath, listPath };
+  return { vaultPath, wikiPath, listPath };
+}
+
+function makeClient(vaultCwd: string) {
+  return {
+    config: { socketPath: "", vaultCwd, timeout: 0 },
+    readFile: async (path: string) => readFile(join(vaultCwd, path), "utf8"),
+    create: async (path: string, content: string) => {
+      await writeFile(join(vaultCwd, path), content, "utf8");
+    },
+  } as any;
 }
 
 describe("findListItem", () => {
@@ -43,28 +55,38 @@ describe("findListItem", () => {
 
 describe("markListItemPromoted", () => {
   test("changes [ ] to [>]", async () => {
-    const { wikiPath, listPath } = await setupVault("/tmp/test-promoted", `**2026-06-01**\n- [ ] First item\n- [ ] Second item`);
-    await markListItemPromoted(wikiPath, "2026-06-01", 1, null);
+    const { vaultPath, wikiPath, listPath } = await setupVault("/tmp/test-promoted", `**2026-06-01**\n- [ ] First item\n- [ ] Second item`);
+    await markListItemPromoted(wikiPath, "2026-06-01", 1, makeClient(vaultPath));
     const updated = await Bun.file(listPath).text();
     expect(updated).toContain("- [>] First item");
     expect(updated).toContain("- [ ] Second item");
+  });
+
+  test("rejects when no client is available", async () => {
+    const { wikiPath } = await setupVault("/tmp/test-promoted-reject", `**2026-06-01**\n- [ ] First item`);
+    await expect(markListItemPromoted(wikiPath, "2026-06-01", 1, null)).rejects.toThrow("Obsidian client required");
   });
 });
 
 describe("markListItemDone", () => {
   test("changes [ ] to [x]", async () => {
-    const { wikiPath, listPath } = await setupVault("/tmp/test-done", `**2026-06-01**\n- [ ] First item\n- [ ] Second item`);
-    await markListItemDone(wikiPath, "2026-06-01", 1, null);
+    const { vaultPath, wikiPath, listPath } = await setupVault("/tmp/test-done", `**2026-06-01**\n- [ ] First item\n- [ ] Second item`);
+    await markListItemDone(wikiPath, "2026-06-01", 1, makeClient(vaultPath));
     const updated = await Bun.file(listPath).text();
     expect(updated).toContain("- [x] First item");
     expect(updated).toContain("- [ ] Second item");
   });
 
   test("changes [>] to [x]", async () => {
-    const { wikiPath, listPath } = await setupVault("/tmp/test-done2", `**2026-06-01**\n- [>] Promoted item`);
-    await markListItemDone(wikiPath, "2026-06-01", 1, null);
+    const { vaultPath, wikiPath, listPath } = await setupVault("/tmp/test-done2", `**2026-06-01**\n- [>] Promoted item`);
+    await markListItemDone(wikiPath, "2026-06-01", 1, makeClient(vaultPath));
     const updated = await Bun.file(listPath).text();
     expect(updated).toContain("- [x] Promoted item");
+  });
+
+  test("rejects when no client is available", async () => {
+    const { wikiPath } = await setupVault("/tmp/test-done-reject", `**2026-06-01**\n- [ ] First item`);
+    await expect(markListItemDone(wikiPath, "2026-06-01", 1, null)).rejects.toThrow("Obsidian client required");
   });
 });
 
@@ -101,7 +123,7 @@ describe("getTasksWithListSource", () => {
 
 describe("syncCompletedTasksToList", () => {
   test("marks completed LIST.md tasks as done", async () => {
-    const { wikiPath, listPath } = await setupVault("/tmp/test-sync", `**2026-06-01**\n- [ ] First item\n- [ ] Second item`);
+    const { vaultPath, wikiPath, listPath } = await setupVault("/tmp/test-sync", `**2026-06-01**\n- [ ] First item\n- [ ] Second item`);
 
     const mockTasks: TaskExportRecord[] = [
       {
@@ -118,7 +140,7 @@ describe("syncCompletedTasksToList", () => {
     const runner = {
       exec: async () => ({ stdout: JSON.stringify(mockTasks), stderr: "", code: 0 }),
     };
-    const result = await syncCompletedTasksToList(wikiPath, runner as any, null);
+    const result = await syncCompletedTasksToList(wikiPath, runner as any, makeClient(vaultPath));
     expect(result.markedDone).toBe(1);
     expect(result.errors).toHaveLength(0);
 
@@ -128,7 +150,7 @@ describe("syncCompletedTasksToList", () => {
   });
 
   test("ignores completed tasks without source annotation", async () => {
-    const { wikiPath, listPath } = await setupVault("/tmp/test-sync2", `**2026-06-01**\n- [ ] First item`);
+    const { listPath } = await setupVault("/tmp/test-sync2", `**2026-06-01**\n- [ ] First item`);
 
     const mockTasks: TaskExportRecord[] = [
       {
@@ -142,7 +164,7 @@ describe("syncCompletedTasksToList", () => {
     const runner = {
       exec: async () => ({ stdout: JSON.stringify(mockTasks), stderr: "", code: 0 }),
     };
-    const result = await syncCompletedTasksToList(wikiPath, runner as any, null);
+    const result = await syncCompletedTasksToList("/tmp/test-sync2/vault/Wiki", runner as any, null);
     expect(result.markedDone).toBe(0);
 
     const updated = await Bun.file(listPath).text();
