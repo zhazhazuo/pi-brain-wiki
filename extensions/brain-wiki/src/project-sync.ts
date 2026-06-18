@@ -2,6 +2,8 @@ import { readFile, readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { appendMarkdown, readMarkdown, toObsidianPath, writeMarkdown } from "./obsidian-io.ts";
 import { buildProjectTemplate } from "./project-schema.ts";
+import type { ProjectStatus } from "./project-schema.ts";
+import { formatTimelineEntry } from "./project-timeline.ts";
 import { projectRoot, listMdPath } from "./paths.ts";
 import type { ProjectSyncAction, ProjectSyncResult } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
@@ -33,6 +35,9 @@ export async function syncProject(
       return suggestTask(root, content, client);
     case "review":
       return reviewProjects(projRoot, client);
+    case "set_status":
+      if (!project || !content) throw new Error("project and content required for set_status");
+      return setProjectStatus(projRoot, project, content, client);
     default:
       throw new Error(`Unknown project sync action: ${action}`);
   }
@@ -129,6 +134,30 @@ async function addProjectNote(
   }
 
   return { noteAdded: true };
+}
+
+async function setProjectStatus(
+  projRoot: string,
+  project: string,
+  content: string,
+  client?: ObsidianClient | null,
+): Promise<ProjectSyncResult> {
+  if (!client) throw new Error("Obsidian client required for project writes");
+  const input = JSON.parse(content) as { status: ProjectStatus; reason: string };
+  const projectPath = join(projRoot, project, "project.md");
+  const timelinePath = join(projRoot, project, "timeline.md");
+  const current = await readMarkdown(client, projectPath);
+  const next = current
+    .replace(/^status:\s*.*$/m, `status: ${input.status}`)
+    .replace(/^updated:\s*.*$/m, `updated: ${new Date().toISOString().slice(0, 10)}`);
+  await writeMarkdown(client, projectPath, next);
+  await appendMarkdown(client, timelinePath, formatTimelineEntry({
+    date: new Date().toISOString().slice(0, 10),
+    type: "status_change",
+    summary: `Status changed to ${input.status}: ${input.reason}`,
+    links: [input.reason],
+  }));
+  return { projectUpdated: true };
 }
 
 export function formatProjectTitleForWeek(projectTitle: string, date = new Date()): string {

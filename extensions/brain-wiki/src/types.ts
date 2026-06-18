@@ -361,7 +361,18 @@ export interface TriageResult {
   suggestions?: string[];
 }
 
-export type ProjectSyncAction = "scan" | "create_project" | "add_note" | "suggest_task" | "review";
+export type ProjectSyncAction =
+  | "scan"
+  | "create_project"
+  | "add_note"
+  | "suggest_task"
+  | "review"
+  | "set_status"
+  | "set_next_action"
+  | "set_deadline"
+  | "link_resource"
+  | "relate"
+  | "timeline_append";
 
 export type ProjectStatus = "idea" | "active" | "waiting" | "blocked" | "done" | "archived";
 
@@ -404,6 +415,7 @@ export interface ProjectSyncResult {
   projectPath?: string;
   projectTitle?: string;
   createdFiles?: string[];
+  projectUpdated?: boolean;
   noteAdded?: boolean;
   taskSuggested?: boolean;
 }

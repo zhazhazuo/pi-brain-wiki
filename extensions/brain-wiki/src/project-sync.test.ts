@@ -208,4 +208,47 @@ describe("syncProject Obsidian IO", () => {
       "Obsidian client required",
     );
   });
+
+  test("set_status updates project.md and appends a timeline entry", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async (path: string) => {
+        if (path.endsWith("project.md")) {
+          return `---
+type: project
+title: Launch Atlas
+status: active
+created: 2026-06-18
+updated: 2026-06-18
+area: [[Area/Product]]
+priority: high
+deadline:
+next_action: [[Project/w25-Launch Atlas/notes#Kickoff]]
+review_after:
+resources:
+  - [[Resource/PRD]]
+related_projects: []
+tags:
+  - project
+---
+`;
+        }
+        return "# Launch Atlas Timeline\n";
+      },
+      write: async (_path: string, content: string) => { writes.push(content); },
+      create: async (_path: string, content: string) => { writes.push(content); },
+      append: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const result = await syncProject("/vault/Wiki", "set_status", "w25-Launch Atlas", JSON.stringify({
+      status: "blocked",
+      reason: "[[Resource/vendor-email]] waiting on credentials",
+    }), client);
+
+    expect(result.projectUpdated).toBe(true);
+    expect(writes[0]).toContain("status: blocked");
+    expect(writes[1]).toContain("status_change");
+    expect(writes[1]).toContain("[[Resource/vendor-email]]");
+  });
 });

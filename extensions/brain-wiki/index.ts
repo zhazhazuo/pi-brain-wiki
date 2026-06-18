@@ -1109,6 +1109,12 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         "add_note",
         "suggest_task",
         "review",
+        "set_status",
+        "set_next_action",
+        "set_deadline",
+        "link_resource",
+        "relate",
+        "timeline_append",
       ] as const),
       project: Type.Optional(
         Type.String({ description: "Project title or folder name" }),
