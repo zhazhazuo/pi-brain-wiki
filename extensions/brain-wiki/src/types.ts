@@ -386,6 +386,49 @@ export interface ProjectValidationResult {
   errors: string[];
 }
 
+export interface ProjectReviewSummary {
+  blocked: Array<{
+    path: string;
+    title: string;
+    status: string;
+    priority: string;
+    deadline: string | null;
+    nextAction: string | null;
+    lastAction: string | null;
+    updated?: string | null;
+  }>;
+  noNextAction: Array<{
+    path: string;
+    title: string;
+    status: string;
+    priority: string;
+    deadline: string | null;
+    nextAction: string | null;
+    lastAction: string | null;
+    updated?: string | null;
+  }>;
+  staleActive: Array<{
+    path: string;
+    title: string;
+    status: string;
+    priority: string;
+    deadline: string | null;
+    nextAction: string | null;
+    lastAction: string | null;
+    updated?: string | null;
+  }>;
+  archiveCandidates: Array<{
+    path: string;
+    title: string;
+    status: string;
+    priority: string;
+    deadline: string | null;
+    nextAction: string | null;
+    lastAction: string | null;
+    updated?: string | null;
+  }>;
+}
+
 export interface ProjectSyncResult {
   projects?: Array<{
     path: string;

@@ -38,6 +38,9 @@ if (!pkg.pi?.skills?.includes(skillsPath)) {
 
 const expectedSkills = [
   "brain-wiki",
+  "project-intake",
+  "project-operator",
+  "project-review",
   "recall",
   "wiki-intel",
   "wiki-map",

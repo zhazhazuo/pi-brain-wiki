@@ -103,8 +103,19 @@ Wiki/
 | `wiki_scan_activity` | Scan vault for recent changes (Intelligence agent) |
 | `wiki_sync` | Scan PARA vault structure, update wiki topic pages |
 | `wiki_triage` | Read, add, suggest, or flag stale items in LIST.md |
-| `wiki_project_sync` | Scan projects, add research notes, suggest tasks |
+| `wiki_project_sync` | Scan projects, create projects, mutate state via validated commands, add notes, suggest tasks |
 | `wiki_generate_workflow` | Create a standardized workflow page from approved structured inputs |
+
+## Deterministic Project Process
+
+Each project lives in `Project/<week-slug>/` with:
+
+- `project.md` for canonical current state
+- `tasks.md` for the local task queue
+- `timeline.md` for append-only history
+- `notes.md` for linked working notes
+
+Agents must mutate this state through `wiki_project_sync` commands rather than direct edits. Supported mutation actions include `set_status`, `set_next_action`, `task_add`, `task_update`, and `timeline_append`.
 
 ## PARA Integration
 

@@ -149,6 +149,9 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", () => ({
     skillPaths: [
       join(skillDir, "brain-wiki", "SKILL.md"),
+      join(skillDir, "project-operator", "SKILL.md"),
+      join(skillDir, "project-review", "SKILL.md"),
+      join(skillDir, "project-intake", "SKILL.md"),
       join(skillDir, "wiki-map", "SKILL.md"),
       join(skillDir, "wiki-workshop", "SKILL.md"),
       join(skillDir, "wiki-intel", "SKILL.md"),
