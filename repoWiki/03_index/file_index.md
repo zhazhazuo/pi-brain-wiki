@@ -47,8 +47,11 @@
 - extensions/brain-wiki/src/obsidian-io.test.ts → Unit tests for CLI-backed markdown/property IO
 - extensions/brain-wiki/src/obsidian-fs.ts → New: file operations via obsidian create/move/rename/delete
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths, resolves wikilinks to absolute paths
-- extensions/brain-wiki/src/project-sync.ts → Create weekly project notes, scan/review future-mode project metadata, add notes/suggest tasks for Project/ folders
-- extensions/brain-wiki/src/project-sync.test.ts → Unit tests for project sync, future-mode metadata scan, and review gaps
+- extensions/brain-wiki/src/project-schema.ts → Build deterministic `Project/` folder templates and validate canonical project frontmatter
+- extensions/brain-wiki/src/project-sync.ts → Create four-file project folders, scan/review canonical project state, mutate project metadata, manage structured tasks, and promote qualifying work to LIST.md
+- extensions/brain-wiki/src/project-sync.test.ts → Unit tests for canonical `project.md` scan, status review, project mutations, task mutations, task promotion, and frontmatter normalization
+- extensions/brain-wiki/src/project-tasks.ts → Parse/render/update structured `tasks.md` blocks and allocate deterministic task ids
+- extensions/brain-wiki/src/project-timeline.ts → Format append-only typed timeline entries for project history
 - extensions/brain-wiki/src/graph.ts → Vault graph discovery: search, neighborhood traversal, and PKB bridging through Obsidian CLI
 - extensions/brain-wiki/src/graph.test.ts → Unit tests for graph discovery, traversal, and bridge output
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
