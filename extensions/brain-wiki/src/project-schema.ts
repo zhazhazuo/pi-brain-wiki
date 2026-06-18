@@ -44,11 +44,21 @@ tags:
 
 export function validateProjectFrontmatter(frontmatter: Record<string, unknown>) {
   const errors: string[] = [];
-  if (frontmatter.type !== "project") errors.push("type must be project");
-  if (!PROJECT_STATUSES.includes(String(frontmatter.status) as ProjectStatus)) errors.push("status is invalid");
-  if ((frontmatter.status === "active" || frontmatter.status === "waiting" || frontmatter.status === "blocked")
-    && !String(frontmatter.next_action ?? "").trim()) {
-    errors.push(`next_action is required when status is ${frontmatter.status}`);
+  const type = normalizeScalar(frontmatter.type);
+  const status = normalizeScalar(frontmatter.status) as ProjectStatus | "";
+  const nextAction = normalizeScalar(frontmatter.next_action);
+  if (type !== "project") errors.push("type must be project");
+  if (!PROJECT_STATUSES.includes(status as ProjectStatus)) errors.push("status is invalid");
+  if ((status === "active" || status === "waiting" || status === "blocked") && !nextAction) {
+    errors.push(`next_action is required when status is ${status}`);
   }
   return { ok: errors.length === 0, errors };
+}
+
+function normalizeScalar(value: unknown): string {
+  if (Array.isArray(value)) {
+    return normalizeScalar(value[0]);
+  }
+  if (value == null) return "";
+  return String(value).trim();
 }

@@ -5,6 +5,30 @@ import { join } from "node:path";
 import { buildProjectTemplate, validateProjectFrontmatter } from "./project-schema.ts";
 import { formatProjectTitleForWeek, syncProject } from "./project-sync.ts";
 
+function projectMarkdown(overrides: Record<string, string> = {}) {
+  return [
+    "---",
+    `type: ${overrides.type ?? "project"}`,
+    `title: ${overrides.title ?? "Launch Atlas"}`,
+    `status: ${overrides.status ?? "active"}`,
+    `created: ${overrides.created ?? "2026-06-18"}`,
+    `updated: ${overrides.updated ?? "2026-06-18"}`,
+    `area: ${overrides.area ?? "[[Area/Product]]"}`,
+    `priority: ${overrides.priority ?? "high"}`,
+    `deadline: ${overrides.deadline ?? ""}`,
+    `next_action: ${overrides.next_action ?? "[[Project/w25-Launch Atlas/notes#Kickoff]]"}`,
+    `review_after: ${overrides.review_after ?? ""}`,
+    "resources:",
+    "  - [[Resource/PRD]]",
+    "related_projects: []",
+    "tags:",
+    "  - project",
+    "---",
+    `# ${overrides.title ?? "Launch Atlas"}`,
+    "",
+  ].join("\n");
+}
+
 describe("project schema", () => {
   test("creates the deterministic four-file project template", async () => {
     const template = buildProjectTemplate("Launch Atlas", new Date("2026-06-18T12:00:00Z"));
@@ -107,6 +131,34 @@ describe("syncProject Obsidian IO", () => {
         deadline: "2026-05-29",
         nextAction: "Prepare showcase script",
         lastAction: "Prepare showcase script",
+        updated: null,
+      },
+    ]);
+  });
+
+  test("scans newly created project.md files from the deterministic template", async () => {
+    const vaultRoot = await mkdtemp(join(tmpdir(), "brain-wiki-project-template-"));
+    const wikiRoot = join(vaultRoot, "Wiki");
+    const projectDir = join(vaultRoot, "Project", "w25-Launch Atlas");
+    await mkdir(projectDir, { recursive: true });
+    const template = buildProjectTemplate("Launch Atlas", new Date("2026-06-18T12:00:00Z"));
+    for (const [name, content] of Object.entries(template)) {
+      await writeFile(join(projectDir, name), content, "utf8");
+    }
+
+    const result = await syncProject(wikiRoot, "scan");
+
+    expect(result.projects).toEqual([
+      {
+        path: "w25-Launch Atlas",
+        mainPath: "w25-Launch Atlas/project.md",
+        title: "Launch Atlas",
+        status: "idea",
+        priority: "medium",
+        deadline: null,
+        nextAction: null,
+        lastAction: null,
+        updated: "2026-06-18",
       },
     ]);
   });
@@ -151,12 +203,15 @@ describe("syncProject Obsidian IO", () => {
 
     expect(result.review).toEqual({
       counts: {
+        idea: 0,
         active: 1,
         waiting: 0,
-        complete: 1,
+        blocked: 0,
+        done: 1,
         archived: 0,
         unknown: 0,
       },
+      blocked: [],
       noNextAction: [
         {
           path: "Active Without Action",
@@ -172,6 +227,58 @@ describe("syncProject Obsidian IO", () => {
         },
       ],
     });
+  });
+
+  test("review recognizes blocked and done statuses from canonical project.md files", async () => {
+    const vaultRoot = await mkdtemp(join(tmpdir(), "brain-wiki-project-statuses-"));
+    const wikiRoot = join(vaultRoot, "Wiki");
+    const projectRoot = join(vaultRoot, "Project");
+    await mkdir(join(projectRoot, "Blocked Work"), { recursive: true });
+    await mkdir(join(projectRoot, "Done Work"), { recursive: true });
+    await writeFile(
+      join(projectRoot, "Blocked Work", "project.md"),
+      projectMarkdown({
+        title: "Blocked Work",
+        status: "blocked",
+        next_action: "[[Resource/vendor-email]] waiting on credentials",
+      }),
+      "utf8",
+    );
+    await writeFile(
+      join(projectRoot, "Done Work", "project.md"),
+      projectMarkdown({
+        title: "Done Work",
+        status: "done",
+        next_action: "",
+      }),
+      "utf8",
+    );
+
+    const result = await syncProject(wikiRoot, "review");
+
+    expect(result.review?.counts).toEqual({
+      active: 0,
+      waiting: 0,
+      blocked: 1,
+      done: 1,
+      archived: 0,
+      idea: 0,
+      unknown: 0,
+    });
+    expect(result.review?.blocked).toEqual([
+      {
+        path: "Blocked Work",
+        title: "Blocked Work",
+        status: "blocked",
+      },
+    ]);
+    expect(result.review?.archiveCandidates).toEqual([
+      {
+        path: "Done Work",
+        title: "Done Work",
+        status: "done",
+      },
+    ]);
   });
 
   test("does not overwrite existing notes when CLI append fails", async () => {
@@ -252,6 +359,140 @@ tags:
     expect(writes[1]).toContain("[[Resource/vendor-email]]");
   });
 
+  test("set_status rejects invalid statuses", async () => {
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => projectMarkdown(),
+      create: async () => undefined,
+      append: async () => undefined,
+    } as any;
+
+    await expect(
+      syncProject(
+        "/vault/Wiki",
+        "set_status",
+        "w25-Launch Atlas",
+        JSON.stringify({ status: "in-review", reason: "bad enum" }),
+        client,
+      ),
+    ).rejects.toThrow("status is invalid");
+  });
+
+  test("set_next_action updates project.md and appends a timeline entry", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async (path: string) => path.endsWith("project.md")
+        ? projectMarkdown({ status: "active", next_action: "[[Project/w25-Launch Atlas/notes#Kickoff]]" })
+        : "# Launch Atlas Timeline\n",
+      create: async (_path: string, content: string) => { writes.push(content); },
+      append: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const result = await syncProject(
+      "/vault/Wiki",
+      "set_next_action",
+      "w25-Launch Atlas",
+      JSON.stringify({ next_action: "[[Project/w25-Launch Atlas/notes#Decision]]", reason: "[[Project/w25-Launch Atlas/notes#Decision]]" }),
+      client,
+    );
+
+    expect(result.projectUpdated).toBe(true);
+    expect(writes[0]).toContain("next_action: '[[Project/w25-Launch Atlas/notes#Decision]]'");
+    expect(writes[1]).toContain("decision");
+  });
+
+  test("set_deadline updates project.md", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => projectMarkdown({ status: "active", deadline: "" }),
+      create: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const result = await syncProject(
+      "/vault/Wiki",
+      "set_deadline",
+      "w25-Launch Atlas",
+      JSON.stringify({ deadline: "2026-06-30" }),
+      client,
+    );
+
+    expect(result.projectUpdated).toBe(true);
+    expect(writes[0]).toContain("deadline: '2026-06-30'");
+  });
+
+  test("link_resource and relate update list-style frontmatter fields", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => projectMarkdown(),
+      create: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const resourceResult = await syncProject(
+      "/vault/Wiki",
+      "link_resource",
+      "w25-Launch Atlas",
+      JSON.stringify({ resource: "[[Resource/Launch Brief]]" }),
+      client,
+    );
+    const relateResult = await syncProject(
+      "/vault/Wiki",
+      "relate",
+      "w25-Launch Atlas",
+      JSON.stringify({ project_link: "[[Project/w23-Shared Service/project]]" }),
+      client,
+    );
+
+    expect(resourceResult.projectUpdated).toBe(true);
+    expect(relateResult.projectUpdated).toBe(true);
+    expect(writes[0]).toContain("[[Resource/Launch Brief]]");
+    expect(writes[1]).toContain("[[Project/w23-Shared Service/project]]");
+  });
+
+  test("project mutations keep Obsidian links as scalar or flat list values", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => projectMarkdown({ status: "active" }),
+      create: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    await syncProject(
+      "/vault/Wiki",
+      "link_resource",
+      "w25-Launch Atlas",
+      JSON.stringify({ resource: "[[Resource/Launch Brief]]" }),
+      client,
+    );
+
+    expect(writes[0]).toContain("area: '[[Area/Product]]'");
+    expect(writes[0]).toContain("- '[[Resource/PRD]]'");
+    expect(writes[0]).toContain("- '[[Resource/Launch Brief]]'");
+    expect(writes[0]).not.toContain("- - Area/Product");
+  });
+
+  test("timeline_append adds typed timeline entries", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      append: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const result = await syncProject(
+      "/vault/Wiki",
+      "timeline_append",
+      "w25-Launch Atlas",
+      JSON.stringify({ type: "milestone", summary: "Reached private beta", links: ["[[Resource/Beta Notes]]"] }),
+      client,
+    );
+
+    expect(result.projectUpdated).toBe(true);
+    expect(writes[0]).toContain("milestone");
+    expect(writes[0]).toContain("[[Resource/Beta Notes]]");
+  });
+
   test("task_add appends a structured task block", async () => {
     const writes: string[] = [];
     const client = {
@@ -270,5 +511,79 @@ tags:
     expect(writes[0]).toContain("### TASK-001");
     expect(writes[0]).toContain("- status: open");
     expect(writes[0]).toContain("- summary: Draft launch checklist");
+  });
+
+  test("task_add allocates the next available task id", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => "# Launch Atlas Tasks\n\n## Open\n\n### TASK-001\n- status: open\n- priority: medium\n- created: 2026-06-18\n- depends_on: []\n- links: []\n- summary: Existing task\n",
+      create: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    await syncProject(
+      "/vault/Wiki",
+      "task_add",
+      "w25-Launch Atlas",
+      JSON.stringify({ summary: "Second task" }),
+      client,
+    );
+
+    expect(writes[0]).toContain("### TASK-002");
+  });
+
+  test("task_update, task_block, and task_close mutate existing tasks by id", async () => {
+    const writes: string[] = [];
+    const baseTasks = "# Launch Atlas Tasks\n\n## Open\n\n### TASK-001\n- status: open\n- priority: medium\n- created: 2026-06-18\n- depends_on: []\n- links: []\n- summary: Existing task\n";
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => baseTasks,
+      create: async (_path: string, content: string) => { writes.push(content); },
+      append: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    await syncProject("/vault/Wiki", "task_update", "w25-Launch Atlas", JSON.stringify({ id: "TASK-001", summary: "Updated task" }), client);
+    await syncProject("/vault/Wiki", "task_block", "w25-Launch Atlas", JSON.stringify({ id: "TASK-001", reason: "[[Resource/vendor-email]]" }), client);
+    await syncProject("/vault/Wiki", "task_close", "w25-Launch Atlas", JSON.stringify({ id: "TASK-001" }), client);
+
+    expect(writes[0]).toContain("- summary: Updated task");
+    expect(writes[1]).toContain("- status: blocked");
+    expect(writes[2]).toContain("- status: done");
+  });
+
+  test("task_promote only promotes qualifying tasks to LIST.md", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async (path: string) => {
+        if (path.endsWith("tasks.md")) {
+          return "# Launch Atlas Tasks\n\n## Open\n\n### TASK-001\n- status: open\n- priority: high\n- created: 2026-06-18\n- depends_on: []\n- links: []\n- summary: Existing task\n";
+        }
+        return "**2026-06-18**\n";
+      },
+      create: async (_path: string, content: string) => { writes.push(content); },
+      append: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const promoted = await syncProject(
+      "/vault/Wiki",
+      "task_promote",
+      "w25-Launch Atlas",
+      JSON.stringify({ id: "TASK-001", crossProject: true }),
+      client,
+    );
+
+    await expect(
+      syncProject(
+        "/vault/Wiki",
+        "task_promote",
+        "w25-Launch Atlas",
+        JSON.stringify({ id: "TASK-001" }),
+        client,
+      ),
+    ).rejects.toThrow("task does not meet promotion criteria");
+
+    expect(promoted.taskSuggested).toBe(true);
+    expect(writes.some((content) => content.includes("Suggested task: Existing task"))).toBe(true);
   });
 });

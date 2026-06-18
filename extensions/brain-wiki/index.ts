@@ -1719,7 +1719,11 @@ function formatProjectSyncResult(
   if (action === "review" && result.review) {
     const review = result.review;
     const lines = [
-      `Project review: active=${review.counts.active} waiting=${review.counts.waiting} complete=${review.counts.complete} archived=${review.counts.archived} unknown=${review.counts.unknown}`,
+      `Project review: idea=${review.counts.idea} active=${review.counts.active} waiting=${review.counts.waiting} blocked=${review.counts.blocked} done=${review.counts.done} archived=${review.counts.archived} unknown=${review.counts.unknown}`,
+      `Blocked: ${review.blocked?.length ?? 0}`,
+      ...(review.blocked ?? [])
+        .slice(0, 5)
+        .map((p) => `- ${p.title} [${p.status}]`),
       `Missing next action: ${review.noNextAction.length}`,
       ...review.noNextAction
         .slice(0, 5)
@@ -1737,8 +1741,17 @@ function formatProjectSyncResult(
   if (action === "create_project" && result.projectCreated) {
     return `Project created: ${result.projectPath}`;
   }
+  if ((action === "set_status" || action === "set_next_action" || action === "set_deadline" || action === "link_resource" || action === "relate" || action === "timeline_append") && result.projectUpdated) {
+    return "Project updated.";
+  }
+  if ((action === "task_add" || action === "task_update" || action === "task_close" || action === "task_block") && result.taskUpdated) {
+    return "Project task updated.";
+  }
   if (action === "suggest_task" && result.taskSuggested) {
     return "Task suggestion added to LIST.md.";
+  }
+  if (action === "task_promote" && result.taskSuggested) {
+    return "Project task promoted to LIST.md.";
   }
   return "Done.";
 }

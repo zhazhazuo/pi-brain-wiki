@@ -439,15 +439,23 @@ export interface ProjectSyncResult {
     deadline: string | null;
     nextAction: string | null;
     lastAction: string | null;
+    updated?: string | null;
   }>;
   review?: {
     counts: {
+      idea: number;
       active: number;
       waiting: number;
-      complete: number;
+      blocked: number;
+      done: number;
       archived: number;
       unknown: number;
     };
+    blocked?: Array<{
+      path: string;
+      title: string;
+      status: string;
+    }>;
     noNextAction: Array<{
       path: string;
       title: string;
