@@ -363,6 +363,13 @@ export interface TriageResult {
 
 export type ProjectSyncAction = "scan" | "create_project" | "add_note" | "suggest_task" | "review";
 
+export type ProjectStatus = "idea" | "active" | "waiting" | "blocked" | "done" | "archived";
+
+export interface ProjectValidationResult {
+  ok: boolean;
+  errors: string[];
+}
+
 export interface ProjectSyncResult {
   projects?: Array<{
     path: string;

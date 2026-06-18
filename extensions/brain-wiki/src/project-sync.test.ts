@@ -2,7 +2,48 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { buildProjectTemplate, validateProjectFrontmatter } from "./project-schema.ts";
 import { formatProjectTitleForWeek, syncProject } from "./project-sync.ts";
+
+describe("project schema", () => {
+  test("creates the deterministic four-file project template", async () => {
+    const template = buildProjectTemplate("Launch Atlas", new Date("2026-06-18T12:00:00Z"));
+
+    expect(Object.keys(template).sort()).toEqual([
+      "notes.md",
+      "project.md",
+      "tasks.md",
+      "timeline.md",
+    ]);
+    expect(template["project.md"]).toContain("type: project");
+    expect(template["project.md"]).toContain("status: idea");
+    expect(template["project.md"]).toContain("## Active Links");
+    expect(template["tasks.md"]).toContain("# Launch Atlas Tasks");
+    expect(template["timeline.md"]).toContain("# Launch Atlas Timeline");
+    expect(template["notes.md"]).toContain("# Launch Atlas Notes");
+  });
+
+  test("rejects project frontmatter without next_action for active work", () => {
+    const result = validateProjectFrontmatter({
+      type: "project",
+      title: "Launch Atlas",
+      status: "active",
+      created: "2026-06-18",
+      updated: "2026-06-18",
+      area: "[[Area/Product]]",
+      priority: "high",
+      deadline: "",
+      next_action: "",
+      review_after: "",
+      resources: ["[[Resource/PRD]]"],
+      related_projects: [],
+      tags: ["project"],
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain("next_action is required when status is active");
+  });
+});
 
 describe("syncProject Obsidian IO", () => {
   test("formats project titles with a zero-padded ISO week prefix", () => {
