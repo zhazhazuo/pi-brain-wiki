@@ -251,4 +251,24 @@ tags:
     expect(writes[1]).toContain("status_change");
     expect(writes[1]).toContain("[[Resource/vendor-email]]");
   });
+
+  test("task_add appends a structured task block", async () => {
+    const writes: string[] = [];
+    const client = {
+      config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
+      readFile: async () => "# Launch Atlas Tasks\n\n## Open\n",
+      create: async (_path: string, content: string) => { writes.push(content); },
+    } as any;
+
+    const result = await syncProject("/vault/Wiki", "task_add", "w25-Launch Atlas", JSON.stringify({
+      summary: "Draft launch checklist",
+      priority: "high",
+      links: ["[[Project/w25-Launch Atlas/project]]", "[[Resource/Launch Brief]]"],
+    }), client);
+
+    expect(result.taskUpdated).toBe(true);
+    expect(writes[0]).toContain("### TASK-001");
+    expect(writes[0]).toContain("- status: open");
+    expect(writes[0]).toContain("- summary: Draft launch checklist");
+  });
 });

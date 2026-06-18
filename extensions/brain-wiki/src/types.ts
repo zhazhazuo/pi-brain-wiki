@@ -372,7 +372,12 @@ export type ProjectSyncAction =
   | "set_deadline"
   | "link_resource"
   | "relate"
-  | "timeline_append";
+  | "timeline_append"
+  | "task_add"
+  | "task_update"
+  | "task_close"
+  | "task_block"
+  | "task_promote";
 
 export type ProjectStatus = "idea" | "active" | "waiting" | "blocked" | "done" | "archived";
 
@@ -416,6 +421,7 @@ export interface ProjectSyncResult {
   projectTitle?: string;
   createdFiles?: string[];
   projectUpdated?: boolean;
+  taskUpdated?: boolean;
   noteAdded?: boolean;
   taskSuggested?: boolean;
 }

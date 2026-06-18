@@ -4,6 +4,7 @@ import { appendMarkdown, readMarkdown, toObsidianPath, writeMarkdown } from "./o
 import { buildProjectTemplate } from "./project-schema.ts";
 import type { ProjectStatus } from "./project-schema.ts";
 import { formatTimelineEntry } from "./project-timeline.ts";
+import { appendTaskBlock } from "./project-tasks.ts";
 import { projectRoot, listMdPath } from "./paths.ts";
 import type { ProjectSyncAction, ProjectSyncResult } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
@@ -38,6 +39,9 @@ export async function syncProject(
     case "set_status":
       if (!project || !content) throw new Error("project and content required for set_status");
       return setProjectStatus(projRoot, project, content, client);
+    case "task_add":
+      if (!project || !content) throw new Error("project and content required for task_add");
+      return addProjectTask(projRoot, project, content, client);
     default:
       throw new Error(`Unknown project sync action: ${action}`);
   }
@@ -158,6 +162,29 @@ async function setProjectStatus(
     links: [input.reason],
   }));
   return { projectUpdated: true };
+}
+
+async function addProjectTask(
+  projRoot: string,
+  project: string,
+  content: string,
+  client?: ObsidianClient | null,
+): Promise<ProjectSyncResult> {
+  if (!client) throw new Error("Obsidian client required for project writes");
+  const input = JSON.parse(content) as { summary: string; priority?: "low" | "medium" | "high"; links?: string[] };
+  const tasksPath = join(projRoot, project, "tasks.md");
+  const current = await readMarkdown(client, tasksPath);
+  const next = appendTaskBlock(current, {
+    id: "TASK-001",
+    status: "open",
+    priority: input.priority ?? "medium",
+    created: new Date().toISOString().slice(0, 10),
+    depends_on: [],
+    links: input.links ?? [],
+    summary: input.summary,
+  });
+  await writeMarkdown(client, tasksPath, next);
+  return { taskUpdated: true };
 }
 
 export function formatProjectTitleForWeek(projectTitle: string, date = new Date()): string {
