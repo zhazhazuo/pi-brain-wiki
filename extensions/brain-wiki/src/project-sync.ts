@@ -187,6 +187,33 @@ async function addProjectTask(
   return { taskUpdated: true };
 }
 
+export function summarizeProjectReview(projects: Array<{
+  path: string;
+  title: string;
+  status: string;
+  priority: string;
+  deadline: string | null;
+  nextAction: string | null;
+  lastAction: string | null;
+  updated?: string | null;
+}>, today: string) {
+  const staleThreshold = new Date(today);
+  staleThreshold.setDate(staleThreshold.getDate() - 7);
+  const staleCutoff = staleThreshold.toISOString().slice(0, 10);
+
+  return {
+    blocked: projects.filter((project) => project.status === "blocked"),
+    noNextAction: projects.filter((project) =>
+      (project.status === "active" || project.status === "waiting" || project.status === "blocked") && !project.nextAction),
+    staleActive: projects.filter((project) => project.status === "active" && project.updated && project.updated < staleCutoff),
+    archiveCandidates: projects.filter((project) => project.status === "done"),
+  };
+}
+
+export function canPromoteTask(input: { status: string; crossProject?: boolean; urgentToday?: boolean; coordination?: boolean }) {
+  return input.status !== "done" && Boolean(input.crossProject || input.urgentToday || input.coordination);
+}
+
 export function formatProjectTitleForWeek(projectTitle: string, date = new Date()): string {
   const week = isoWeekNumber(date);
   return `w${String(week).padStart(2, "0")}-${projectTitle.trim()}`;
