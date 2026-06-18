@@ -1,6 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
-import { appendMarkdown, readMarkdown, toObsidianPath, writeMarkdownPage, writeMarkdown } from "./obsidian-io.ts";
+import { appendMarkdown, readMarkdown, toObsidianPath, writeMarkdown } from "./obsidian-io.ts";
+import { buildProjectTemplate } from "./project-schema.ts";
 import { projectRoot, listMdPath } from "./paths.ts";
 import type { ProjectSyncAction, ProjectSyncResult } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
@@ -77,31 +78,21 @@ async function createProject(
   projectTitle: string,
   client?: ObsidianClient | null,
 ): Promise<ProjectSyncResult> {
-  if (!client) {
-    throw new Error("Obsidian client required for project writes");
+  if (!client) throw new Error("Obsidian client required for project writes");
+
+  const folderName = formatProjectTitleForWeek(projectTitle);
+  const projectDir = join(projRoot, folderName);
+  const template = buildProjectTemplate(projectTitle.trim(), new Date());
+
+  for (const [fileName, content] of Object.entries(template)) {
+    await writeMarkdown(client, join(projectDir, fileName), content);
   }
-
-  const title = formatProjectTitleForWeek(projectTitle);
-  const absolutePath = join(projRoot, title, `${title}.md`);
-  const date = new Date().toISOString().slice(0, 10);
-  const frontmatter = {
-    type: "project",
-    title,
-    project: projectTitle.trim(),
-    status: "active",
-    date,
-    priority: "medium",
-    deadline: "",
-    next_action: "",
-  };
-  const body = `# ${title}\n\n## Outcome\n\n## Next Action\n\n## Notes\n\n## Tasks\n`;
-
-  await writeMarkdownPage(client, absolutePath, frontmatter, body);
 
   return {
     projectCreated: true,
-    projectTitle: title,
-    projectPath: relative(join(projRoot, ".."), absolutePath).replace(/\\/g, "/"),
+    projectTitle: folderName,
+    projectPath: relative(join(projRoot, ".."), projectDir).replace(/\\/g, "/"),
+    createdFiles: Object.keys(template).map((name) => `Project/${folderName}/${name}`),
   };
 }
 

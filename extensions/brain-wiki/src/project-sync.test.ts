@@ -50,27 +50,21 @@ describe("syncProject Obsidian IO", () => {
     expect(formatProjectTitleForWeek("Project Title", new Date("2026-01-14T12:00:00Z"))).toBe("w03-Project Title");
   });
 
-  test("creates a project directory and same-named markdown file with the weekly title", async () => {
+  test("create_project writes project.md, tasks.md, timeline.md, and notes.md", async () => {
     const calls: Array<{ method: string; args: unknown[] }> = [];
-    const weeklyTitle = formatProjectTitleForWeek("Project Title");
     const client = {
       config: { socketPath: "", vaultCwd: "/vault", timeout: 0 },
-      create: async (...args: unknown[]) => {
-        calls.push({ method: "create", args });
-      },
+      create: async (...args: unknown[]) => { calls.push({ method: "create", args }); },
     } as any;
 
-    const result = await syncProject("/vault/Wiki", "create_project", "Project Title", undefined, client);
+    await syncProject("/vault/Wiki", "create_project", "Launch Atlas", undefined, client);
 
-    expect(result.projectCreated).toBe(true);
-    expect(result.projectPath).toBe(`Project/${weeklyTitle}/${weeklyTitle}.md`);
-    expect(calls).toHaveLength(1);
-    expect(calls[0].args[0]).toBe(`Project/${weeklyTitle}/${weeklyTitle}.md`);
-    expect(String(calls[0].args[1])).toContain(`title: ${weeklyTitle}`);
-    expect(String(calls[0].args[1])).toContain(`type: project`);
-    expect(String(calls[0].args[1])).toContain(`project: Project Title`);
-    expect(String(calls[0].args[1])).toContain(`next_action:`);
-    expect(String(calls[0].args[1])).toContain(`# ${weeklyTitle}`);
+    expect(calls.map((call) => call.args[0])).toEqual([
+      "Project/w25-Launch Atlas/project.md",
+      "Project/w25-Launch Atlas/tasks.md",
+      "Project/w25-Launch Atlas/timeline.md",
+      "Project/w25-Launch Atlas/notes.md",
+    ]);
   });
 
   test("rejects create_project without a client", async () => {

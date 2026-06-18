@@ -403,6 +403,7 @@ export interface ProjectSyncResult {
   projectCreated?: boolean;
   projectPath?: string;
   projectTitle?: string;
+  createdFiles?: string[];
   noteAdded?: boolean;
   taskSuggested?: boolean;
 }
