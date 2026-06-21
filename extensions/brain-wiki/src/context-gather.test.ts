@@ -28,6 +28,12 @@ describe("gatherExternalContext", () => {
     })).rejects.toThrow("requires a query");
   });
 
+  test("requires a query for question intent", async () => {
+    await expect(gatherExternalContext(context, {
+      intent: "question",
+    })).rejects.toThrow('Intent "question" requires a query');
+  });
+
   test("returns overview steps and structured files_read", async () => {
     const result = await gatherExternalContext(context, {
       intent: "overview",
