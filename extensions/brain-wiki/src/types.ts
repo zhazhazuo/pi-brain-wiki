@@ -47,6 +47,33 @@ export interface ResolvedExternalContext {
   notes?: string;
 }
 
+export interface GatherEvidence {
+  kind: "file" | "search" | "commit" | "note";
+  label: string;
+  detail: string;
+}
+
+export interface GatherExternalContextInput {
+  intent: ContextGatherIntent;
+  query?: string;
+  readTextFile?: (path: string) => Promise<string>;
+  listRepoFiles?: () => Promise<string[]>;
+  searchRepo?: (query: string) => Promise<string[]>;
+  getRecentCommits?: () => Promise<string[]>;
+}
+
+export interface GatherExternalContextResult {
+  context_id: string;
+  repo_path: string;
+  intent: ContextGatherIntent;
+  files_read: string[];
+  commands_used: string[];
+  summary: string[];
+  evidence: GatherEvidence[];
+  limits_hit: string[];
+  follow_up_suggestions: string[];
+}
+
 export interface WikiConfig {
   version: number;
   title: string;
