@@ -28,6 +28,25 @@ export interface LocalEnvConfig {
   repos: Record<string, string>;
 }
 
+export interface ResolveExternalContextInput {
+  context_id?: string;
+  pkb_note?: string;
+}
+
+export interface ResolvedExternalContext {
+  context_id: string;
+  label: string;
+  pkb_note: string;
+  repo_key: string;
+  repo_path: string;
+  allowed_intents: ContextGatherIntent[];
+  seed_files: string[];
+  include_paths: string[];
+  exclude_paths: string[];
+  search_terms: string[];
+  notes?: string;
+}
+
 export interface WikiConfig {
   version: number;
   title: string;
