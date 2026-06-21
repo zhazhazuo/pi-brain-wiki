@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { createDefaultConfig, hasWikiConfig, writeDefaultConfig } from "./config.ts";
+import { createDefaultConfig, hasWikiConfig, writeDefaultConfig, writeLocalEnvExample } from "./config.ts";
 import { readTemplate, renderTemplate, writePage } from "./frontmatter.ts";
 import { buildEnsurePageGraphTerms, findGraphContext, renderPkbContextBlock } from "./graph.ts";
 import { canonicalPagePath, metaPath, toRelative } from "./paths.ts";
@@ -323,6 +323,7 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   }
 
   await writeDefaultConfig(root, title, domain);
+  const localEnvExamplePath = await writeLocalEnvExample(root);
 
   const config = createDefaultConfig(title, domain);
   await writeFile(join(root, config.templates.summary), DEFAULT_SUMMARY_TEMPLATE, "utf8");
@@ -341,7 +342,11 @@ export async function bootstrapVault(root: string, title: string, domain?: strin
   await writeFile(metaPath(root, "workflows.md"), `# Workflow Routes\n\n## Active\n\n| Trigger | Workflow | Use When |\n|---|---|---|\n|  | _None_ |  |\n\n## Draft\n\n| Trigger | Workflow | Use When |\n|---|---|---|\n|  | _None_ |  |\n`, "utf8");
   await writeFile(join(root, "discussions", "route.md"), defaultRouteMarkdown(), "utf8");
 
-  return [toRelative(root, configPath), ...created.map((dir) => toRelative(root, dir))];
+  return [
+    toRelative(root, configPath),
+    toRelative(root, localEnvExamplePath),
+    ...created.map((dir) => toRelative(root, dir)),
+  ];
 }
 
 // ── Ensure Page ──────────────────────────────────────────────

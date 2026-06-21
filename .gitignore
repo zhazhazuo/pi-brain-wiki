@@ -3,3 +3,5 @@ npm-debug.log*
 .DS_Store
 *.tgz
 .worktrees/
+.wiki/env.local.json
+!.wiki/env.local.example.json

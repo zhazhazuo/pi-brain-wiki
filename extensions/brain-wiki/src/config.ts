@@ -1,8 +1,10 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { WikiConfig } from "./types.ts";
+import type { LocalEnvConfig, WikiConfig } from "./types.ts";
 
 const CONFIG_RELATIVE_PATH = join(".wiki", "config.json");
+export const LOCAL_ENV_RELATIVE_PATH = join(".wiki", "env.local.json");
+const LOCAL_ENV_EXAMPLE_RELATIVE_PATH = join(".wiki", "env.local.example.json");
 
 export function createDefaultConfig(title: string, domain = "General"): WikiConfig {
   return {
@@ -52,6 +54,7 @@ export function createDefaultConfig(title: string, domain = "General"): WikiConf
     search: {
       defaultLimit: 10,
     },
+    contexts: {},
   };
 }
 
@@ -92,12 +95,38 @@ export async function loadConfig(root: string): Promise<WikiConfig> {
     },
     protect: Array.isArray(parsed.protect) ? parsed.protect : fallback.protect,
     allowExternal: Array.isArray(parsed.allowExternal) ? parsed.allowExternal : fallback.allowExternal,
+    contexts: parsed.contexts ?? fallback.contexts,
   };
+}
+
+export async function loadLocalEnvConfig(root: string): Promise<LocalEnvConfig> {
+  const path = join(root, LOCAL_ENV_RELATIVE_PATH);
+
+  try {
+    const raw = await readFile(path, "utf8");
+    const parsed = JSON.parse(raw) as Partial<LocalEnvConfig>;
+    return {
+      repos: parsed.repos ?? {},
+    };
+  } catch {
+    return { repos: {} };
+  }
 }
 
 export async function writeDefaultConfig(root: string, title: string, domain?: string): Promise<string> {
   const path = join(root, CONFIG_RELATIVE_PATH);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(createDefaultConfig(title, domain), null, 2)}\n`, "utf8");
+  return path;
+}
+
+export async function writeLocalEnvExample(root: string): Promise<string> {
+  const path = join(root, LOCAL_ENV_EXAMPLE_RELATIVE_PATH);
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, `${JSON.stringify({
+    repos: {
+      example_repo_key: "/absolute/path/to/local/repo",
+    },
+  }, null, 2)}\n`, "utf8");
   return path;
 }

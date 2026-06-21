@@ -4,6 +4,19 @@ export type WikiPageType = (typeof PAGE_TYPES)[number];
 export const CANONICAL_PAGE_TYPES = ["topic"] as const;
 export type CanonicalPageType = (typeof CANONICAL_PAGE_TYPES)[number];
 
+export type ContextGatherIntent = "overview" | "architecture" | "implementation" | "usage";
+
+export interface ExternalContextConfig {
+  label: string;
+  pkb_note: string;
+  repo_key: string;
+  allowed_intents: ContextGatherIntent[];
+}
+
+export interface LocalEnvConfig {
+  repos: Record<string, string>;
+}
+
 export interface WikiConfig {
   version: number;
   title: string;
@@ -29,6 +42,7 @@ export interface WikiConfig {
   search: {
     defaultLimit: number;
   };
+  contexts: Record<string, ExternalContextConfig>;
 }
 
 export interface ParsedPage {
