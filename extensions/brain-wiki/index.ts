@@ -1,4 +1,4 @@
-import { readFile, readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -651,15 +651,6 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const result = await gatherExternalContext(resolved, {
         intent: params.intent,
         query: params.query,
-        readTextFile: (path) => readFile(path, "utf8"),
-        listRepoFiles: (options) => listRepoFiles(resolved.repo_path, options),
-        searchRepo: (query, options) => searchRepo(pi, resolved.repo_path, query, options),
-        getRecentCommits: (options) =>
-          getRecentCommits(
-            pi,
-            resolved.repo_path,
-            Math.min(options.limit, params.limit_commits ?? options.limit),
-          ),
       });
       return {
         content: [
@@ -1474,90 +1465,6 @@ async function loadRegistry(root: string): Promise<RegistryData> {
     const rebuilt = await rebuildRegistryAndIndex(root);
     return rebuilt.registry;
   }
-}
-
-async function listRepoFiles(
-  repoPath: string,
-  options: { limit: number; includePaths: string[]; excludePaths: string[] },
-): Promise<string[]> {
-  const roots = options.includePaths.length > 0 ? options.includePaths : ["."];
-  const seen = new Set<string>();
-
-  for (const relativeRoot of roots) {
-    const dirPath = resolve(repoPath, relativeRoot);
-    let entries: string[];
-    try {
-      entries = await readdir(dirPath);
-    } catch {
-      continue;
-    }
-
-    for (const entry of entries) {
-      const relativePath =
-        relativeRoot === "." ? entry : join(relativeRoot, entry);
-      if (isExcludedPath(relativePath, options.excludePaths)) continue;
-      seen.add(relativePath);
-      if (seen.size >= options.limit) {
-        return [...seen];
-      }
-    }
-  }
-
-  return [...seen];
-}
-
-async function searchRepo(
-  pi: ExtensionAPI,
-  repoPath: string,
-  query: string,
-  options: { limit: number; includePaths: string[]; excludePaths: string[] },
-): Promise<string[]> {
-  const args = [
-    "-l",
-    "--no-messages",
-    "--glob",
-    "!node_modules",
-    ...options.excludePaths.flatMap((value) => ["--glob", `!${value}/**`]),
-    ...options.includePaths.flatMap((value) => ["--glob", `${value}/**`]),
-    query,
-    ".",
-  ];
-  const { stdout, code } = await pi.exec("rg", args, { cwd: repoPath });
-  if (code !== 0) {
-    return [];
-  }
-
-  return stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, options.limit);
-}
-
-async function getRecentCommits(
-  pi: ExtensionAPI,
-  repoPath: string,
-  limit: number,
-): Promise<string[]> {
-  const { stdout, code } = await pi.exec(
-    "git",
-    ["log", `-${limit}`, "--oneline"],
-    { cwd: repoPath },
-  );
-  if (code !== 0) {
-    return [];
-  }
-
-  return stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
-function isExcludedPath(path: string, excludePaths: string[]): boolean {
-  return excludePaths.some(
-    (excluded) => path === excluded || path.startsWith(`${excluded}/`),
-  );
 }
 
 export async function buildStatus(root: string): Promise<StatusSummary> {
