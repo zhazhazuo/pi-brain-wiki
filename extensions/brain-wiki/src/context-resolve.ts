@@ -1,5 +1,5 @@
-import { access } from "node:fs/promises";
-import { isAbsolute } from "node:path";
+import { stat } from "node:fs/promises";
+import { isAbsolute, win32 } from "node:path";
 import { loadConfig, loadLocalEnvConfig } from "./config.ts";
 import type {
   ExternalContextConfig,
@@ -25,10 +25,15 @@ export async function resolveExternalContext(
     throw new Error(`Configured repo path must be absolute for repo key "${context.repo_key}"`);
   }
 
+  let repoStat;
   try {
-    await access(repoPath);
+    repoStat = await stat(repoPath);
   } catch {
     throw new Error(`Configured repo path does not exist for repo key "${context.repo_key}"`);
+  }
+
+  if (!repoStat.isDirectory()) {
+    throw new Error(`Configured repo path must be an existing directory for repo key "${context.repo_key}"`);
   }
 
   return {
@@ -38,9 +43,9 @@ export async function resolveExternalContext(
     repo_key: context.repo_key,
     repo_path: repoPath,
     allowed_intents: [...context.allowed_intents],
-    seed_files: [...(context.seed_files ?? [])],
-    include_paths: [...(context.include_paths ?? [])],
-    exclude_paths: [...(context.exclude_paths ?? [])],
+    seed_files: sanitizeRelativePaths(context.seed_files),
+    include_paths: sanitizeRelativePaths(context.include_paths),
+    exclude_paths: sanitizeRelativePaths(context.exclude_paths),
     search_terms: [...(context.search_terms ?? [])],
     notes: context.notes,
   };
@@ -50,6 +55,19 @@ function resolveContextEntry(
   contexts: Record<string, ExternalContextConfig>,
   input: ResolveExternalContextInput,
 ): [string, ExternalContextConfig] {
+  if (input.context_id && input.pkb_note) {
+    const context = contexts[input.context_id];
+    if (!context) {
+      throw new Error(`Unknown external context "${input.context_id}"`);
+    }
+
+    if (context.pkb_note !== input.pkb_note) {
+      throw new Error("context_id and pkb_note must refer to the same external context");
+    }
+
+    return [input.context_id, context];
+  }
+
   if (input.context_id) {
     const context = contexts[input.context_id];
     if (!context) {
@@ -69,4 +87,18 @@ function resolveContextEntry(
   }
 
   throw new Error("Either context_id or pkb_note is required");
+}
+
+function sanitizeRelativePaths(values: string[] | undefined): string[] {
+  return (values ?? []).filter((value) => isSafeRelativePath(value));
+}
+
+function isSafeRelativePath(value: string): boolean {
+  if (!value || isAbsolute(value) || win32.isAbsolute(value)) {
+    return false;
+  }
+
+  return value
+    .split(/[\\/]+/)
+    .every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
 }

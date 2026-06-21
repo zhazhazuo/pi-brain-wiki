@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { resolveExternalContext } from "./context-resolve.ts";
@@ -34,6 +34,16 @@ async function makeRoot() {
 
 async function writeEnv(root: string, repos: Record<string, string>) {
   await writeFile(join(root, ".wiki", "env.local.json"), JSON.stringify({ repos }, null, 2));
+}
+
+async function updateContext(root: string, contextId: string, patch: Record<string, unknown>) {
+  const configPath = join(root, ".wiki", "config.json");
+  const config = JSON.parse(await readFile(configPath, "utf8"));
+  config.contexts[contextId] = {
+    ...config.contexts[contextId],
+    ...patch,
+  };
+  await writeFile(configPath, JSON.stringify(config, null, 2));
 }
 
 describe("resolveExternalContext", () => {
@@ -112,5 +122,52 @@ describe("resolveExternalContext", () => {
     await expect(resolveExternalContext(root, {
       context_id: "sales-tool-application",
     })).rejects.toThrow("Configured repo path does not exist");
+  });
+
+  test("rejects existing absolute file paths as repo roots", async () => {
+    const root = await makeRoot();
+    const repoFile = join(root, "repo-file.txt");
+    await writeFile(repoFile, "not a directory");
+    await writeEnv(root, {
+      sales_tool_application_repo: repoFile,
+    });
+
+    await expect(resolveExternalContext(root, {
+      context_id: "sales-tool-application",
+    })).rejects.toThrow("Configured repo path must be an existing directory");
+  });
+
+  test("sanitizes path lists before returning the resolved descriptor", async () => {
+    const root = await makeRoot();
+    const repoRoot = await mkdtemp(join(tmpdir(), "sales-tool-repo-"));
+    await updateContext(root, "sales-tool-application", {
+      seed_files: ["README.md", "../secrets.txt", "/etc/passwd", "docs/guide.md"],
+      include_paths: ["src", "../private", "/tmp/outside", "packages/app"],
+      exclude_paths: ["dist", "..", "/var/tmp", "coverage/reports"],
+    });
+    await writeEnv(root, {
+      sales_tool_application_repo: repoRoot,
+    });
+
+    const result = await resolveExternalContext(root, {
+      context_id: "sales-tool-application",
+    });
+
+    expect(result.seed_files).toEqual(["README.md", "docs/guide.md"]);
+    expect(result.include_paths).toEqual(["src", "packages/app"]);
+    expect(result.exclude_paths).toEqual(["dist", "coverage/reports"]);
+  });
+
+  test("fails clearly when context id and pkb note disagree", async () => {
+    const root = await makeRoot();
+    const repoRoot = await mkdtemp(join(tmpdir(), "sales-tool-repo-"));
+    await writeEnv(root, {
+      sales_tool_application_repo: repoRoot,
+    });
+
+    await expect(resolveExternalContext(root, {
+      context_id: "sales-tool-application",
+      pkb_note: "Area/5 Work/53 Visable/Other.md",
+    })).rejects.toThrow("context_id and pkb_note must refer to the same external context");
   });
 });
