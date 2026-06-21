@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,8 @@ import { scanActivity } from "./src/activity.ts";
 import { captureSource, listCaptureStates, updateCaptureState } from "./src/capture.ts";
 import { rebuildDigest } from "./src/digest.ts";
 import { loadConfig } from "./src/config.ts";
+import { gatherExternalContext } from "./src/context-gather.ts";
+import { resolveExternalContext } from "./src/context-resolve.ts";
 import { analyzeToolMutation } from "./src/guards.ts";
 import { rebuildRegistryAndIndex } from "./src/indexer.ts";
 import { integrateCapturedSource } from "./src/integration.ts";
@@ -123,6 +125,14 @@ const LINT_MODE_ENUM = StringEnum([
   "staleness",
   "graph",
   "all",
+] as const);
+const CONTEXT_INTENT_ENUM = StringEnum([
+  "overview",
+  "architecture",
+  "implementation",
+  "recent_changes",
+  "question",
+  "handoff",
 ] as const);
 const EVENT_KIND_ENUM = StringEnum([
   "capture",
@@ -573,6 +583,92 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
               `Bridge candidates for ${result.title}`,
               `Current links: ${result.currentLinks.length}`,
               `Candidates: ${result.candidates.length}`,
+            ].join("\n"),
+          },
+        ],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_context_resolve",
+    label: "Wiki Context Resolve",
+    description:
+      "Resolve an external context descriptor from a configured context id or PKB note.",
+    promptSnippet:
+      "Resolve an external repo context before gathering implementation or handoff details",
+    parameters: Type.Object({
+      context_id: Type.Optional(
+        Type.String({ description: "Configured external context id" }),
+      ),
+      pkb_note: Type.Optional(
+        Type.String({ description: "PKB note path mapped to an external context" }),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const result = await resolveExternalContext(root, params);
+      return {
+        content: [
+          {
+            type: "text",
+            text: [
+              `Resolved external context: ${result.label}`,
+              `Context ID: ${result.context_id}`,
+              `Repo: ${result.repo_path}`,
+              `Allowed intents: ${result.allowed_intents.join(", ")}`,
+            ].join("\n"),
+          },
+        ],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "wiki_context_gather",
+    label: "Wiki Context Gather",
+    description:
+      "Gather bounded external repository context for overview, architecture, implementation, changes, or handoff work.",
+    promptSnippet:
+      "Gather bounded external repo context using a resolved context id and intent",
+    parameters: Type.Object({
+      context_id: Type.String({ description: "Configured external context id" }),
+      intent: CONTEXT_INTENT_ENUM,
+      query: Type.Optional(
+        Type.String({ description: "Focused query for implementation or question gathers" }),
+      ),
+      limit_commits: Type.Optional(
+        Type.Number({ description: "Optional max recent commits to include" }),
+      ),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const resolved = await resolveExternalContext(root, {
+        context_id: params.context_id,
+      });
+      const result = await gatherExternalContext(resolved, {
+        intent: params.intent,
+        query: params.query,
+        readTextFile: (path) => readFile(path, "utf8"),
+        listRepoFiles: (options) => listRepoFiles(resolved.repo_path, options),
+        searchRepo: (query, options) => searchRepo(pi, resolved.repo_path, query, options),
+        getRecentCommits: (options) =>
+          getRecentCommits(
+            pi,
+            resolved.repo_path,
+            Math.min(options.limit, params.limit_commits ?? options.limit),
+          ),
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: [
+              `External context gather: ${resolved.label}`,
+              `Intent: ${result.intent}`,
+              ...result.summary,
             ].join("\n"),
           },
         ],
@@ -1378,6 +1474,90 @@ async function loadRegistry(root: string): Promise<RegistryData> {
     const rebuilt = await rebuildRegistryAndIndex(root);
     return rebuilt.registry;
   }
+}
+
+async function listRepoFiles(
+  repoPath: string,
+  options: { limit: number; includePaths: string[]; excludePaths: string[] },
+): Promise<string[]> {
+  const roots = options.includePaths.length > 0 ? options.includePaths : ["."];
+  const seen = new Set<string>();
+
+  for (const relativeRoot of roots) {
+    const dirPath = resolve(repoPath, relativeRoot);
+    let entries: string[];
+    try {
+      entries = await readdir(dirPath);
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      const relativePath =
+        relativeRoot === "." ? entry : join(relativeRoot, entry);
+      if (isExcludedPath(relativePath, options.excludePaths)) continue;
+      seen.add(relativePath);
+      if (seen.size >= options.limit) {
+        return [...seen];
+      }
+    }
+  }
+
+  return [...seen];
+}
+
+async function searchRepo(
+  pi: ExtensionAPI,
+  repoPath: string,
+  query: string,
+  options: { limit: number; includePaths: string[]; excludePaths: string[] },
+): Promise<string[]> {
+  const args = [
+    "-l",
+    "--no-messages",
+    "--glob",
+    "!node_modules",
+    ...options.excludePaths.flatMap((value) => ["--glob", `!${value}/**`]),
+    ...options.includePaths.flatMap((value) => ["--glob", `${value}/**`]),
+    query,
+    ".",
+  ];
+  const { stdout, code } = await pi.exec("rg", args, { cwd: repoPath });
+  if (code !== 0) {
+    return [];
+  }
+
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, options.limit);
+}
+
+async function getRecentCommits(
+  pi: ExtensionAPI,
+  repoPath: string,
+  limit: number,
+): Promise<string[]> {
+  const { stdout, code } = await pi.exec(
+    "git",
+    ["log", `-${limit}`, "--oneline"],
+    { cwd: repoPath },
+  );
+  if (code !== 0) {
+    return [];
+  }
+
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function isExcludedPath(path: string, excludePaths: string[]): boolean {
+  return excludePaths.some(
+    (excluded) => path === excluded || path.startsWith(`${excluded}/`),
+  );
 }
 
 export async function buildStatus(root: string): Promise<StatusSummary> {
