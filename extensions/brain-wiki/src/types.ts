@@ -4,13 +4,24 @@ export type WikiPageType = (typeof PAGE_TYPES)[number];
 export const CANONICAL_PAGE_TYPES = ["topic"] as const;
 export type CanonicalPageType = (typeof CANONICAL_PAGE_TYPES)[number];
 
-export type ContextGatherIntent = "overview" | "architecture" | "implementation" | "usage";
+export type ContextGatherIntent =
+  | "overview"
+  | "architecture"
+  | "implementation"
+  | "recent_changes"
+  | "question"
+  | "handoff";
 
 export interface ExternalContextConfig {
   label: string;
   pkb_note: string;
   repo_key: string;
   allowed_intents: ContextGatherIntent[];
+  seed_files?: string[];
+  include_paths?: string[];
+  exclude_paths?: string[];
+  search_terms?: string[];
+  notes?: string;
 }
 
 export interface LocalEnvConfig {
