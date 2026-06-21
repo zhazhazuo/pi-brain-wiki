@@ -3,6 +3,9 @@ import type {
   GatherEvidence,
   GatherExternalContextInput,
   GatherExternalContextResult,
+  GatherRecentCommitOptions,
+  GatherRepoListOptions,
+  GatherRepoSearchOptions,
   ResolvedExternalContext,
 } from "./types.ts";
 
@@ -40,23 +43,27 @@ export async function gatherExternalContext(
   }
 
   if (input.intent === "overview" || input.intent === "architecture") {
-    const repoFiles = await safeListRepoFiles(input);
+    const repoFiles = await safeListRepoFiles(input, buildRepoListOptions(context));
     if (repoFiles) {
       commandsUsed.push("listRepoFiles");
-      summary.push(`Repo file listing returned ${repoFiles.length} paths.`);
+      if (repoFiles.length > MAX_SEARCH_RESULTS) {
+        limitsHit.push(`repo-files:${MAX_SEARCH_RESULTS}`);
+      }
+      summary.push(`Repo file listing returned ${Math.min(repoFiles.length, MAX_SEARCH_RESULTS)} paths.`);
       evidence.push({
         kind: "note",
-        label: "repo-files",
-        detail: repoFiles.slice(0, MAX_SEARCH_RESULTS).join(", "),
+        note: "repo-files",
+        paths: repoFiles.slice(0, MAX_SEARCH_RESULTS),
       });
     } else {
       limitsHit.push("repo-files-unavailable");
+      summary.push(`No repo file listing helper was available for ${context.label}.`);
     }
   }
 
   if (input.intent === "architecture") {
     const searchQuery = buildSearchQuery(context, "architecture");
-    const results = await safeSearchRepo(input, searchQuery);
+    const results = await safeSearchRepo(input, searchQuery, buildRepoSearchOptions(context));
     if (results) {
       commandsUsed.push("searchRepo");
       if (results.length > MAX_SEARCH_RESULTS) {
@@ -64,17 +71,18 @@ export async function gatherExternalContext(
       }
       summary.push(`Architecture search used "${searchQuery}".`);
       for (const match of results.slice(0, MAX_SEARCH_RESULTS)) {
-        evidence.push({ kind: "search", label: searchQuery, detail: match });
+        evidence.push({ kind: "search", query: searchQuery, path: match });
       }
     } else {
       limitsHit.push("search-unavailable");
+      summary.push(`No repo search helper was available for ${context.label}.`);
     }
     followUpSuggestions.push("Ask for implementation details about a specific subsystem.");
   }
 
   if (input.intent === "implementation" || input.intent === "question") {
     const query = input.query!.trim();
-    const results = await safeSearchRepo(input, query);
+    const results = await safeSearchRepo(input, query, buildRepoSearchOptions(context));
     if (results) {
       commandsUsed.push("searchRepo");
       if (results.length > MAX_SEARCH_RESULTS) {
@@ -82,16 +90,17 @@ export async function gatherExternalContext(
       }
       summary.push(`Searched the repo for "${query}".`);
       for (const match of results.slice(0, MAX_SEARCH_RESULTS)) {
-        evidence.push({ kind: "search", label: query, detail: match });
+        evidence.push({ kind: "search", query, path: match });
       }
     } else {
       limitsHit.push("search-unavailable");
+      summary.push(`No repo search helper was available for ${context.label}.`);
     }
     followUpSuggestions.push("Provide an exact file, symbol, or error message to narrow the gather.");
   }
 
   if (input.intent === "recent_changes" || input.intent === "handoff") {
-    const commits = await safeGetRecentCommits(input);
+    const commits = await safeGetRecentCommits(input, buildRecentCommitOptions());
     if (commits) {
       commandsUsed.push("getRecentCommits");
       if (commits.length > MAX_COMMITS) {
@@ -99,10 +108,11 @@ export async function gatherExternalContext(
       }
       summary.push(`Recent commit sample captured from ${context.label}.`);
       for (const commit of commits.slice(0, MAX_COMMITS)) {
-        evidence.push({ kind: "commit", label: "recent-commit", detail: commit });
+        evidence.push({ kind: "commit", commit });
       }
     } else {
       limitsHit.push("commits-unavailable");
+      summary.push(`No recent commits helper was available for ${context.label}.`);
     }
   }
 
@@ -158,8 +168,8 @@ async function readSeedFiles(
     summary.push(`Read seed file ${relativePath}.`);
     evidence.push({
       kind: "file",
-      label: relativePath,
-      detail: summarizeText(content),
+      path: relativePath,
+      preview: summarizeText(content),
     });
   }
 }
@@ -168,28 +178,58 @@ function buildSearchQuery(context: ResolvedExternalContext, fallback: string): s
   return context.search_terms[0] ?? context.include_paths[0] ?? fallback;
 }
 
-async function safeListRepoFiles(input: GatherExternalContextInput): Promise<string[] | null> {
+function buildRepoListOptions(context: ResolvedExternalContext): GatherRepoListOptions {
+  return {
+    limit: MAX_SEARCH_RESULTS,
+    includePaths: [...context.include_paths],
+    excludePaths: [...context.exclude_paths],
+  };
+}
+
+function buildRepoSearchOptions(context: ResolvedExternalContext): GatherRepoSearchOptions {
+  return {
+    limit: MAX_SEARCH_RESULTS,
+    includePaths: [...context.include_paths],
+    excludePaths: [...context.exclude_paths],
+  };
+}
+
+function buildRecentCommitOptions(): GatherRecentCommitOptions {
+  return { limit: MAX_COMMITS };
+}
+
+async function safeListRepoFiles(
+  input: GatherExternalContextInput,
+  options: GatherRepoListOptions,
+): Promise<string[] | null> {
   if (!input.listRepoFiles) {
     return null;
   }
 
-  return input.listRepoFiles();
+  return input.listRepoFiles(options);
 }
 
-async function safeSearchRepo(input: GatherExternalContextInput, query: string): Promise<string[] | null> {
+async function safeSearchRepo(
+  input: GatherExternalContextInput,
+  query: string,
+  options: GatherRepoSearchOptions,
+): Promise<string[] | null> {
   if (!input.searchRepo) {
     return null;
   }
 
-  return input.searchRepo(query);
+  return input.searchRepo(query, options);
 }
 
-async function safeGetRecentCommits(input: GatherExternalContextInput): Promise<string[] | null> {
+async function safeGetRecentCommits(
+  input: GatherExternalContextInput,
+  options: GatherRecentCommitOptions,
+): Promise<string[] | null> {
   if (!input.getRecentCommits) {
     return null;
   }
 
-  return input.getRecentCommits();
+  return input.getRecentCommits(options);
 }
 
 function summarizeText(value: string): string {

@@ -47,4 +47,91 @@ describe("gatherExternalContext", () => {
     expect(result.files_read).toContain("README.md");
     expect(result.summary.length).toBeGreaterThan(0);
   });
+
+  test("returns branchable architecture evidence with bounded search requests", async () => {
+    const calls: Array<{ query: string; limit: number; includePaths: string[]; excludePaths: string[] }> = [];
+
+    const result = await gatherExternalContext(context, {
+      intent: "architecture",
+      readTextFile: async (path) => path.endsWith("README.md") ? "# Sales Tool\n\nApp repo" : "{\"name\":\"sales-tool\"}",
+      listRepoFiles: async ({ limit, includePaths, excludePaths }) => {
+        expect(limit).toBe(5);
+        expect(includePaths).toEqual(["src"]);
+        expect(excludePaths).toEqual(["node_modules"]);
+        return ["README.md", "package.json", "src/index.ts"];
+      },
+      searchRepo: async (query, options) => {
+        calls.push({ query, ...options });
+        return ["src/index.ts", "src/routes.ts"];
+      },
+      getRecentCommits: async () => [],
+    });
+
+    expect(calls).toEqual([{
+      query: "sales tool",
+      limit: 5,
+      includePaths: ["src"],
+      excludePaths: ["node_modules"],
+    }]);
+    expect(result.evidence).toContainEqual({
+      kind: "search",
+      query: "sales tool",
+      path: "src/index.ts",
+    });
+  });
+
+  test("returns recent change evidence for handoff", async () => {
+    const result = await gatherExternalContext({
+      ...context,
+      allowed_intents: [...context.allowed_intents, "handoff"],
+    }, {
+      intent: "handoff",
+      readTextFile: async () => "# Sales Tool",
+      listRepoFiles: async () => ["README.md"],
+      searchRepo: async () => [],
+      getRecentCommits: async ({ limit }) => {
+        expect(limit).toBe(5);
+        return ["abc123 Fix sales flow", "def456 Add docs"];
+      },
+    });
+
+    expect(result.intent).toBe("handoff");
+    expect(result.evidence).toContainEqual({
+      kind: "commit",
+      commit: "abc123 Fix sales flow",
+    });
+    expect(result.follow_up_suggestions).toContain("Ask a focused question about the next task or open issue.");
+  });
+
+  test("records limits_hit when helper results exceed caps", async () => {
+    const result = await gatherExternalContext({
+      ...context,
+      seed_files: ["README.md", "package.json", "src/index.ts", "src/routes.ts"],
+    }, {
+      intent: "architecture",
+      readTextFile: async () => "content",
+      listRepoFiles: async () => ["README.md", "package.json", "src/index.ts", "src/routes.ts", "src/app.ts", "src/lib.ts"],
+      searchRepo: async () => ["src/a.ts", "src/b.ts", "src/c.ts", "src/d.ts", "src/e.ts", "src/f.ts"],
+      getRecentCommits: async () => [],
+    });
+
+    expect(result.limits_hit).toContain("seed_files:3");
+    expect(result.limits_hit).toContain("repo-files:5");
+    expect(result.limits_hit).toContain("search-results:5");
+    expect(result.evidence.filter((item) => item.kind === "search")).toHaveLength(5);
+  });
+
+  test("degrades deterministically when helpers are missing", async () => {
+    const result = await gatherExternalContext({
+      ...context,
+      allowed_intents: [...context.allowed_intents, "recent_changes"],
+    }, {
+      intent: "recent_changes",
+    });
+
+    expect(result.commands_used).toEqual([]);
+    expect(result.evidence).toEqual([]);
+    expect(result.limits_hit).toEqual(["commits-unavailable"]);
+    expect(result.summary).toEqual(["No recent commits helper was available for Sales Tool Application."]);
+  });
 });

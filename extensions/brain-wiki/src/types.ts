@@ -47,19 +47,58 @@ export interface ResolvedExternalContext {
   notes?: string;
 }
 
-export interface GatherEvidence {
-  kind: "file" | "search" | "commit" | "note";
-  label: string;
-  detail: string;
+export interface GatherFileEvidence {
+  kind: "file";
+  path: string;
+  preview: string;
+}
+
+export interface GatherSearchEvidence {
+  kind: "search";
+  query: string;
+  path: string;
+}
+
+export interface GatherCommitEvidence {
+  kind: "commit";
+  commit: string;
+}
+
+export interface GatherNoteEvidence {
+  kind: "note";
+  note: string;
+  paths?: string[];
+}
+
+export type GatherEvidence =
+  | GatherFileEvidence
+  | GatherSearchEvidence
+  | GatherCommitEvidence
+  | GatherNoteEvidence;
+
+export interface GatherRepoListOptions {
+  limit: number;
+  includePaths: string[];
+  excludePaths: string[];
+}
+
+export interface GatherRepoSearchOptions {
+  limit: number;
+  includePaths: string[];
+  excludePaths: string[];
+}
+
+export interface GatherRecentCommitOptions {
+  limit: number;
 }
 
 export interface GatherExternalContextInput {
   intent: ContextGatherIntent;
   query?: string;
   readTextFile?: (path: string) => Promise<string>;
-  listRepoFiles?: () => Promise<string[]>;
-  searchRepo?: (query: string) => Promise<string[]>;
-  getRecentCommits?: () => Promise<string[]>;
+  listRepoFiles?: (options: GatherRepoListOptions) => Promise<string[]>;
+  searchRepo?: (query: string, options: GatherRepoSearchOptions) => Promise<string[]>;
+  getRecentCommits?: (options: GatherRecentCommitOptions) => Promise<string[]>;
 }
 
 export interface GatherExternalContextResult {
