@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -652,6 +652,9 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         intent: params.intent,
         query: params.query,
         readTextFile: (path) => readFile(path, "utf8"),
+        listRepoFiles: (options) => listRepoFiles(resolved.repo_path, options),
+        searchRepo: (query, options) =>
+          searchRepo(pi, resolved.repo_path, query, options),
         getRecentCommits: (options) =>
           getRecentCommits(
             pi,
@@ -1494,6 +1497,69 @@ async function getRecentCommits(
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
+}
+
+async function listRepoFiles(
+  repoPath: string,
+  options: { limit: number; includePaths: string[]; excludePaths: string[] },
+): Promise<string[]> {
+  const roots = options.includePaths.length > 0 ? options.includePaths : ["."];
+  const files: string[] = [];
+
+  for (const root of roots) {
+    const dirPath = resolve(repoPath, root);
+    let entries: string[];
+    try {
+      entries = await readdir(dirPath);
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      const path = root === "." ? entry : join(root, entry);
+      if (matchesExcludedPath(path, options.excludePaths)) {
+        continue;
+      }
+      files.push(path);
+      if (files.length >= options.limit) {
+        return files;
+      }
+    }
+  }
+
+  return files;
+}
+
+async function searchRepo(
+  pi: ExtensionAPI,
+  repoPath: string,
+  query: string,
+  options: { limit: number; includePaths: string[]; excludePaths: string[] },
+): Promise<string[]> {
+  const args = [
+    "-l",
+    "--no-messages",
+    ...options.includePaths.flatMap((path) => ["-g", `${path}/**`]),
+    ...options.excludePaths.flatMap((path) => ["-g", `!${path}/**`]),
+    query,
+    ".",
+  ];
+  const { stdout, code } = await pi.exec("rg", args, { cwd: repoPath });
+  if (code !== 0) {
+    return [];
+  }
+
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, options.limit);
+}
+
+function matchesExcludedPath(path: string, excludePaths: string[]): boolean {
+  return excludePaths.some(
+    (excluded) => path === excluded || path.startsWith(`${excluded}/`),
+  );
 }
 
 export async function buildStatus(root: string): Promise<StatusSummary> {

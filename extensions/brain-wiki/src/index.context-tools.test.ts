@@ -22,6 +22,9 @@ async function makeWikiRoot() {
   const root = await mkdtemp(join(tmpdir(), "brain-wiki-context-tools-"));
   const repoRoot = await mkdtemp(join(tmpdir(), "brain-wiki-context-repo-"));
   await writeFile(join(repoRoot, "README.md"), "# Sales Tool\n\nApp repo\n");
+  await mkdir(join(repoRoot, "src"), { recursive: true });
+  await writeFile(join(repoRoot, "src", "index.ts"), "export const salesTool = true;\n");
+  await writeFile(join(repoRoot, "src", "invoice.ts"), "export function invoiceFlow() { return 'invoice'; }\n");
 
   await mkdir(join(root, ".wiki"), { recursive: true });
   await writeFile(
@@ -64,6 +67,9 @@ async function makeWikiRoot() {
             repo_key: "sales_tool_application_repo",
             allowed_intents: ["overview", "architecture", "question", "handoff"],
             seed_files: ["README.md"],
+            include_paths: ["src"],
+            exclude_paths: ["dist"],
+            search_terms: ["sales tool"],
           },
         },
       },
@@ -106,6 +112,29 @@ function registerTools() {
           stdout: commits.slice(0, requested).join("\n"),
           stderr: "",
           code: 0,
+        };
+      }
+
+      if (command === "rg") {
+        const query = args?.at(-2) ?? "";
+        if (query === "sales tool") {
+          return {
+            stdout: ["src/index.ts", "src/invoice.ts"].join("\n"),
+            stderr: "",
+            code: 0,
+          };
+        }
+        if (query === "invoice") {
+          return {
+            stdout: "src/invoice.ts",
+            stderr: "",
+            code: 0,
+          };
+        }
+        return {
+          stdout: "",
+          stderr: "",
+          code: 1,
         };
       }
 
@@ -184,6 +213,55 @@ describe("external context tools", () => {
     expect(handoff.details.evidence).not.toContainEqual({
       kind: "commit",
       commit: "def456 Add docs",
+    });
+
+    const architecture = await gatherTool!.execute(
+      "architecture-call",
+      {
+        context_id: "sales-tool-application",
+        intent: "architecture",
+      },
+      undefined,
+      undefined,
+      { cwd: root },
+    );
+
+    expect(architecture.details.intent).toBe("architecture");
+    expect(architecture.details.commands_used).toContain("listRepoFiles");
+    expect(architecture.details.commands_used).toContain("searchRepo");
+    const repoFilesNote = architecture.details.evidence.find(
+      (item: Record<string, unknown>) =>
+        item.kind === "note" && item.note === "repo-files",
+    );
+    expect(repoFilesNote).toBeDefined();
+    expect((repoFilesNote?.paths as string[]).sort()).toEqual([
+      "src/index.ts",
+      "src/invoice.ts",
+    ]);
+    expect(architecture.details.evidence).toContainEqual({
+      kind: "search",
+      query: "sales tool",
+      path: "src/index.ts",
+    });
+
+    const question = await gatherTool!.execute(
+      "question-call",
+      {
+        context_id: "sales-tool-application",
+        intent: "question",
+        query: "invoice",
+      },
+      undefined,
+      undefined,
+      { cwd: root },
+    );
+
+    expect(question.details.intent).toBe("question");
+    expect(question.details.commands_used).toContain("searchRepo");
+    expect(question.details.evidence).toContainEqual({
+      kind: "search",
+      query: "invoice",
+      path: "src/invoice.ts",
     });
   });
 });
