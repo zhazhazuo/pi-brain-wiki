@@ -70,11 +70,19 @@ export interface GatherNoteEvidence {
   paths?: string[];
 }
 
+export interface GatherAgentEvidence {
+  kind: "agent";
+  exit_code: number;
+  model?: string;
+  brief: string;
+}
+
 export type GatherEvidence =
   | GatherFileEvidence
   | GatherSearchEvidence
   | GatherCommitEvidence
-  | GatherNoteEvidence;
+  | GatherNoteEvidence
+  | GatherAgentEvidence;
 
 export interface GatherRepoListOptions {
   limit: number;
@@ -106,6 +114,22 @@ export interface GatherExternalContextInput {
   listRepoFiles?: (options: GatherRepoListOptions) => Promise<string[]>;
   searchRepo?: (query: string, options: GatherRepoSearchOptions) => Promise<string[]>;
   getRecentCommits?: (options: GatherRecentCommitOptions) => Promise<string[]>;
+  runRepoAgent?: (input: GatherRepoAgentInput) => Promise<GatherRepoAgentResult>;
+}
+
+export interface GatherRepoAgentInput {
+  context: ResolvedExternalContext;
+  intent: ContextGatherIntent;
+  query?: string;
+  signal?: AbortSignal;
+  onUpdate?: (brief: string) => void;
+}
+
+export interface GatherRepoAgentResult {
+  exitCode: number;
+  brief: string;
+  stderr: string;
+  model?: string;
 }
 
 export interface GatherExternalContextResult {
@@ -428,6 +452,12 @@ export interface StatusSummary {
     pageCount: number;
     topPage?: { title: string; count: number };
   };
+  externalContexts?: Array<{
+    context_id: string;
+    label: string;
+    pkb_note: string;
+    allowed_intents: ContextGatherIntent[];
+  }>;
 }
 
 export type ListItemCategory = "source" | "task" | "idea" | "meeting-note" | "plan" | "unknown";

@@ -94,6 +94,7 @@ async function makeWikiRoot() {
 }
 
 function registerTools() {
+  process.env.BRAIN_WIKI_SKIP_REPO_GATHER_AGENT = "1";
   const tools = new Map<string, RegisteredTool>();
   const execCalls: Array<{ command: string; args: string[] }> = [];
   const pi = {
@@ -170,6 +171,20 @@ describe("external context tools", () => {
     expect(resolveTool).toBeDefined();
     expect(gatherTool).toBeDefined();
 
+    const listTool = tools.get("wiki_context_list");
+    expect(listTool).toBeDefined();
+
+    const listed = await listTool!.execute(
+      "list-call",
+      {},
+      undefined,
+      undefined,
+      { cwd: root },
+    );
+
+    expect(listed.content[0]?.text).toContain("sales-tool-application");
+    expect(listed.content[0]?.text).toContain("wiki_context_resolve");
+
     const resolved = await resolveTool!.execute(
       "resolve-call",
       { context_id: "sales-tool-application" },
@@ -181,6 +196,7 @@ describe("external context tools", () => {
     expect(resolved.details.context_id).toBe("sales-tool-application");
     expect(resolved.details.repo_path).toBe(repoRoot);
     expect(resolved.content[0]?.text).toContain("Resolved external context: Sales Tool Application");
+    expect(resolved.content[0]?.text).toContain("wiki_context_gather");
 
     const gathered = await gatherTool!.execute(
       "gather-call",

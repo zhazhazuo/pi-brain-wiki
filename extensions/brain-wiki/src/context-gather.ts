@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import type {
+  ContextGatherIntent,
   GatherEvidence,
   GatherExecResult,
   GatherExternalContextInput,
@@ -19,8 +20,6 @@ export async function gatherExternalContext(
   context: ResolvedExternalContext,
   input: GatherExternalContextInput,
 ): Promise<GatherExternalContextResult> {
-  const helpers = withDefaultRepoHelpers(context, input);
-
   if (!context.allowed_intents.includes(input.intent)) {
     throw new Error("Intent not allowed");
   }
@@ -29,6 +28,36 @@ export async function gatherExternalContext(
     throw new Error(`Intent "${input.intent}" requires a query`);
   }
 
+  if (input.runRepoAgent) {
+    const agentResult = await input.runRepoAgent({
+      context,
+      intent: input.intent,
+      query: input.query,
+    });
+
+    if (agentResult.exitCode === 0 && agentResult.brief.trim()) {
+      return buildAgentGatherResult(context, input.intent, agentResult);
+    }
+
+    const fallback = await gatherExternalContextRecipe(context, input);
+    fallback.limits_hit.push(agentResult.exitCode === 0 ? "agent-empty-brief" : "agent-failed");
+    if (agentResult.stderr) {
+      fallback.summary.unshift(`Repo gather agent failed: ${agentResult.stderr}`);
+    }
+    fallback.follow_up_suggestions.unshift(
+      "Retry wiki_context_gather with a narrower intent or query before reading the external repository directly.",
+    );
+    return fallback;
+  }
+
+  return gatherExternalContextRecipe(context, input);
+}
+
+async function gatherExternalContextRecipe(
+  context: ResolvedExternalContext,
+  input: GatherExternalContextInput,
+): Promise<GatherExternalContextResult> {
+  const helpers = withDefaultRepoHelpers(context, input);
   const filesRead: string[] = [];
   const commandsUsed: string[] = [];
   const summary: string[] = [];
@@ -147,6 +176,36 @@ export async function gatherExternalContext(
     evidence,
     limits_hit: dedupe(limitsHit),
     follow_up_suggestions: dedupe(followUpSuggestions),
+  };
+}
+
+function buildAgentGatherResult(
+  context: ResolvedExternalContext,
+  intent: ContextGatherIntent,
+  agentResult: { exitCode: number; brief: string; model?: string },
+): GatherExternalContextResult {
+  const summary = agentResult.brief
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"));
+
+  return {
+    context_id: context.context_id,
+    repo_path: context.repo_path,
+    intent,
+    files_read: [],
+    commands_used: ["repoGatherAgent"],
+    summary: summary.length > 0 ? summary : [agentResult.brief.trim()],
+    evidence: [{
+      kind: "agent",
+      exit_code: agentResult.exitCode,
+      model: agentResult.model,
+      brief: agentResult.brief.trim(),
+    }],
+    limits_hit: [],
+    follow_up_suggestions: [
+      "Use this brief in wiki/PKB reasoning; do not read the external repository directly from the parent session.",
+    ],
   };
 }
 

@@ -75,6 +75,7 @@ The extension registers skills through `resources_discover`:
 
 - Skill name: `map-external-context`
 - Path: `skills/map-external-context/`
+- Discovery tool: `wiki_context_list` — lists configured PKB ↔ repo links and access steps
 - Routes PKB notes to linked local repos via `wiki_context_resolve` → `wiki_context_gather`
 - Setup protocol: `skills/map-external-context/instructions/setup.md`
 - Feature reference: `repoWiki/06_features/external-context.md`

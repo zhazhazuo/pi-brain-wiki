@@ -10,6 +10,17 @@ import { captureSource, listCaptureStates, updateCaptureState } from "./src/capt
 import { rebuildDigest } from "./src/digest.ts";
 import { loadConfig } from "./src/config.ts";
 import { gatherExternalContext } from "./src/context-gather.ts";
+import { runRepoGatherAgent } from "./src/context-gather-agent.ts";
+import {
+  analyzeExternalRepoAccess,
+  formatExternalRepoAccessBlock,
+} from "./src/context-guards.ts";
+import {
+  appendExternalContextHintsToGraphFind,
+  formatExternalContextCatalog,
+  formatResolveNextSteps,
+  listConfiguredContexts,
+} from "./src/context-guide.ts";
 import { resolveExternalContext } from "./src/context-resolve.ts";
 import { analyzeToolMutation } from "./src/guards.ts";
 import { rebuildRegistryAndIndex } from "./src/indexer.ts";
@@ -159,6 +170,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
   }));
 
   pi.on("tool_call", async (event, ctx) => {
+    const externalRepoBlock = await analyzeExternalRepoAccess(ctx.cwd, event.toolName, event.input);
+    if (externalRepoBlock) {
+      const reason = formatExternalRepoAccessBlock(externalRepoBlock);
+      if (ctx.hasUI) ctx.ui.notify(reason, "warning");
+      return { block: true, reason };
+    }
+
     if (event.toolName !== "write" && event.toolName !== "edit")
       return undefined;
 
@@ -431,6 +449,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Use scope=wiki only when you need registry-only wiki lookup.",
       "Use this tool before editing so you update existing pages instead of creating duplicates.",
       "If a capture tool already returned a sourcePagePath, use that path directly instead of shell discovery.",
+      "When a PKB hit matches a configured external context (see wiki_context_list or wiki_status), and Walker needs repo-backed implementation or architecture details, call wiki_context_resolve then wiki_context_gather.",
     ],
     parameters: Type.Object({
       query: Type.String({ description: "Search query" }),
@@ -480,6 +499,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Use this after vault search to identify nearby nodes.",
       "Use terms from the source title, summary, or topic query.",
       "Do not use bash, find, or grep to locate candidate pages when search and graph tools can answer the question.",
+      "When PKB hits include a configured external context, follow the External repo context hints and call wiki_context_resolve before gathering codebase details.",
     ],
     parameters: Type.Object({
       query: Type.Optional(Type.String({ description: "Search query" })),
@@ -490,6 +510,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
+      const config = await loadConfig(root);
       const client = await requireObsidianClient(root);
       const terms = (params.terms?.length ? params.terms : [params.query ?? ""]).filter(Boolean);
       const result = await findGraphContext(client, terms, params.limit ?? 12);
@@ -497,8 +518,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         root,
         result.wiki.length + result.pkb.length > 0,
       );
+      const text = appendExternalContextHintsToGraphFind(
+        formatGraphFind(result),
+        result,
+        config.contexts,
+      );
       return {
-        content: [{ type: "text", text: formatGraphFind(result) }],
+        content: [{ type: "text", text }],
         details: result,
       };
     },
@@ -578,12 +604,41 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
   });
 
   pi.registerTool({
+    name: "wiki_context_list",
+    label: "Wiki Context List",
+    description:
+      "List configured PKB-linked external repository contexts and how to access them with wiki_context_resolve and wiki_context_gather.",
+    promptSnippet:
+      "List configured external repo contexts before resolving or gathering repo-backed PKB details",
+    promptGuidelines: [
+      "Use this when Walker asks about linked codebases, brain_wiki_context, or repo-backed context for a PKB note.",
+      "After listing, call wiki_context_resolve for the matching context_id or pkb_note, then wiki_context_gather with an allowed intent.",
+      "Load skill map-external-context for setup, intent choice, and weaving results into wiki/PKB reasoning.",
+    ],
+    parameters: Type.Object({}),
+    async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      const config = await loadConfig(root);
+      const entries = listConfiguredContexts(config.contexts);
+      return {
+        content: [{ type: "text", text: formatExternalContextCatalog(entries) }],
+        details: { contexts: entries },
+      };
+    },
+  });
+
+  pi.registerTool({
     name: "wiki_context_resolve",
     label: "Wiki Context Resolve",
     description:
       "Resolve an external context descriptor from a configured context id or PKB note.",
     promptSnippet:
       "Resolve an external repo context before gathering implementation or handoff details",
+    promptGuidelines: [
+      "Call this before wiki_context_gather whenever repo-backed details are needed for a configured PKB note.",
+      "Pass context_id from brain_wiki_context frontmatter or pkb_note from the PKB path.",
+      "If resolve fails, run wiki_context_list to inspect configured contexts or load skill map-external-context for setup.",
+    ],
     parameters: Type.Object({
       context_id: Type.Optional(
         Type.String({ description: "Configured external context id" }),
@@ -604,6 +659,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
               `Context ID: ${result.context_id}`,
               `Repo: ${result.repo_path}`,
               `Allowed intents: ${result.allowed_intents.join(", ")}`,
+              formatResolveNextSteps(result.context_id),
             ].join("\n"),
           },
         ],
@@ -619,6 +675,14 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Gather bounded external repository context for overview, architecture, implementation, changes, or handoff work.",
     promptSnippet:
       "Gather bounded external repo context using a resolved context id and intent",
+    promptGuidelines: [
+      "Call wiki_context_resolve first unless you already have a validated context_id.",
+      "This tool runs an isolated Pi agent inside the resolved repository and returns a structured brief.",
+      "Do not use read, grep, find, ls, or bash against the external repository path from the parent wiki session.",
+      "Pick intent from Walker's goal: overview, architecture, implementation, recent_changes, question, or handoff.",
+      "Pass query for implementation and question intents.",
+      "Load skill map-external-context to weave the returned brief into wiki or PKB reasoning.",
+    ],
     parameters: Type.Object({
       context_id: Type.String({ description: "Configured external context id" }),
       intent: CONTEXT_INTENT_ENUM,
@@ -629,7 +693,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
         Type.Number({ description: "Optional max recent commits to include" }),
       ),
     }),
-    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+    async execute(_toolCallId, params, signal, onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const resolved = await resolveExternalContext(root, {
         context_id: params.context_id,
@@ -642,7 +706,18 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
           pi.exec(command, adjustContextGatherArgs(command, args, params.limit_commits), {
             cwd: resolved.repo_path,
           }),
+        runRepoAgent: (input) => runRepoGatherAgent({
+          ...input,
+          signal,
+          onUpdate: onUpdate
+            ? (brief) => onUpdate({
+              content: [{ type: "text", text: brief }],
+              details: { phase: "repo-gather-agent", context_id: resolved.context_id },
+            })
+            : undefined,
+        }),
       });
+      const agentBrief = result.evidence.find((entry) => entry.kind === "agent");
       return {
         content: [
           {
@@ -650,7 +725,11 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
             text: [
               `External context gather: ${resolved.label}`,
               `Intent: ${result.intent}`,
-              ...result.summary,
+              agentBrief && agentBrief.kind === "agent"
+                ? agentBrief.brief
+                : result.summary.join("\n"),
+              "",
+              "Parent session: use this brief only. Do not read the external repository directly.",
             ].join("\n"),
           },
         ],
@@ -1476,6 +1555,7 @@ function adjustContextGatherArgs(
 }
 
 export async function buildStatus(root: string): Promise<StatusSummary> {
+  const config = await loadConfig(root);
   const registry = await loadRegistry(root);
   const events = await readEvents(root);
   const captureStates = await listCaptureStates(root);
@@ -1554,6 +1634,7 @@ export async function buildStatus(root: string): Promise<StatusSummary> {
     lastEvent: events.at(-1)?.ts,
     oldestIntegrated,
     externalBacklinks,
+    externalContexts: listConfiguredContexts(config.contexts),
   };
 }
 
@@ -1656,6 +1737,9 @@ function formatStatus(status: StatusSummary): string {
       : []),
     ...(status.lastCapture ? [`Last capture: ${status.lastCapture}`] : []),
     ...(status.lastEvent ? [`Last event: ${status.lastEvent}`] : []),
+    ...(status.externalContexts?.length
+      ? ["", formatExternalContextCatalog(status.externalContexts)]
+      : []),
   ].join("\n");
 }
 

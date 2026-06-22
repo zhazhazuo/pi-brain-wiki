@@ -24,10 +24,15 @@ Never put filesystem paths in PKB notes or checked-in wiki config.
 
 ## Tool Contract
 
-1. `wiki_context_resolve({ context_id? , pkb_note? })` — at least one input
-2. `wiki_context_gather({ context_id, intent, query?, limit_commits? })`
+1. `wiki_context_list()` — catalog configured contexts and access flow
+2. `wiki_context_resolve({ context_id? , pkb_note? })` — at least one input
+3. `wiki_context_gather({ context_id, intent, query?, limit_commits? })`
 
-Resolve performs config validation only. Gather runs inside the resolved repo cwd.
+Resolve performs config validation only. Gather spawns an **isolated Pi agent** in the resolved repository cwd. That repo agent reads `AGENTS.md`, uses repository-local skills, and returns a structured brief.
+
+**Parent wiki session rules:**
+- Use the gather brief for wiki/PKB reasoning
+- Do **not** call `read`, `grep`, `find`, `ls`, or `bash` against external repository paths directly — the extension blocks these and directs you back to `wiki_context_gather`
 
 ## Fail-Closed Errors
 

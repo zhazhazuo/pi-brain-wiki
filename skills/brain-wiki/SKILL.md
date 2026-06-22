@@ -60,6 +60,7 @@ Full rules in `instructions/writing-standards.md`. Key points:
 | `wiki_graph_find` | Find related wiki and PKB nodes across the vault |
 | `wiki_graph_traverse` | Inspect backlinks, links, and second-hop neighbors |
 | `wiki_graph_bridge` | Find missing PKB or wiki connections for an existing page |
+| `wiki_context_list` | List configured external repo contexts and access steps |
 | `wiki_context_resolve` | Resolve external context from context id or PKB note (no repo reads) |
 | `wiki_context_gather` | Bounded read-only gather from a linked local repository by intent |
 | `wiki_ensure_page` | Resolve or create canonical topic page safely |

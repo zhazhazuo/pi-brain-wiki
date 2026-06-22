@@ -44,7 +44,8 @@
 - extensions/brain-wiki/src/config.ts → Loads, creates, and writes .wiki/config.json with defaults; normalizes `contexts` registry and loads `.wiki/env.local.json`
 - extensions/brain-wiki/src/context-resolve.ts → Resolve context id or PKB note to validated local repo descriptor
 - extensions/brain-wiki/src/context-resolve.test.ts → Unit tests for external context resolution and path validation
-- extensions/brain-wiki/src/context-gather.ts → Bounded intent recipes and structured external-repo evidence
+- extensions/brain-wiki/src/context-guide.ts → Format external context catalog and graph/status access hints for agents
+- extensions/brain-wiki/src/context-guide.test.ts → Unit tests for external context guidance helpers
 - extensions/brain-wiki/src/context-gather.test.ts → Unit tests for gather intents, query requirements, and evidence shape
 - extensions/brain-wiki/src/context-config.test.ts → Unit tests for external context config merge, env loading, and bootstrap example creation
 - extensions/brain-wiki/src/index.context-tools.test.ts → Integration tests for `wiki_context_resolve` and `wiki_context_gather` tool handlers

@@ -121,6 +121,52 @@ describe("gatherExternalContext", () => {
     expect(result.evidence.filter((item) => item.kind === "search")).toHaveLength(5);
   });
 
+  test("prefers repo agent brief when available", async () => {
+    const result = await gatherExternalContext(context, {
+      intent: "overview",
+      runRepoAgent: async () => ({
+        exitCode: 0,
+        brief: [
+          "## Summary",
+          "- Nuxt app for sales tooling",
+          "## Evidence",
+          "- package.json: nuxt dependency",
+          "## Limits",
+          "- none",
+          "## Suggested follow-ups",
+          "- inspect routing",
+        ].join("\n"),
+        model: "test-model",
+      }),
+    });
+
+    expect(result.commands_used).toContain("repoGatherAgent");
+    expect(result.evidence).toContainEqual({
+      kind: "agent",
+      exit_code: 0,
+      model: "test-model",
+      brief: expect.stringContaining("Nuxt app"),
+    });
+    expect(result.limits_hit).toEqual([]);
+  });
+
+  test("falls back to recipe when repo agent fails", async () => {
+    const result = await gatherExternalContext(context, {
+      intent: "overview",
+      runRepoAgent: async () => ({
+        exitCode: 1,
+        brief: "",
+        stderr: "spawn failed",
+      }),
+      readTextFile: async () => "# Sales Tool",
+      listRepoFiles: async () => ["README.md"],
+    });
+
+    expect(result.limits_hit).toContain("agent-failed");
+    expect(result.files_read).toContain("README.md");
+    expect(result.summary[0]).toContain("Repo gather agent failed");
+  });
+
   test("degrades deterministically when helpers are missing", async () => {
     const result = await gatherExternalContext({
       ...context,

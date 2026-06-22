@@ -13,7 +13,7 @@ Read the PKB note frontmatter. If `brain_wiki_context` is set, use that id.
 
 ## Phase 2 — Ensure configuration exists
 
-Call `wiki_context_resolve` with `context_id` and/or `pkb_note`.
+Call `wiki_context_list` when you need the catalog, or `wiki_context_resolve` with `context_id` and/or `pkb_note`.
 
 | Result | Action |
 |--------|--------|
@@ -50,7 +50,9 @@ wiki_context_gather({
 })
 ```
 
-Do not run gather if resolve failed.
+`wiki_context_gather` runs an isolated Pi agent inside the target repository. The repo agent follows that repository's `AGENTS.md` and local skills, then returns a brief with Summary, Evidence, Limits, and Suggested follow-ups.
+
+Do not run gather if resolve failed. Do not bypass gather by reading the external repository from the parent wiki session.
 
 ## Phase 5 — Weave results
 

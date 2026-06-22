@@ -43,6 +43,7 @@ Load this skill when Walker says:
 
 | Tool | Purpose |
 |------|---------|
+| `wiki_context_list` | List configured PKB-linked external contexts and access steps |
 | `wiki_context_resolve` | Validate registry + env mapping; return descriptor (no repo reads) |
 | `wiki_context_gather` | Bounded gather by intent against resolved repo |
 
