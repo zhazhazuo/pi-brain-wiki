@@ -92,10 +92,17 @@ export interface GatherRecentCommitOptions {
   limit: number;
 }
 
+export interface GatherExecResult {
+  stdout: string;
+  stderr: string;
+  code: number;
+}
+
 export interface GatherExternalContextInput {
   intent: ContextGatherIntent;
   query?: string;
   readTextFile?: (path: string) => Promise<string>;
+  execCommand?: (command: string, args: string[]) => Promise<GatherExecResult>;
   listRepoFiles?: (options: GatherRepoListOptions) => Promise<string[]>;
   searchRepo?: (query: string, options: GatherRepoSearchOptions) => Promise<string[]>;
   getRecentCommits?: (options: GatherRecentCommitOptions) => Promise<string[]>;

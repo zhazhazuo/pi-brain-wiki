@@ -80,6 +80,44 @@ describe("gatherExternalContext", () => {
     });
   });
 
+  test("builds architecture helpers from a thin exec adapter", async () => {
+    const execCalls: Array<{ command: string; args: string[] }> = [];
+
+    const result = await gatherExternalContext(context, {
+      intent: "architecture",
+      readTextFile: async (path) => path.endsWith("README.md") ? "# Sales Tool\n\nApp repo" : "{\"name\":\"sales-tool\"}",
+      execCommand: async (command, args) => {
+        execCalls.push({ command, args: [...args] });
+        if (command !== "rg") {
+          return { stdout: "", stderr: "unexpected command", code: 1 };
+        }
+        if (args.includes("--files")) {
+          return {
+            stdout: ["src/index.ts", "src/invoice.ts", "node_modules/ignored.js"].join("\n"),
+            stderr: "",
+            code: 0,
+          };
+        }
+        return {
+          stdout: ["src/index.ts", "src/routes.ts"].join("\n"),
+          stderr: "",
+          code: 0,
+        };
+      },
+    } as any);
+
+    expect(execCalls).toContainEqual({
+      command: "rg",
+      args: ["--files", "-g", "src/**", "-g", "!node_modules/**", "."],
+    });
+    expect(result.commands_used).toContain("listRepoFiles");
+    expect(result.evidence).toContainEqual({
+      kind: "note",
+      note: "repo-files",
+      paths: ["src/index.ts", "src/invoice.ts"],
+    });
+  });
+
   test("returns recent change evidence for handoff", async () => {
     const result = await gatherExternalContext({
       ...context,
@@ -101,6 +139,65 @@ describe("gatherExternalContext", () => {
       commit: "abc123 Fix sales flow",
     });
     expect(result.follow_up_suggestions).toContain("Ask a focused question about the next task or open issue.");
+  });
+
+  test("builds question and handoff helpers from a thin exec adapter", async () => {
+    const question = await gatherExternalContext({
+      ...context,
+      allowed_intents: [...context.allowed_intents, "handoff"],
+    }, {
+      intent: "question",
+      query: "invoice",
+      execCommand: async (command, args) => {
+        if (command === "rg") {
+          expect(args).toEqual(["-l", "--no-messages", "-g", "src/**", "-g", "!node_modules/**", "invoice", "."]);
+          return {
+            stdout: "src/invoice.ts\nsrc/billing.ts",
+            stderr: "",
+            code: 0,
+          };
+        }
+        return { stdout: "", stderr: "", code: 1 };
+      },
+    } as any);
+
+    expect(question.evidence).toContainEqual({
+      kind: "search",
+      query: "invoice",
+      path: "src/invoice.ts",
+    });
+
+    const handoff = await gatherExternalContext({
+      ...context,
+      allowed_intents: [...context.allowed_intents, "handoff"],
+    }, {
+      intent: "handoff",
+      readTextFile: async () => "# Sales Tool",
+      execCommand: async (command, args) => {
+        if (command === "git") {
+          expect(args).toEqual(["log", "-5", "--oneline"]);
+          return {
+            stdout: "abc123 Fix sales flow\ndef456 Add docs",
+            stderr: "",
+            code: 0,
+          };
+        }
+        if (command === "rg" && args.includes("--files")) {
+          return {
+            stdout: "src/index.ts",
+            stderr: "",
+            code: 0,
+          };
+        }
+        return { stdout: "", stderr: "", code: 1 };
+      },
+    } as any);
+
+    expect(handoff.commands_used).toContain("getRecentCommits");
+    expect(handoff.evidence).toContainEqual({
+      kind: "commit",
+      commit: "abc123 Fix sales flow",
+    });
   });
 
   test("records limits_hit when helper results exceed caps", async () => {

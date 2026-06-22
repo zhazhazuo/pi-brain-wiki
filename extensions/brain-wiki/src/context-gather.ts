@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import type {
   GatherEvidence,
+  GatherExecResult,
   GatherExternalContextInput,
   GatherExternalContextResult,
   GatherRecentCommitOptions,
@@ -18,6 +19,8 @@ export async function gatherExternalContext(
   context: ResolvedExternalContext,
   input: GatherExternalContextInput,
 ): Promise<GatherExternalContextResult> {
+  const helpers = withDefaultRepoHelpers(context, input);
+
   if (!context.allowed_intents.includes(input.intent)) {
     throw new Error("Intent not allowed");
   }
@@ -39,11 +42,11 @@ export async function gatherExternalContext(
   }
 
   if (input.intent === "overview" || input.intent === "architecture" || input.intent === "handoff") {
-    await readSeedFiles(context, seedFiles, input, filesRead, commandsUsed, summary, evidence);
+    await readSeedFiles(context, seedFiles, helpers, filesRead, commandsUsed, summary, evidence);
   }
 
   if (input.intent === "overview" || input.intent === "architecture") {
-    const repoFiles = await safeListRepoFiles(input, buildRepoListOptions(context));
+    const repoFiles = await safeListRepoFiles(helpers, buildRepoListOptions(context));
     if (repoFiles) {
       commandsUsed.push("listRepoFiles");
       if (repoFiles.length > MAX_SEARCH_RESULTS) {
@@ -63,7 +66,7 @@ export async function gatherExternalContext(
 
   if (input.intent === "architecture") {
     const searchQuery = buildSearchQuery(context, "architecture");
-    const results = await safeSearchRepo(input, searchQuery, buildRepoSearchOptions(context));
+    const results = await safeSearchRepo(helpers, searchQuery, buildRepoSearchOptions(context));
     if (results) {
       commandsUsed.push("searchRepo");
       if (results.length > MAX_SEARCH_RESULTS) {
@@ -82,7 +85,7 @@ export async function gatherExternalContext(
 
   if (input.intent === "implementation" || input.intent === "question") {
     const query = input.query!.trim();
-    const results = await safeSearchRepo(input, query, buildRepoSearchOptions(context));
+    const results = await safeSearchRepo(helpers, query, buildRepoSearchOptions(context));
     if (results) {
       commandsUsed.push("searchRepo");
       if (results.length > MAX_SEARCH_RESULTS) {
@@ -100,7 +103,7 @@ export async function gatherExternalContext(
   }
 
   if (input.intent === "recent_changes" || input.intent === "handoff") {
-    const commits = await safeGetRecentCommits(input, buildRecentCommitOptions());
+    const commits = await safeGetRecentCommits(helpers, buildRecentCommitOptions());
     if (commits) {
       commandsUsed.push("getRecentCommits");
       if (commits.length > MAX_COMMITS) {
@@ -198,6 +201,28 @@ function buildRecentCommitOptions(): GatherRecentCommitOptions {
   return { limit: MAX_COMMITS };
 }
 
+function withDefaultRepoHelpers(
+  context: ResolvedExternalContext,
+  input: GatherExternalContextInput,
+): GatherExternalContextInput {
+  if (!input.execCommand) {
+    return input;
+  }
+
+  return {
+    ...input,
+    listRepoFiles:
+      input.listRepoFiles ??
+      ((options) => listRepoFilesViaExec(input.execCommand!, context, options)),
+    searchRepo:
+      input.searchRepo ??
+      ((query, options) => searchRepoViaExec(input.execCommand!, context, query, options)),
+    getRecentCommits:
+      input.getRecentCommits ??
+      ((options) => getRecentCommitsViaExec(input.execCommand!, options)),
+  };
+}
+
 async function safeListRepoFiles(
   input: GatherExternalContextInput,
   options: GatherRepoListOptions,
@@ -234,6 +259,107 @@ async function safeGetRecentCommits(
 
 function summarizeText(value: string): string {
   return value.replace(/\s+/g, " ").trim().slice(0, 120);
+}
+
+async function listRepoFilesViaExec(
+  execCommand: (command: string, args: string[]) => Promise<GatherExecResult>,
+  context: ResolvedExternalContext,
+  options: GatherRepoListOptions,
+): Promise<string[]> {
+  const { stdout, code } = await execCommand("rg", [
+    "--files",
+    ...buildGlobArgs(options.includePaths, options.excludePaths),
+    ".",
+  ]);
+  if (code !== 0) {
+    return [];
+  }
+
+  return normalizePathList(stdout, context, options).slice(0, options.limit);
+}
+
+async function searchRepoViaExec(
+  execCommand: (command: string, args: string[]) => Promise<GatherExecResult>,
+  context: ResolvedExternalContext,
+  query: string,
+  options: GatherRepoSearchOptions,
+): Promise<string[]> {
+  const { stdout, code } = await execCommand("rg", [
+    "-l",
+    "--no-messages",
+    ...buildGlobArgs(options.includePaths, options.excludePaths),
+    query,
+    ".",
+  ]);
+  if (code !== 0) {
+    return [];
+  }
+
+  return normalizePathList(stdout, context, options).slice(0, options.limit);
+}
+
+async function getRecentCommitsViaExec(
+  execCommand: (command: string, args: string[]) => Promise<GatherExecResult>,
+  options: GatherRecentCommitOptions,
+): Promise<string[]> {
+  const { stdout, code } = await execCommand("git", [
+    "log",
+    `-${options.limit}`,
+    "--oneline",
+  ]);
+  if (code !== 0) {
+    return [];
+  }
+
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, options.limit);
+}
+
+function buildGlobArgs(includePaths: string[], excludePaths: string[]): string[] {
+  return [
+    ...includePaths.flatMap((path) => ["-g", `${path}/**`]),
+    ...excludePaths.flatMap((path) => ["-g", `!${path}/**`]),
+  ];
+}
+
+function normalizePathList(
+  stdout: string,
+  context: ResolvedExternalContext,
+  options: { includePaths: string[]; excludePaths: string[] },
+): string[] {
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((path) => isIncludedPath(path, context, options))
+    .filter((path, index, values) => values.indexOf(path) === index);
+}
+
+function isIncludedPath(
+  path: string,
+  context: ResolvedExternalContext,
+  options: { includePaths: string[]; excludePaths: string[] },
+): boolean {
+  if (path.startsWith(`${context.repo_path}/`)) {
+    return false;
+  }
+
+  if (matchesPathFilter(path, options.excludePaths)) {
+    return false;
+  }
+
+  if (options.includePaths.length === 0) {
+    return true;
+  }
+
+  return matchesPathFilter(path, options.includePaths);
+}
+
+function matchesPathFilter(path: string, filters: string[]): boolean {
+  return filters.some((filterPath) => path === filterPath || path.startsWith(`${filterPath}/`));
 }
 
 function dedupe(values: string[]): string[] {

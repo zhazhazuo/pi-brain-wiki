@@ -95,6 +95,7 @@ async function makeWikiRoot() {
 
 function registerTools() {
   const tools = new Map<string, RegisteredTool>();
+  const execCalls: Array<{ command: string; args: string[] }> = [];
   const pi = {
     on: () => undefined,
     registerTool: (tool: RegisteredTool) => {
@@ -102,6 +103,7 @@ function registerTools() {
     },
     registerCommand: () => undefined,
     exec: async (command: string, args?: string[]) => {
+      execCalls.push({ command, args: [...(args ?? [])] });
       if (command === "git" && args?.[0] === "log") {
         const requested = Number(args[1]?.replace(/^-/, "") || "0");
         const commits = [
@@ -116,6 +118,13 @@ function registerTools() {
       }
 
       if (command === "rg") {
+        if (args?.includes("--files")) {
+          return {
+            stdout: ["src/index.ts", "src/invoice.ts"].join("\n"),
+            stderr: "",
+            code: 0,
+          };
+        }
         const query = args?.at(-2) ?? "";
         if (query === "sales tool") {
           return {
@@ -148,12 +157,12 @@ function registerTools() {
 
   brainWikiExtension(pi);
 
-  return tools;
+  return { tools, execCalls };
 }
 
 describe("external context tools", () => {
   test("executes resolve and gather through the extension tool layer", async () => {
-    const tools = registerTools();
+    const { tools, execCalls } = registerTools();
     const { root, repoRoot } = await makeWikiRoot();
     const resolveTool = tools.get("wiki_context_resolve");
     const gatherTool = tools.get("wiki_context_gather");
@@ -229,7 +238,8 @@ describe("external context tools", () => {
     expect(architecture.details.intent).toBe("architecture");
     expect(architecture.details.commands_used).toContain("listRepoFiles");
     expect(architecture.details.commands_used).toContain("searchRepo");
-    const repoFilesNote = architecture.details.evidence.find(
+    const architectureEvidence = architecture.details.evidence as Array<Record<string, unknown>>;
+    const repoFilesNote = architectureEvidence.find(
       (item: Record<string, unknown>) =>
         item.kind === "note" && item.note === "repo-files",
     );
@@ -238,6 +248,10 @@ describe("external context tools", () => {
       "src/index.ts",
       "src/invoice.ts",
     ]);
+    expect(execCalls).toContainEqual({
+      command: "rg",
+      args: ["--files", "-g", "src/**", "-g", "!dist/**", "."],
+    });
     expect(architecture.details.evidence).toContainEqual({
       kind: "search",
       query: "sales tool",
