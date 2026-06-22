@@ -26,4 +26,5 @@
 - workflow-generation → ./06_features/workflow-generation.md — create standardized workflow pages and generated route metadata for learned workflows
 - taskwarrior → ./06_features/taskwarrior.md — integrate Taskwarrior CLI with validated promotion and bidirectional wiki linking
 - graph-first architecture → ./06_features/graph-first-architecture.md — vault-wide graph discovery, neighborhood traversal, and PKB bridging through Obsidian CLI
+- external-context → ./06_features/external-context.md — deterministic PKB-linked local repo resolution and bounded gather via extension tools
 - task-sync → extensions/brain-wiki/src/task-sync.ts — bidirectional LIST.md ↔ Taskwarrior sync

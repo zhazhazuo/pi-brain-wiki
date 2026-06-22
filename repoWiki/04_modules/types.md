@@ -44,6 +44,16 @@ Defines all shared TypeScript interfaces, types, and enums used across the exten
 | `ProjectSyncResult.projects[]` | adds `mainPath`, `nextAction`, keeps `lastAction` fallback |
 | `ProjectSyncResult.review` | status counts, missing next actions, archive candidates |
 
+## External Context Types
+
+| Type | Role |
+|------|------|
+| `ContextGatherIntent` | `overview`, `architecture`, `implementation`, `recent_changes`, `question`, `handoff` |
+| `ExternalContextConfig` | Registry entry: label, pkb_note, repo_key, allowed_intents, scope hints |
+| `LocalEnvConfig` | Machine-local `repos` map: repo_key → absolute path |
+| `ResolvedExternalContext` | Validated descriptor returned by resolve |
+| `GatherExternalContextResult` | Gather output: files_read, evidence, summary, limits_hit |
+
 ## Scope Table
 
 | Layer | Item | Description |

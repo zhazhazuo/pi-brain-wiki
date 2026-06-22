@@ -38,6 +38,8 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 - [activity](./04_modules/activity.md) - Vault activity scanning
 - [guards](./04_modules/guards.md) - Protected path enforcement
 - [graph](./04_modules/graph.md) - Vault graph discovery and PKB bridging
+- [context-resolve](./04_modules/context-resolve.md) - External context registry and env resolution
+- [context-gather](./04_modules/context-gather.md) - Bounded external repo gather recipes
 - [slug](./04_modules/slug.md) - Slug and ID generation utilities
 - [types](./04_modules/types.md) - Shared TypeScript type definitions
 - [sync](./04_modules/sync.md) - PARA vault folder sync to wiki topics
@@ -60,6 +62,7 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 
 - [Future Mode Project Review](./06_features/future-mode-project-review.md)
 - [Graph-First Architecture](./06_features/graph-first-architecture.md)
+- [External Context](./06_features/external-context.md)
 - [Workflow Generation](./06_features/workflow-generation.md)
 - [Taskwarrior Integration](./06_features/taskwarrior.md)
 

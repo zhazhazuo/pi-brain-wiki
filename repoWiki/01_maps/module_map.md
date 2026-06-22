@@ -22,6 +22,8 @@ flowchart LR
   Triage[src/triage.ts]
   ProjectSync[src/project-sync.ts]
   Graph[src/graph.ts]
+  ContextResolve[src/context-resolve.ts]
+  ContextGather[src/context-gather.ts]
   ObsidianIo[src/obsidian-io.ts]
 
   Index --> Capture
@@ -43,6 +45,10 @@ flowchart LR
   Index --> Triage
   Index --> ProjectSync
   Index --> Graph
+  Index --> ContextResolve
+  Index --> ContextGather
+  ContextGather --> ContextResolve
+  ContextResolve --> Config
   Index -.-> ObsidianClient[src/obsidian-client.ts]
   Index --> ObsidianIo
   ObsidianIo --> ObsidianClient
@@ -86,6 +92,8 @@ flowchart LR
 | triage | extensions/brain-wiki/src/triage.ts | current |
 | project-sync | extensions/brain-wiki/src/project-sync.ts | current |
 | graph | extensions/brain-wiki/src/graph.ts | current |
+| context-resolve | extensions/brain-wiki/src/context-resolve.ts | current |
+| context-gather | extensions/brain-wiki/src/context-gather.ts | current |
 | obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | current |
 | obsidian-io | extensions/brain-wiki/src/obsidian-io.ts | current |
 | obsidian-fs | extensions/brain-wiki/src/obsidian-fs.ts | **proposed** |

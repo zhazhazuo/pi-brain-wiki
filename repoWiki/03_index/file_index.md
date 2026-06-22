@@ -29,11 +29,21 @@
 - skills/taskwarrior/instructions/creation-rules.md → Task creation validation rules, naming conventions, and agent write permissions
 - skills/taskwarrior/instructions/session-workflow.md → Session workflow and LIST.md draining protocol with bidirectional linking
 
+## .wiki/
+
+- .wiki/env.local.example.json → Example repo-key to absolute-path mapping for per-machine external context setup
+
 ## extensions/brain-wiki/src/
 
 - extensions/brain-wiki/src/activity.ts → Scans vault for recent changes across wiki and PARA folders; parses LIST.md into typed items
 - extensions/brain-wiki/src/capture.ts → Captures URL/file/text as immutable source packet, scaffolds summary page, and returns sourcePagePath for follow-up
-- extensions/brain-wiki/src/config.ts → Loads, creates, and writes .wiki/config.json with defaults
+- extensions/brain-wiki/src/config.ts → Loads, creates, and writes .wiki/config.json with defaults; normalizes `contexts` registry and loads `.wiki/env.local.json`
+- extensions/brain-wiki/src/context-resolve.ts → Resolve context id or PKB note to validated local repo descriptor
+- extensions/brain-wiki/src/context-resolve.test.ts → Unit tests for external context resolution and path validation
+- extensions/brain-wiki/src/context-gather.ts → Bounded intent recipes and structured external-repo evidence
+- extensions/brain-wiki/src/context-gather.test.ts → Unit tests for gather intents, query requirements, and evidence shape
+- extensions/brain-wiki/src/context-config.test.ts → Unit tests for external context config merge, env loading, and bootstrap example creation
+- extensions/brain-wiki/src/index.context-tools.test.ts → Integration tests for `wiki_context_resolve` and `wiki_context_gather` tool handlers
 - extensions/brain-wiki/src/digest.ts → Builds meta/wiki-digest.md: agent entry point with stats, events, stale items, below-minimum topics
 - extensions/brain-wiki/src/frontmatter.ts → Parses/renders YAML frontmatter, extracts wiki links/headings, delegates CLI-backed writes when a client is provided
 - extensions/brain-wiki/src/guards.ts → Analyzes tool mutations to protect inbox/ and meta/ paths from edits
@@ -83,6 +93,7 @@
 
 ## docs/
 
+- docs/superpowers/specs/2026-06-21-external-context-design.md → External-context feature design, activation model, and tool contract
 - docs/00_overview/big_picture.md → High-level system overview: core flow, constraints, available tools
 - docs/00_overview/tech_stack.md → Technology stack: Node.js >=20, ESM TypeScript, filesystem storage, gray-matter
 - docs/01_maps/feature_map.md → Maps each feature to its source file with one-line description
