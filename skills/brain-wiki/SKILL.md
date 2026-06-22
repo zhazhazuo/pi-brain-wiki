@@ -60,6 +60,8 @@ Full rules in `instructions/writing-standards.md`. Key points:
 | `wiki_graph_find` | Find related wiki and PKB nodes across the vault |
 | `wiki_graph_traverse` | Inspect backlinks, links, and second-hop neighbors |
 | `wiki_graph_bridge` | Find missing PKB or wiki connections for an existing page |
+| `wiki_context_resolve` | Resolve external context from context id or PKB note (no repo reads) |
+| `wiki_context_gather` | Bounded read-only gather from a linked local repository by intent |
 | `wiki_ensure_page` | Resolve or create canonical topic page safely |
 | `wiki_log_event` | Record structured events (capture, integrate, query, etc.) |
 | `wiki_sync` | Seed topics from PARA vault structure |
@@ -76,3 +78,7 @@ Full rules in `instructions/writing-standards.md`. Key points:
 ## Taskwarrior
 
 Load the `taskwarrior` skill for all task operations. The protocol is defined there, not here.
+
+## External Context
+
+Load the `map-external-context` skill when Walker wants repo-backed context for a PKB note or linked codebase. Route through `wiki_context_resolve` → `wiki_context_gather`; do not browse external repos directly.

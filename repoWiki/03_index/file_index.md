@@ -19,6 +19,10 @@
 
 - extensions/brain-wiki/index.ts → Main pi extension entry point: registers tools, lifecycle hooks, and tool definitions
 - skills/brain-wiki/SKILL.md → Agent skill: wiki maintenance rules and non-negotiable constraints
+- skills/map-external-context/SKILL.md → Agent skill: link PKB notes to local repos and gather bounded external context
+- skills/map-external-context/instructions/setup.md → Register context registry, env.local, and brain_wiki_context pointer
+- skills/map-external-context/instructions/protocol.md → Resolve → gather → weave workflow for repo-backed note context
+- skills/map-external-context/instructions/rules.md → Activation model, fail-closed rules, write boundaries
 - skills/workflow-extract/SKILL.md → Agent skill: extract repeatable session patterns into approved workflow specs
 - skills/workflow-invoke/SKILL.md → Agent skill: route matching requests through generated workflow pages
 - skills/recall/SKILL.md → Agent skill: compare wiki sources against PKB entries
@@ -65,6 +69,8 @@
 - extensions/brain-wiki/src/graph.ts → Vault graph discovery: search, neighborhood traversal, and PKB bridging through Obsidian CLI
 - extensions/brain-wiki/src/graph.test.ts → Unit tests for graph discovery, traversal, and bridge output
 - extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
+- extensions/brain-wiki/src/skills.ts → Resolve package skills directory and discover SKILL.md files
+- extensions/brain-wiki/src/skills.test.ts → Unit tests for automatic package skill discovery
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure (incl. discussions/, drafts/), templates, and metadata files
 - extensions/brain-wiki/src/search.ts → Queries the compiled page registry with scoring and ranking; scope=vault routes through Obsidian CLI search
 - extensions/brain-wiki/src/search.test.ts → Unit tests for registry search

@@ -73,3 +73,15 @@ summary: Draft a weekly OKR report.
 ```
 
 Workflow body must include a `## Workflow YAML` fenced `yaml` block. Do not hand-roll new workflow pages; use `wiki_generate_workflow` so the schema stays consistent.
+
+## PKB notes (Area/) — external context pointer
+
+Optional frontmatter on PKB notes that have a linked local repository (not wiki topic pages):
+
+```yaml
+brain_wiki_context: sales-tool-application
+```
+
+- Value is a stable context id keyed in `.wiki/config.json` → `contexts`
+- Does not contain filesystem paths or repo aliases
+- Setup and gather protocol: load the `map-external-context` skill

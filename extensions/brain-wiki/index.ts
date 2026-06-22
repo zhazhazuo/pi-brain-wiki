@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, relative, resolve } from "node:path";
 import { StringEnum } from "@mariozechner/pi-ai";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { withFileMutationQueue } from "@mariozechner/pi-coding-agent";
@@ -71,9 +70,8 @@ import {
   markListItemPromoted,
   syncCompletedTasksToList,
 } from "./src/task-sync.ts";
+import { getPackageSkillPaths } from "./src/skills.ts";
 
-const baseDir = dirname(fileURLToPath(import.meta.url));
-const skillDir = resolve(baseDir, "..", "..", "skills");
 const dirtyRoots = new Set<string>();
 
 let cachedClient: ObsidianClient | null = null;
@@ -157,19 +155,7 @@ const priorityMap: Record<string, "H" | "M" | "L"> = {
 
 export default function brainWikiExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", () => ({
-    skillPaths: [
-      join(skillDir, "brain-wiki", "SKILL.md"),
-      join(skillDir, "project-operator", "SKILL.md"),
-      join(skillDir, "project-review", "SKILL.md"),
-      join(skillDir, "project-intake", "SKILL.md"),
-      join(skillDir, "wiki-map", "SKILL.md"),
-      join(skillDir, "wiki-workshop", "SKILL.md"),
-      join(skillDir, "wiki-intel", "SKILL.md"),
-      join(skillDir, "workflow-extract", "SKILL.md"),
-      join(skillDir, "workflow-invoke", "SKILL.md"),
-      join(skillDir, "recall", "SKILL.md"),
-      join(skillDir, "taskwarrior", "SKILL.md"),
-    ],
+    skillPaths: getPackageSkillPaths(),
   }));
 
   pi.on("tool_call", async (event, ctx) => {
