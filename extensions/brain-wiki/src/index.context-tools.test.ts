@@ -21,6 +21,7 @@ type RegisteredTool = {
 async function makeWikiRoot() {
   const root = await mkdtemp(join(tmpdir(), "brain-wiki-context-tools-"));
   const repoRoot = await mkdtemp(join(tmpdir(), "brain-wiki-context-repo-"));
+  await writeFile(join(repoRoot, "README.md"), "# Sales Tool\n\nApp repo\n");
 
   await mkdir(join(root, ".wiki"), { recursive: true });
   await writeFile(
@@ -61,7 +62,8 @@ async function makeWikiRoot() {
             label: "Sales Tool Application",
             pkb_note: "Area/5 Work/53 Visable/Sales Tool Application.md",
             repo_key: "sales_tool_application_repo",
-            allowed_intents: ["overview", "architecture", "question"],
+            allowed_intents: ["overview", "architecture", "question", "handoff"],
+            seed_files: ["README.md"],
           },
         },
       },
@@ -93,6 +95,26 @@ function registerTools() {
       tools.set(tool.name, tool);
     },
     registerCommand: () => undefined,
+    exec: async (command: string, args?: string[]) => {
+      if (command === "git" && args?.[0] === "log") {
+        const requested = Number(args[1]?.replace(/^-/, "") || "0");
+        const commits = [
+          "abc123 Fix sales flow",
+          "def456 Add docs",
+        ];
+        return {
+          stdout: commits.slice(0, requested).join("\n"),
+          stderr: "",
+          code: 0,
+        };
+      }
+
+      return {
+        stdout: "",
+        stderr: `unexpected command: ${command} ${(args ?? []).join(" ")}`,
+        code: 1,
+      };
+    },
   } as any;
 
   brainWikiExtension(pi);
@@ -136,9 +158,32 @@ describe("external context tools", () => {
     expect(gathered.details.intent).toBe("overview");
     expect(gathered.details.context_id).toBe("sales-tool-application");
     expect(Array.isArray(gathered.details.summary)).toBe(true);
-    expect(gathered.details.commands_used).toEqual([]);
-    expect(gathered.details.limits_hit).toContain("repo-files-unavailable");
+    expect(gathered.details.files_read).toContain("README.md");
+    expect(gathered.details.commands_used).toContain("readTextFile");
     expect(gathered.content[0]?.text).toContain("External context gather: Sales Tool Application");
     expect(gathered.content[0]?.text).toContain("Intent: overview");
+
+    const handoff = await gatherTool!.execute(
+      "handoff-call",
+      {
+        context_id: "sales-tool-application",
+        intent: "handoff",
+        limit_commits: 1,
+      },
+      undefined,
+      undefined,
+      { cwd: root },
+    );
+
+    expect(handoff.details.intent).toBe("handoff");
+    expect(handoff.details.commands_used).toContain("getRecentCommits");
+    expect(handoff.details.evidence).toContainEqual({
+      kind: "commit",
+      commit: "abc123 Fix sales flow",
+    });
+    expect(handoff.details.evidence).not.toContainEqual({
+      kind: "commit",
+      commit: "def456 Add docs",
+    });
   });
 });

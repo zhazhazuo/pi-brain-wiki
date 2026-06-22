@@ -651,6 +651,15 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const result = await gatherExternalContext(resolved, {
         intent: params.intent,
         query: params.query,
+        readTextFile: (path) => readFile(path, "utf8"),
+        getRecentCommits: (options) =>
+          getRecentCommits(
+            pi,
+            resolved.repo_path,
+            params.limit_commits == null
+              ? options.limit
+              : Math.min(options.limit, params.limit_commits),
+          ),
       });
       return {
         content: [
@@ -1465,6 +1474,26 @@ async function loadRegistry(root: string): Promise<RegistryData> {
     const rebuilt = await rebuildRegistryAndIndex(root);
     return rebuilt.registry;
   }
+}
+
+async function getRecentCommits(
+  pi: ExtensionAPI,
+  repoPath: string,
+  limit: number,
+): Promise<string[]> {
+  const { stdout, code } = await pi.exec(
+    "git",
+    ["log", `-${limit}`, "--oneline"],
+    { cwd: repoPath },
+  );
+  if (code !== 0) {
+    return [];
+  }
+
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 export async function buildStatus(root: string): Promise<StatusSummary> {
