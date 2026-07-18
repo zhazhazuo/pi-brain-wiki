@@ -28,3 +28,16 @@
 - graph-first architecture → ./06_features/graph-first-architecture.md — vault-wide graph discovery, neighborhood traversal, and PKB bridging through Obsidian CLI
 - external-context → ./06_features/external-context.md — deterministic PKB-linked local repo resolution and bounded gather via extension tools
 - task-sync → extensions/brain-wiki/src/task-sync.ts — bidirectional LIST.md ↔ Taskwarrior sync
+- integration → extensions/brain-wiki/src/integration.ts — finalize captured sources by marking source packet and target pages as integrated
+- skills → extensions/brain-wiki/src/skills.ts — resolve package skills directory and discover SKILL.md files
+- workflow-gate → extensions/brain-wiki/src/workflow-gate.ts — route user requests through learned workflow page triggers
+- context-gather-agent → extensions/brain-wiki/src/context-gather-agent.ts — spawn isolated Pi subagent inside resolved external repo for bounded context brief
+- context-guards → extensions/brain-wiki/src/context-guards.ts — pre-flight guard intercepting tool calls targeting external repo paths
+- context-guide → extensions/brain-wiki/src/context-guide.ts — format external context catalog and access hints for agents
+- project-schema → extensions/brain-wiki/src/project-schema.ts — Project/ folder templates and frontmatter validation
+- project-tasks → extensions/brain-wiki/src/project-tasks.ts — parse/render/update structured task blocks in project tasks.md
+- project-timeline → extensions/brain-wiki/src/project-timeline.ts — format append-only typed timeline entries
+- task-cli → extensions/brain-wiki/src/task-cli.ts — Taskwarrior CLI execution wrapper and error parsing
+- task-scan → extensions/brain-wiki/src/task-scan.ts — scan vault for stale LIST.md items and task promotion proposals
+- task-validator → extensions/brain-wiki/src/task-validator.ts — promotion payload validation enforcing creation rules
+- wiki-week → extensions/brain-wiki/src/wiki-week.ts — weekly dashboard rendering and task summary generation

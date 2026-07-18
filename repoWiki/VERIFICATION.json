@@ -1,0 +1,3473 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "chunkId": "00_overview%2Fbig_picture.md::Big Picture::What the system does::0",
+      "path": "00_overview/big_picture.md",
+      "breadcrumb": [
+        "Big Picture",
+        "What the system does"
+      ],
+      "chunkSha256": "909fd132cd15a2acd9046fec4379332920686093a5b22306b66eee3a0b2ab3ab",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Fbig_picture.md::Big Picture::Core flow::0",
+      "path": "00_overview/big_picture.md",
+      "breadcrumb": [
+        "Big Picture",
+        "Core flow"
+      ],
+      "chunkSha256": "cfb3d4d4ae29cd0bca544f19de35b16d4a2d2fba086a9ae18a5b80237ba35dc7",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Fbig_picture.md::Big Picture::Constraints::0",
+      "path": "00_overview/big_picture.md",
+      "breadcrumb": [
+        "Big Picture",
+        "Constraints"
+      ],
+      "chunkSha256": "471a4fd996e05a048f0ab26e719e90d2993a9640b8ce2a967b28878cdc1834e2",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Findex.md::00 Overview::Overview::0",
+      "path": "00_overview/index.md",
+      "breadcrumb": [
+        "00 Overview",
+        "Overview"
+      ],
+      "chunkSha256": "27e15014f3a12a920098125e7e75ef99b24002d4665f73fe15cf470f41e8e3cc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Ftech_stack.md::Tech Stack::runtime::0",
+      "path": "00_overview/tech_stack.md",
+      "breadcrumb": [
+        "Tech Stack",
+        "runtime"
+      ],
+      "chunkSha256": "40fcab86f74096ff59896659965045fb29e94e1d64bba3ded963e49cf6bf5440",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Ftech_stack.md::Tech Stack::frontend::0",
+      "path": "00_overview/tech_stack.md",
+      "breadcrumb": [
+        "Tech Stack",
+        "frontend"
+      ],
+      "chunkSha256": "de37e83da751e24d92b80263a5282404df50840fb627f754d5dba62d62333830",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Ftech_stack.md::Tech Stack::backend::0",
+      "path": "00_overview/tech_stack.md",
+      "breadcrumb": [
+        "Tech Stack",
+        "backend"
+      ],
+      "chunkSha256": "cfab9049a6abe5c5e2479fa7aa48d51f5e4cabcd32ea7077f71d4e66b9c401bc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Ftech_stack.md::Tech Stack::storage::0",
+      "path": "00_overview/tech_stack.md",
+      "breadcrumb": [
+        "Tech Stack",
+        "storage"
+      ],
+      "chunkSha256": "4ecf99b257489b0323da724cce97bd0632ea4931f8a0b2bb8ff74e8d5b6d7465",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "00_overview%2Ftech_stack.md::Tech Stack::infra::0",
+      "path": "00_overview/tech_stack.md",
+      "breadcrumb": [
+        "Tech Stack",
+        "infra"
+      ],
+      "chunkSha256": "b5cef750f9b20e91e663ec1df6ec67e50d86a786e99b54c09f693788a3432cde",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Ffeature_map.md::Feature Map::Overview::0",
+      "path": "01_maps/feature_map.md",
+      "breadcrumb": [
+        "Feature Map",
+        "Overview"
+      ],
+      "chunkSha256": "d3f9e0df35de5f085bbd0bb14162109e346b09e25930aaca4be4fa4a7aca7bf7",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Ffeature_map.md::Feature Map::Overview::1",
+      "path": "01_maps/feature_map.md",
+      "breadcrumb": [
+        "Feature Map",
+        "Overview"
+      ],
+      "chunkSha256": "b6b60ca31373efe920fafe30cc5f3425e262248fd309abf205e5362d9758c07c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Ffeature_map.md::Feature Map::Overview::2",
+      "path": "01_maps/feature_map.md",
+      "breadcrumb": [
+        "Feature Map",
+        "Overview"
+      ],
+      "chunkSha256": "dc7b0fcedde87892f8c1adf28ad3837cf8a47119f590394f19eac07915d58e95",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Findex.md::01 Maps::Overview::0",
+      "path": "01_maps/index.md",
+      "breadcrumb": [
+        "01 Maps",
+        "Overview"
+      ],
+      "chunkSha256": "64f5b96f29e83517aa6af32f842c49b7ffdcc873fc8aca95d1c3c3d1e540a196",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Fmodule_map.md::Module Map::Overview::0",
+      "path": "01_maps/module_map.md",
+      "breadcrumb": [
+        "Module Map",
+        "Overview"
+      ],
+      "chunkSha256": "b39122f1f509f6ab640de65671b669d64d9ebee9f46da002470be52f96f58125",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Fmodule_map.md::Module Map::Overview::1",
+      "path": "01_maps/module_map.md",
+      "breadcrumb": [
+        "Module Map",
+        "Overview"
+      ],
+      "chunkSha256": "e6d682b278609ca2b463ecc604789eeb7085b1671dd13054a3567b319d52d015",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Fsystem_map.md::System Map::Core layers::0",
+      "path": "01_maps/system_map.md",
+      "breadcrumb": [
+        "System Map",
+        "Core layers"
+      ],
+      "chunkSha256": "aae643076c11af45ebd595f002a0114dcff654f7afe9d65e01cb59716c758841",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Fsystem_map.md::System Map::Integrations::0",
+      "path": "01_maps/system_map.md",
+      "breadcrumb": [
+        "System Map",
+        "Integrations"
+      ],
+      "chunkSha256": "c6ff356acdc084f5924cfa294d29a8366777c14f5a27960b0f7a5f1cb0d25a51",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "01_maps%2Fsystem_map.md::System Map::Layers::0",
+      "path": "01_maps/system_map.md",
+      "breadcrumb": [
+        "System Map",
+        "Layers"
+      ],
+      "chunkSha256": "622735406bbd96d8a555714c77889fa64418f149d76c427cb552e9f437d64a7f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdebug.md::Debug Guide::Common issues::0",
+      "path": "02_guides/debug.md",
+      "breadcrumb": [
+        "Debug Guide",
+        "Common issues"
+      ],
+      "chunkSha256": "2bd25ddda842e3bfd3be264023a48c8f0cb6bce629a3d010d703509688b6722e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdebug.md::Debug Guide::Log locations::0",
+      "path": "02_guides/debug.md",
+      "breadcrumb": [
+        "Debug Guide",
+        "Log locations"
+      ],
+      "chunkSha256": "bc61d2981e66b2b0b36e1820c303d4e7304e6ba688b0e7759f7136c92968ab4e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdeploy.md::Deploy Guide::Build::0",
+      "path": "02_guides/deploy.md",
+      "breadcrumb": [
+        "Deploy Guide",
+        "Build"
+      ],
+      "chunkSha256": "67e2a0d125bbc2e7be2693e36224b8524c33253d46ece7b6a04e3356231e2e50",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdeploy.md::Deploy Guide::Release::0",
+      "path": "02_guides/deploy.md",
+      "breadcrumb": [
+        "Deploy Guide",
+        "Release"
+      ],
+      "chunkSha256": "dcce0fc2db93f50d5e88c784d1aa52fd5c10c7dfe550a2380c39bffccab56b63",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdeploy.md::Deploy Guide::CI/CD pipeline::0",
+      "path": "02_guides/deploy.md",
+      "breadcrumb": [
+        "Deploy Guide",
+        "CI/CD pipeline"
+      ],
+      "chunkSha256": "0082251d3c5b4fc859c0e8f5c0c888890ece8973e0c3f9ab92c1f0461f886eb5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdeploy.md::Deploy Guide::Prerequisites::0",
+      "path": "02_guides/deploy.md",
+      "breadcrumb": [
+        "Deploy Guide",
+        "Prerequisites"
+      ],
+      "chunkSha256": "6aea978372a73d81e440887357c0b9fbd0c69507caaca01e468c846d6d53d02e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Prerequisites::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Prerequisites"
+      ],
+      "chunkSha256": "f21791419ecf72629fb45d72748de33e77b35aec00cb856c68c051aad9503e40",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Setup::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Setup"
+      ],
+      "chunkSha256": "019efa1a99be41741e8b7b7831a0aca1c8ddd62263056b086c758421f560aeda",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Dev server::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Dev server"
+      ],
+      "chunkSha256": "c8a575408c6ff8dc8219e10776c8bb47c7d3d9b3255863a91d3aadde2fafd8c1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Test commands::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Test commands"
+      ],
+      "chunkSha256": "3c54f759ded2940b238906e45abda1083c52c4c9ce4af3c714238622685d5f8e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Skills::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Skills"
+      ],
+      "chunkSha256": "e3dd367773311032413c94d5e45e136893d011d11c33179fb34c96c0a4db8ef7",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Env variables::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Env variables"
+      ],
+      "chunkSha256": "22971549a76097b5d5e650dc49d092636825e13f075139278a15925412bb3f9d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fdev.md::Dev Guide::Project structure::0",
+      "path": "02_guides/dev.md",
+      "breadcrumb": [
+        "Dev Guide",
+        "Project structure"
+      ],
+      "chunkSha256": "e062574e6835c98ead182718777b6831a3f24fd8725cfedfa810a5b3933bb2ac",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Overview::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Overview"
+      ],
+      "chunkSha256": "31b4804783a2d1336a917e0c9fdb2f3b6b863e3a142800e3175ea052a78a3a02",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Quick Start::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Quick Start"
+      ],
+      "chunkSha256": "3ac281110ff67af8b150210e60d1c8c76337b92e598979b8925dc1f8d0a565ab",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::The Three Agents::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "The Three Agents"
+      ],
+      "chunkSha256": "d8fa9971d0223a74780757806c4be4ce47e4082eae560c0b4d8e22e207b0a323",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::The Four Workflows::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "The Four Workflows"
+      ],
+      "chunkSha256": "9926403c84d939ebf525f73d4c60815bd32835769b98d2c9a4b8bd2cb0173263",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Session Start Sequence::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Session Start Sequence"
+      ],
+      "chunkSha256": "9b42d136821a0ba634cac09c0ffe9fd1e6d2d3da6b5abc38530ccc3dc7d2811b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Zone Rules — What the Agent Can Do::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Zone Rules — What the Agent Can Do"
+      ],
+      "chunkSha256": "6e5d202707eb602c317aec9b283412dc16c4cba7e35ab10f7203f6d7130f6b44",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Key Tools::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Key Tools"
+      ],
+      "chunkSha256": "62694123e04798eb248d5fac66a04055bf7431b50b575582bb60be331bb77adb",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Lifecycle — Page States::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Lifecycle — Page States"
+      ],
+      "chunkSha256": "42f109dbd985e6037df5ed3258dae3ef1d25acfa662d0522a74a10d1bea664ec",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::LIST.md Protocol::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "LIST.md Protocol"
+      ],
+      "chunkSha256": "cb0da41a4d4bf0f51c93db0c16de20e810d7bb2a5c748cfd12bfb02eefe99c48",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Current Discovery Workflow::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Current Discovery Workflow"
+      ],
+      "chunkSha256": "f68908aff6940cf4ca40461604a4cb0177b87f782862cc176c49a391d6b86115",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Discussion System::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Discussion System"
+      ],
+      "chunkSha256": "52b73bff4981a2b91df154b9bfadfdc94816abffc0f0aabe6549b150415c430c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Common Patterns::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Common Patterns"
+      ],
+      "chunkSha256": "b027b253b1af0c80d7871c59dacb1043198fea916c94dca4b9ad3df70e56fd9a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Digests and Events::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Digests and Events"
+      ],
+      "chunkSha256": "336cfd22e23bced05deb6b3638102bf10127317a17a65136d64a71338517103a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Migration Notes::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Migration Notes"
+      ],
+      "chunkSha256": "741ac00c8a51675adcf2c2a5ee084dae1fa2da462239215963f5a91eb2729012",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Troubleshooting::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Troubleshooting"
+      ],
+      "chunkSha256": "94ce1fd870b7da9d07ced72ae3bc49cb515f6e1237616c3b9d1436105bc16cc9",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "02_guides%2Fuser-guide.md::Brain Wiki User Guide::Design Principles::0",
+      "path": "02_guides/user-guide.md",
+      "breadcrumb": [
+        "Brain Wiki User Guide",
+        "Design Principles"
+      ],
+      "chunkSha256": "b20ab02c8c7fa62106b9a6d009dc89efbd60451f4f2412ddbd7430b8ae394194",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::Root::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "Root"
+      ],
+      "chunkSha256": "37269b29f488f6dffa1b047caa079063a3bb299f776fc7fa861ee0475a36448c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::.github/workflows/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        ".github/workflows/"
+      ],
+      "chunkSha256": "252ec122814ad2d226a7f69230a9cff4be088877bd24a7d88e19bc63f96b69da",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::extensions/brain-wiki/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "extensions/brain-wiki/"
+      ],
+      "chunkSha256": "3785f87d1e64e9be576a22de47644bb812ccf82e4c096483555ab3703cd0418f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::.wiki/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        ".wiki/"
+      ],
+      "chunkSha256": "a957be9757eddd193387b11de74bf211268080f0e1e8c5c71f2d4da2c91721d5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::extensions/brain-wiki/src/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "extensions/brain-wiki/src/"
+      ],
+      "chunkSha256": "1acb19bc05dda919b5af5bb27842efd68e0468c87b51b459eb2f895b1934cc4d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::extensions/brain-wiki/src/::1",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "extensions/brain-wiki/src/"
+      ],
+      "chunkSha256": "88a29461e7c6d6307b7dc018655ad5c0132d5e9eb118b15bc39c6cc6190bb66f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::extensions/brain-wiki/src/::2",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "extensions/brain-wiki/src/"
+      ],
+      "chunkSha256": "0347cbebc230311337a2190754514722eee59372e998b1f12c261ee252154b31",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::scripts/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "scripts/"
+      ],
+      "chunkSha256": "ac0500d260167b33e5594f7fb0aa9ad2f77634eb60fe8169e2235fcfca684d2d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::docs/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "docs/"
+      ],
+      "chunkSha256": "e28f00d1e3cc7254f86e158938b9a9a953c7c130d5a2d7156f1063f019a0b364",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Responsibility::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Responsibility"
+      ],
+      "chunkSha256": "a28e2580cea743cad958ac9614abf17f2238e61012c58b2a3e0df83d861ece74",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Entry Points::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Entry Points"
+      ],
+      "chunkSha256": "d93f33831a1fa0c7202d4f3575a4fc75d9516631588c018e683f1a25c283c050",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Key Files::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Key Files"
+      ],
+      "chunkSha256": "e428ab93dbbf0dd21f732e19cff1b9854ace91a4ef0ca31aa742becd99a3eb6d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Constraints::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Constraints"
+      ],
+      "chunkSha256": "916aece46d44cbfd91ef8341781fa92bf4179c50aaf5ff3a06e3936dc729225d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::LIST.md Parsing::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "LIST.md Parsing"
+      ],
+      "chunkSha256": "986520f78bc74c754f873f78046e684c917851bc6132edd290cc45d0693819a4",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Agent Line Regex::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Agent Line Regex"
+      ],
+      "chunkSha256": "31ec1a6bd4df59416a6a5891446ae471f363a8404fb475266cb00c2f7684c4a7",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Vault Activity Output::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Vault Activity Output"
+      ],
+      "chunkSha256": "87bae79c313b77e4f4f3d3a575b65633c5b8c8bd66aebe16e2c72da4ad64d1a2",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Lifecycle Backlog::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Lifecycle Backlog"
+      ],
+      "chunkSha256": "037e31dcc8b4e2a22d51717698e1ca7e6db10ed2aa71c23d2557380cb2223e82",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Factivity.md::Module: activity::Scope Table::0",
+      "path": "04_modules/activity.md",
+      "breadcrumb": [
+        "Module: activity",
+        "Scope Table"
+      ],
+      "chunkSha256": "156b956af8efcc03070fac26920cdd161ad1d5b496de671881f97183b7f9e6cf",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcapture.md::Module: capture::Responsibility::0",
+      "path": "04_modules/capture.md",
+      "breadcrumb": [
+        "Module: capture",
+        "Responsibility"
+      ],
+      "chunkSha256": "039410044d3dd070cf048c020a725c3c927f4446efbd1b76ca29a38cfd8fdaee",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcapture.md::Module: capture::Entry Points::0",
+      "path": "04_modules/capture.md",
+      "breadcrumb": [
+        "Module: capture",
+        "Entry Points"
+      ],
+      "chunkSha256": "f70dcec0e31a785602a5035c1a98ca9b88772e675431c919241d73283eddf831",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcapture.md::Module: capture::Key Files::0",
+      "path": "04_modules/capture.md",
+      "breadcrumb": [
+        "Module: capture",
+        "Key Files"
+      ],
+      "chunkSha256": "c685c29f12b195fcf83e497b413c1d68dbb7e12de1f31c8dc79618f3aa687725",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcapture.md::Module: capture::Constraints::0",
+      "path": "04_modules/capture.md",
+      "breadcrumb": [
+        "Module: capture",
+        "Constraints"
+      ],
+      "chunkSha256": "ce31a63b55d350c599221c3cfa27965b6a4f40d2bfd7e534a3d100ae8a8ab9f4",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcapture.md::Module: capture::Scope Table::0",
+      "path": "04_modules/capture.md",
+      "breadcrumb": [
+        "Module: capture",
+        "Scope Table"
+      ],
+      "chunkSha256": "6dba21fdaa6f00a54ddad2ca9d5aa634c68cf39fb314563ff8b3742b04c09887",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fconfig.md::Module: config::Responsibility::0",
+      "path": "04_modules/config.md",
+      "breadcrumb": [
+        "Module: config",
+        "Responsibility"
+      ],
+      "chunkSha256": "b9557dec8764a0ea2174c9136aa92a9b789ba3ac7e5c4dcebee74b429fe675fd",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fconfig.md::Module: config::Entry Points::0",
+      "path": "04_modules/config.md",
+      "breadcrumb": [
+        "Module: config",
+        "Entry Points"
+      ],
+      "chunkSha256": "924f6b58c91b4f473de073baab0ad1df597ae1aca2f1e2d3b5a062c7fe61793c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fconfig.md::Module: config::Key Files::0",
+      "path": "04_modules/config.md",
+      "breadcrumb": [
+        "Module: config",
+        "Key Files"
+      ],
+      "chunkSha256": "9a6681f98ddd6f9b9582e0df694ac7d0f2d4b03d54a88fcaea40e27702ab90e6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fconfig.md::Module: config::Constraints::0",
+      "path": "04_modules/config.md",
+      "breadcrumb": [
+        "Module: config",
+        "Constraints"
+      ],
+      "chunkSha256": "c02fdd608a660b3769052627ad9849af7dcd63764e52bbf9afbde9586cbbbcdc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fconfig.md::Module: config::Scope Table::0",
+      "path": "04_modules/config.md",
+      "breadcrumb": [
+        "Module: config",
+        "Scope Table"
+      ],
+      "chunkSha256": "18a51497e7c860f04a94074348883e7074b83f83caf6e742fb914923f7d4aec0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather-agent.md::context-gather-agent::Responsibility::0",
+      "path": "04_modules/context-gather-agent.md",
+      "breadcrumb": [
+        "context-gather-agent",
+        "Responsibility"
+      ],
+      "chunkSha256": "5c875eef2e9000788a70c4f0b53ead1c076c5a1d6f0397f1fdfd438b3cb6848e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather-agent.md::context-gather-agent::Entry Points::0",
+      "path": "04_modules/context-gather-agent.md",
+      "breadcrumb": [
+        "context-gather-agent",
+        "Entry Points"
+      ],
+      "chunkSha256": "137af2c75ff11b3e0d99df7810705d304c12cdd6ff0948d58bbe735d0a9169fd",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather-agent.md::context-gather-agent::Key Files::0",
+      "path": "04_modules/context-gather-agent.md",
+      "breadcrumb": [
+        "context-gather-agent",
+        "Key Files"
+      ],
+      "chunkSha256": "389067b45225ae50e9be6afe5b0f1026fcd5d2d607350c1cb61eed91ee6c539a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather-agent.md::context-gather-agent::Constraints::0",
+      "path": "04_modules/context-gather-agent.md",
+      "breadcrumb": [
+        "context-gather-agent",
+        "Constraints"
+      ],
+      "chunkSha256": "7ffb361c8fed492a3367a8841004cebf6d21cd8456bf4b178d0f7e8d5bae4733",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather-agent.md::context-gather-agent::Scope Table::0",
+      "path": "04_modules/context-gather-agent.md",
+      "breadcrumb": [
+        "context-gather-agent",
+        "Scope Table"
+      ],
+      "chunkSha256": "62d0751de279957360d3245c2bb52eab5525f0ee166b860f336405f67433e305",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather.md::Module: context-gather::Responsibility::0",
+      "path": "04_modules/context-gather.md",
+      "breadcrumb": [
+        "Module: context-gather",
+        "Responsibility"
+      ],
+      "chunkSha256": "7517d7a2f9e29891b703d1676fed9ea54019197fab9de788298f2ad7151e59a6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather.md::Module: context-gather::Entry Points::0",
+      "path": "04_modules/context-gather.md",
+      "breadcrumb": [
+        "Module: context-gather",
+        "Entry Points"
+      ],
+      "chunkSha256": "4128cb0e9292adc336a3fda78abd648de39e950511d03685e002f05a78e26b3a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather.md::Module: context-gather::Key Files::0",
+      "path": "04_modules/context-gather.md",
+      "breadcrumb": [
+        "Module: context-gather",
+        "Key Files"
+      ],
+      "chunkSha256": "2edaaa527c176b2d563ac4da9ac7a933a3f944e1ef66ebadabb8b29a16ec6e0b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather.md::Module: context-gather::Constraints::0",
+      "path": "04_modules/context-gather.md",
+      "breadcrumb": [
+        "Module: context-gather",
+        "Constraints"
+      ],
+      "chunkSha256": "d538ecf2cb8b904f3165f29b1a3f72fa56e3ee8fcda17f528775e241e70cad45",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather.md::Module: context-gather::Gather Intents::0",
+      "path": "04_modules/context-gather.md",
+      "breadcrumb": [
+        "Module: context-gather",
+        "Gather Intents"
+      ],
+      "chunkSha256": "02c111ae3cf55903d4de5446d273c59c0a3fadffeae6453c339284d2b568b888",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-gather.md::Module: context-gather::Scope Table::0",
+      "path": "04_modules/context-gather.md",
+      "breadcrumb": [
+        "Module: context-gather",
+        "Scope Table"
+      ],
+      "chunkSha256": "587f6ad02bbbbb4ff14f34595d0c63bf9e1744acd79c4faa892ff50822ea8e2c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guards.md::context-guards::Responsibility::0",
+      "path": "04_modules/context-guards.md",
+      "breadcrumb": [
+        "context-guards",
+        "Responsibility"
+      ],
+      "chunkSha256": "378116531e9b4cb606bae8e90811ecbfa668cdd270d069752aa0613dcca3b323",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guards.md::context-guards::Entry Points::0",
+      "path": "04_modules/context-guards.md",
+      "breadcrumb": [
+        "context-guards",
+        "Entry Points"
+      ],
+      "chunkSha256": "bf3b4ab336ed07976431e3aa1974c8506701f13d26db203797f1e71f9ec1a806",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guards.md::context-guards::Key Files::0",
+      "path": "04_modules/context-guards.md",
+      "breadcrumb": [
+        "context-guards",
+        "Key Files"
+      ],
+      "chunkSha256": "1fa22dfed5a63d0226bfe5a5281f7d71c0d036be880acb4143c5e536583a69ba",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guards.md::context-guards::Constraints::0",
+      "path": "04_modules/context-guards.md",
+      "breadcrumb": [
+        "context-guards",
+        "Constraints"
+      ],
+      "chunkSha256": "823f8d7030692e3c25e3dad87a01c34b858c9bfdc05ceb4be11de81751ae7004",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guards.md::context-guards::Scope Table::0",
+      "path": "04_modules/context-guards.md",
+      "breadcrumb": [
+        "context-guards",
+        "Scope Table"
+      ],
+      "chunkSha256": "b23e99f60ab6904de4a4ce15fe05512b40fab517d95ad5587e9031f5ca3e3c6a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guide.md::context-guide::Responsibility::0",
+      "path": "04_modules/context-guide.md",
+      "breadcrumb": [
+        "context-guide",
+        "Responsibility"
+      ],
+      "chunkSha256": "f94aeaa31c322a365cd0547d754ae4748e97b410b5a65fa3e2a5adf8f38b3551",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guide.md::context-guide::Entry Points::0",
+      "path": "04_modules/context-guide.md",
+      "breadcrumb": [
+        "context-guide",
+        "Entry Points"
+      ],
+      "chunkSha256": "8a594bd786c2781f7625ccd31cdc144fe8c02eabad7731dc0667eaf0a254be09",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guide.md::context-guide::Key Files::0",
+      "path": "04_modules/context-guide.md",
+      "breadcrumb": [
+        "context-guide",
+        "Key Files"
+      ],
+      "chunkSha256": "dda0339d378907cdde1d3af613322e2b0a552f00b557c409e8505d751ec0e523",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guide.md::context-guide::Constraints::0",
+      "path": "04_modules/context-guide.md",
+      "breadcrumb": [
+        "context-guide",
+        "Constraints"
+      ],
+      "chunkSha256": "4bff7e0c35072e7d24209b066e9b864d2af5272e793a1fd9d16ff24ce7a611a3",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-guide.md::context-guide::Scope Table::0",
+      "path": "04_modules/context-guide.md",
+      "breadcrumb": [
+        "context-guide",
+        "Scope Table"
+      ],
+      "chunkSha256": "101ca343d05f2e9b8a6006b373795aeec27fce06aca32b345f00844e38eccee4",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-resolve.md::Module: context-resolve::Responsibility::0",
+      "path": "04_modules/context-resolve.md",
+      "breadcrumb": [
+        "Module: context-resolve",
+        "Responsibility"
+      ],
+      "chunkSha256": "2f66e181dc972269c6aa5c2ac5abf5315f4c5a2d530c8df4b69b969b22da9b63",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-resolve.md::Module: context-resolve::Entry Points::0",
+      "path": "04_modules/context-resolve.md",
+      "breadcrumb": [
+        "Module: context-resolve",
+        "Entry Points"
+      ],
+      "chunkSha256": "e43ff62aca9737e9ac6a121d3a113b93d57feee2498d9b8e7854cbaa055f9773",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-resolve.md::Module: context-resolve::Key Files::0",
+      "path": "04_modules/context-resolve.md",
+      "breadcrumb": [
+        "Module: context-resolve",
+        "Key Files"
+      ],
+      "chunkSha256": "898a55becbdc7fff35438eb0a6717f8533888160a3152b537da2a021f71387b5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-resolve.md::Module: context-resolve::Constraints::0",
+      "path": "04_modules/context-resolve.md",
+      "breadcrumb": [
+        "Module: context-resolve",
+        "Constraints"
+      ],
+      "chunkSha256": "3c2a4054e80ea1fb7b679c8906e325b24f753f9298dbccb0b8128b70eadda8a8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fcontext-resolve.md::Module: context-resolve::Scope Table::0",
+      "path": "04_modules/context-resolve.md",
+      "breadcrumb": [
+        "Module: context-resolve",
+        "Scope Table"
+      ],
+      "chunkSha256": "b7ae4e65fdd7ab57effaa97d240857164b4981d9d504ba032077e65896a9395d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fdigest.md::Module: digest::Responsibility::0",
+      "path": "04_modules/digest.md",
+      "breadcrumb": [
+        "Module: digest",
+        "Responsibility"
+      ],
+      "chunkSha256": "1b39bd2a2830cf123a7d3b526388ec0f3cff7a67b08675d36d7664e56f39e007",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fdigest.md::Module: digest::Entry Points::0",
+      "path": "04_modules/digest.md",
+      "breadcrumb": [
+        "Module: digest",
+        "Entry Points"
+      ],
+      "chunkSha256": "f77f398df06a896673381fc0003d175185d596d8b5302bf4b73f5abd66d97e63",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fdigest.md::Module: digest::Key Files::0",
+      "path": "04_modules/digest.md",
+      "breadcrumb": [
+        "Module: digest",
+        "Key Files"
+      ],
+      "chunkSha256": "ce669dcee6fb57dda85bce9a91843d3228d1ecaafbc3e11567f430ec307dbce9",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fdigest.md::Module: digest::Constraints::0",
+      "path": "04_modules/digest.md",
+      "breadcrumb": [
+        "Module: digest",
+        "Constraints"
+      ],
+      "chunkSha256": "43c45ef728bdd25a7026680e749eaf04c3b7339024f8655f037e804198815d01",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fdigest.md::Module: digest::Scope Table::0",
+      "path": "04_modules/digest.md",
+      "breadcrumb": [
+        "Module: digest",
+        "Scope Table"
+      ],
+      "chunkSha256": "e3121f9cc447a44505db0718de8e16f8dbb389375fc699ae602bf44d8ba247e5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ffrontmatter.md::Module: frontmatter::Responsibility::0",
+      "path": "04_modules/frontmatter.md",
+      "breadcrumb": [
+        "Module: frontmatter",
+        "Responsibility"
+      ],
+      "chunkSha256": "2fcb0fdbe4501203cfb5909ac1c7bca46f0676e307d8835214896737361b98bf",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ffrontmatter.md::Module: frontmatter::Entry Points::0",
+      "path": "04_modules/frontmatter.md",
+      "breadcrumb": [
+        "Module: frontmatter",
+        "Entry Points"
+      ],
+      "chunkSha256": "65b9cdc8a15bea2d26da4a7d224ee11cfb1dc86a7b64c2e5db8513b460ff04fe",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ffrontmatter.md::Module: frontmatter::Key Files::0",
+      "path": "04_modules/frontmatter.md",
+      "breadcrumb": [
+        "Module: frontmatter",
+        "Key Files"
+      ],
+      "chunkSha256": "39b0df9d57813fbf813fe1cbe6167b095292531e1e9ea3dc4a099323f2536e0c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ffrontmatter.md::Module: frontmatter::Constraints::0",
+      "path": "04_modules/frontmatter.md",
+      "breadcrumb": [
+        "Module: frontmatter",
+        "Constraints"
+      ],
+      "chunkSha256": "8e4d8c576047c47d1bbd5454d6e399000eaa20c8f5a31e1969b8d5b92f09ffbf",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ffrontmatter.md::Module: frontmatter::Scope Table::0",
+      "path": "04_modules/frontmatter.md",
+      "breadcrumb": [
+        "Module: frontmatter",
+        "Scope Table"
+      ],
+      "chunkSha256": "57b0cda8908f88e3491db17c1f55d238d26964622ad3cfe9842d42241952a58e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fgraph.md::Module: graph::Responsibility::0",
+      "path": "04_modules/graph.md",
+      "breadcrumb": [
+        "Module: graph",
+        "Responsibility"
+      ],
+      "chunkSha256": "e01d0d4525d3a81ca1cb67b0c77f989bb962842b552ba291eec2bda32e4bd9f1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fgraph.md::Module: graph::Entry Points::0",
+      "path": "04_modules/graph.md",
+      "breadcrumb": [
+        "Module: graph",
+        "Entry Points"
+      ],
+      "chunkSha256": "d4f83bf070f53bb853d3a1012c877631a983518d8c3f367614f79cf31ff5643d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fgraph.md::Module: graph::Key Files::0",
+      "path": "04_modules/graph.md",
+      "breadcrumb": [
+        "Module: graph",
+        "Key Files"
+      ],
+      "chunkSha256": "1f9874c284abe4eb0d3272f25ccb589c8eb6eb4daa83dbb6e83590c3148c083e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fgraph.md::Module: graph::Constraints::0",
+      "path": "04_modules/graph.md",
+      "breadcrumb": [
+        "Module: graph",
+        "Constraints"
+      ],
+      "chunkSha256": "efc2a9f175b9c079b4dcc5fe51939a989e5e1b3ad2f699b5c59d757d2355849c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fgraph.md::Module: graph::Scope Table::0",
+      "path": "04_modules/graph.md",
+      "breadcrumb": [
+        "Module: graph",
+        "Scope Table"
+      ],
+      "chunkSha256": "9e7d667e1c845f2805302845d61d4c19709759f1570ccc3ec8c2847aaf273be8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fguards.md::Module: guards::Responsibility::0",
+      "path": "04_modules/guards.md",
+      "breadcrumb": [
+        "Module: guards",
+        "Responsibility"
+      ],
+      "chunkSha256": "153b9e6b09108e0e948a40d5adc0907a9f51f780d39c3d5eff4be5fc50347799",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fguards.md::Module: guards::Entry Points::0",
+      "path": "04_modules/guards.md",
+      "breadcrumb": [
+        "Module: guards",
+        "Entry Points"
+      ],
+      "chunkSha256": "cddc7fe913efcebd8d9cba388d15e890424338f43aa551b56af875615d48bb7d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fguards.md::Module: guards::Key Files::0",
+      "path": "04_modules/guards.md",
+      "breadcrumb": [
+        "Module: guards",
+        "Key Files"
+      ],
+      "chunkSha256": "7650f735b0120559f5aa162da2d57c41870a91da84797f633fd1d4aebaea873e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fguards.md::Module: guards::Constraints::0",
+      "path": "04_modules/guards.md",
+      "breadcrumb": [
+        "Module: guards",
+        "Constraints"
+      ],
+      "chunkSha256": "1d8e878ec2f52ec6acdfd6ee7b38f59e3dd8ac2960c055b07c1dd333d190ba2b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fguards.md::Module: guards::Scope Table::0",
+      "path": "04_modules/guards.md",
+      "breadcrumb": [
+        "Module: guards",
+        "Scope Table"
+      ],
+      "chunkSha256": "2c745f22c17aae809221d39ecbfab053d2cdf22c57d52e521695cf1264883e06",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findex.md::04 Modules::Core pipeline::0",
+      "path": "04_modules/index.md",
+      "breadcrumb": [
+        "04 Modules",
+        "Core pipeline"
+      ],
+      "chunkSha256": "26c8546252d3dd1a7040459c5046fa5831333a518f4bd4a07fa6be5dc96b0470",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findex.md::04 Modules::Health and guardrails::0",
+      "path": "04_modules/index.md",
+      "breadcrumb": [
+        "04 Modules",
+        "Health and guardrails"
+      ],
+      "chunkSha256": "36e258cd5fed26f7a691599b4d14868a131fa71a69390f9c27c02b4d7ceec7db",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findex.md::04 Modules::Auxiliary::0",
+      "path": "04_modules/index.md",
+      "breadcrumb": [
+        "04 Modules",
+        "Auxiliary"
+      ],
+      "chunkSha256": "2315e030d758fb592d85bfdcf5bca9f0213c71b4772cec917f173479b51540f0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findex.md::04 Modules::PARA integration::0",
+      "path": "04_modules/index.md",
+      "breadcrumb": [
+        "04 Modules",
+        "PARA integration"
+      ],
+      "chunkSha256": "349739965ba8a028f3ef52ee8f723af87a5255c04f21babc2c9fa825f9deb89a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findex.md::04 Modules::Obsidian integration::0",
+      "path": "04_modules/index.md",
+      "breadcrumb": [
+        "04 Modules",
+        "Obsidian integration"
+      ],
+      "chunkSha256": "f5de2dd01d23af11d010c7be6510528de9bcef22db4037daf118919b115dd6f9",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findexer.md::Module: indexer::Responsibility::0",
+      "path": "04_modules/indexer.md",
+      "breadcrumb": [
+        "Module: indexer",
+        "Responsibility"
+      ],
+      "chunkSha256": "5cf96ec7a0a810d6f2b519e09081ce8dca9a2ee4b8a440b1b7963ec8ebf4d5ab",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findexer.md::Module: indexer::Entry Points::0",
+      "path": "04_modules/indexer.md",
+      "breadcrumb": [
+        "Module: indexer",
+        "Entry Points"
+      ],
+      "chunkSha256": "4528ab593d1ddb3010a2d4230d57f93bf4b86020d744fff2dc6efff5ae90a619",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findexer.md::Module: indexer::Key Files::0",
+      "path": "04_modules/indexer.md",
+      "breadcrumb": [
+        "Module: indexer",
+        "Key Files"
+      ],
+      "chunkSha256": "4da6e351545c66afb4f1d1690c83003c472a67f33346710cd2513925a034db31",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findexer.md::Module: indexer::Constraints::0",
+      "path": "04_modules/indexer.md",
+      "breadcrumb": [
+        "Module: indexer",
+        "Constraints"
+      ],
+      "chunkSha256": "39cceb95ea786ac2ae06d64946f0e963c8b3f8c345c3811e84d25df89ab66339",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Findexer.md::Module: indexer::Scope Table::0",
+      "path": "04_modules/indexer.md",
+      "breadcrumb": [
+        "Module: indexer",
+        "Scope Table"
+      ],
+      "chunkSha256": "9ad51c6f9f3ead644eeff3b3a27c82cc28a839f2ae04955964c2d533f1d44194",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fintegration.md::integration::Responsibility::0",
+      "path": "04_modules/integration.md",
+      "breadcrumb": [
+        "integration",
+        "Responsibility"
+      ],
+      "chunkSha256": "484b42e77f8de11928fb88652f56a214dc941c02542bffa7fb79c46e2791e9a8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fintegration.md::integration::Entry Points::0",
+      "path": "04_modules/integration.md",
+      "breadcrumb": [
+        "integration",
+        "Entry Points"
+      ],
+      "chunkSha256": "9eb537e89814536fae6da97e6afe0e8d57b9c0423aafbb22c3c9cfa3e00e0933",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fintegration.md::integration::Key Files::0",
+      "path": "04_modules/integration.md",
+      "breadcrumb": [
+        "integration",
+        "Key Files"
+      ],
+      "chunkSha256": "9f5d178fc1a48965204c6daaab4a4c0de644976ab8809fb61d6ea00b40335ebd",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fintegration.md::integration::Constraints::0",
+      "path": "04_modules/integration.md",
+      "breadcrumb": [
+        "integration",
+        "Constraints"
+      ],
+      "chunkSha256": "cc8ad62fbd558d261781a69ecee12f44c5363e646aa389519f5d3cf28185a7b6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fintegration.md::integration::Scope Table::0",
+      "path": "04_modules/integration.md",
+      "breadcrumb": [
+        "integration",
+        "Scope Table"
+      ],
+      "chunkSha256": "0505409bbb5f0f16c4950b6ac28c41fd61fb5396b2c68bc0644d004763c51ac6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flifecycle.md::Module: lifecycle::Responsibility::0",
+      "path": "04_modules/lifecycle.md",
+      "breadcrumb": [
+        "Module: lifecycle",
+        "Responsibility"
+      ],
+      "chunkSha256": "ca898b443b297102b6eac878e2c8351b0179d55b0bc69624ea6b944cdd4116fb",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flifecycle.md::Module: lifecycle::Entry Points::0",
+      "path": "04_modules/lifecycle.md",
+      "breadcrumb": [
+        "Module: lifecycle",
+        "Entry Points"
+      ],
+      "chunkSha256": "0295f79f0aee829cbd763150b4442ef263955175f316d22f0853768a06458a71",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flifecycle.md::Module: lifecycle::Key Files::0",
+      "path": "04_modules/lifecycle.md",
+      "breadcrumb": [
+        "Module: lifecycle",
+        "Key Files"
+      ],
+      "chunkSha256": "7615ca9fec934dd2f9a72a8270a770c2966d78e8dc4ab17a223de181fe025d32",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flifecycle.md::Module: lifecycle::Constraints::0",
+      "path": "04_modules/lifecycle.md",
+      "breadcrumb": [
+        "Module: lifecycle",
+        "Constraints"
+      ],
+      "chunkSha256": "1b64c41e0c842e1849914c989fdd1c2b70cc297a98cdbb7aa23484b7b9ebe0df",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flifecycle.md::Module: lifecycle::Scope Table::0",
+      "path": "04_modules/lifecycle.md",
+      "breadcrumb": [
+        "Module: lifecycle",
+        "Scope Table"
+      ],
+      "chunkSha256": "1992351153014833876518ab8d0d52cdc4c8fe42e2c60a5d29b8306ea234de36",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flint.md::Module: lint::Responsibility::0",
+      "path": "04_modules/lint.md",
+      "breadcrumb": [
+        "Module: lint",
+        "Responsibility"
+      ],
+      "chunkSha256": "3016e43febe1bb096447be8567328bc2cf51b717a1ff21e12995ada87739fa48",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flint.md::Module: lint::Entry Points::0",
+      "path": "04_modules/lint.md",
+      "breadcrumb": [
+        "Module: lint",
+        "Entry Points"
+      ],
+      "chunkSha256": "7cdd5a50a8528f8f211f91570c41d04c04ad5d5da1a654395892bfe22e1b35f1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flint.md::Module: lint::Key Files::0",
+      "path": "04_modules/lint.md",
+      "breadcrumb": [
+        "Module: lint",
+        "Key Files"
+      ],
+      "chunkSha256": "40edbfb8c79992049402e6c3d19cd02cc1abc4d2b38f6cd58908e28ac1c4caca",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flint.md::Module: lint::Constraints::0",
+      "path": "04_modules/lint.md",
+      "breadcrumb": [
+        "Module: lint",
+        "Constraints"
+      ],
+      "chunkSha256": "8cd2be8a2af8d7fcaf88d72c05b69667747dda4e079554205dd7dd88cb2c00e2",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flint.md::Module: lint::Lifecycle-Aware Checks::0",
+      "path": "04_modules/lint.md",
+      "breadcrumb": [
+        "Module: lint",
+        "Lifecycle-Aware Checks"
+      ],
+      "chunkSha256": "8e5d4e56e0f8ae87851c50b7e2ffcdef7153fae382d2f950be7b5da3a8987da6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flint.md::Module: lint::Scope Table::0",
+      "path": "04_modules/lint.md",
+      "breadcrumb": [
+        "Module: lint",
+        "Scope Table"
+      ],
+      "chunkSha256": "396d60d24fefd923921035b82a94e439cb9e49acafb8c0a08acc29c39955d3ed",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flog.md::Module: log::Responsibility::0",
+      "path": "04_modules/log.md",
+      "breadcrumb": [
+        "Module: log",
+        "Responsibility"
+      ],
+      "chunkSha256": "b876426ba2ebe107105798b8aa48861894cf938bec48217dce1537d18254f79f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flog.md::Module: log::Entry Points::0",
+      "path": "04_modules/log.md",
+      "breadcrumb": [
+        "Module: log",
+        "Entry Points"
+      ],
+      "chunkSha256": "d15f4a144d384d74892bbb556b41001f54c40b6b04d0fcce4fcfe008064bd7a1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flog.md::Module: log::Key Files::0",
+      "path": "04_modules/log.md",
+      "breadcrumb": [
+        "Module: log",
+        "Key Files"
+      ],
+      "chunkSha256": "bce29f80ca3b092f1eeeac16100f899e1f292b115ebb4e19f5bbb922b47e1663",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flog.md::Module: log::Constraints::0",
+      "path": "04_modules/log.md",
+      "breadcrumb": [
+        "Module: log",
+        "Constraints"
+      ],
+      "chunkSha256": "699c4516a430326a2fb2d92488d5f4249dff5080ed4f249d44233d6f38eaccbb",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flog.md::Module: log::Lifecycle Events::0",
+      "path": "04_modules/log.md",
+      "breadcrumb": [
+        "Module: log",
+        "Lifecycle Events"
+      ],
+      "chunkSha256": "d882ad758fac773e5648ee75d5f283fcabfe845e642f425136d53b26c3b70d73",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Flog.md::Module: log::Scope Table::0",
+      "path": "04_modules/log.md",
+      "breadcrumb": [
+        "Module: log",
+        "Scope Table"
+      ],
+      "chunkSha256": "1be7c9a4391e84c552e6bf3ee3e48a0b36d1efe53417d17db116443935a28f4a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-client.md::obsidian-client::Responsibility::0",
+      "path": "04_modules/obsidian-client.md",
+      "breadcrumb": [
+        "obsidian-client",
+        "Responsibility"
+      ],
+      "chunkSha256": "a1dddc2b6840bfe83049ff8167813aaa0254877b317e70bb54f875e0c3019ffc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-client.md::obsidian-client::Entry Points::0",
+      "path": "04_modules/obsidian-client.md",
+      "breadcrumb": [
+        "obsidian-client",
+        "Entry Points"
+      ],
+      "chunkSha256": "7a18649beb3e840193a998c971e6bc5a3a648efad6bbe32e0f6550f44540503f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-client.md::obsidian-client::Key Files::0",
+      "path": "04_modules/obsidian-client.md",
+      "breadcrumb": [
+        "obsidian-client",
+        "Key Files"
+      ],
+      "chunkSha256": "dcdc9c6eed3c066b92fd93a252ebe3cc499075060106a0c6aa169b90b5679790",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-client.md::obsidian-client::Constraints::0",
+      "path": "04_modules/obsidian-client.md",
+      "breadcrumb": [
+        "obsidian-client",
+        "Constraints"
+      ],
+      "chunkSha256": "1e4c4a366ecd249a9d64a992e96d8dfd8b3c857eccbeb17e81406cf5e12fc618",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-client.md::obsidian-client::Scope Table::0",
+      "path": "04_modules/obsidian-client.md",
+      "breadcrumb": [
+        "obsidian-client",
+        "Scope Table"
+      ],
+      "chunkSha256": "b29515a522d3301192572ae2a8a54511676b6ccdc29a817eff027dca93b2a0f8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-io.md::Module: obsidian-io::Responsibility::0",
+      "path": "04_modules/obsidian-io.md",
+      "breadcrumb": [
+        "Module: obsidian-io",
+        "Responsibility"
+      ],
+      "chunkSha256": "70e8a6ee2c1a509c2cf084708cea10792cc1d73d1538e51d07f0ceb6b7a69b88",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-io.md::Module: obsidian-io::Entry Points::0",
+      "path": "04_modules/obsidian-io.md",
+      "breadcrumb": [
+        "Module: obsidian-io",
+        "Entry Points"
+      ],
+      "chunkSha256": "a36b1981a8e727ab00ff9daa8084dc49850bd19a153a908d182fc552579cf318",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-io.md::Module: obsidian-io::Key Files::0",
+      "path": "04_modules/obsidian-io.md",
+      "breadcrumb": [
+        "Module: obsidian-io",
+        "Key Files"
+      ],
+      "chunkSha256": "33dd1aa0ec803d4a76c31c7d02965b5c1e1f55ed3d13393a91e6904fdfed84f5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-io.md::Module: obsidian-io::Constraints::0",
+      "path": "04_modules/obsidian-io.md",
+      "breadcrumb": [
+        "Module: obsidian-io",
+        "Constraints"
+      ],
+      "chunkSha256": "2cbfd9cc31968e90a78e1fb88e2b6df62fe4915aa0744513eb6f54e90ac26999",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fobsidian-io.md::Module: obsidian-io::Scope Table::0",
+      "path": "04_modules/obsidian-io.md",
+      "breadcrumb": [
+        "Module: obsidian-io",
+        "Scope Table"
+      ],
+      "chunkSha256": "5b7b60f13ca72764d16e8575f860fbed9146771a763182471f0d4ce915b4f0eb",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fpaths.md::Module: paths::Responsibility::0",
+      "path": "04_modules/paths.md",
+      "breadcrumb": [
+        "Module: paths",
+        "Responsibility"
+      ],
+      "chunkSha256": "8918b786d84817d6eb04be0440fbb60cdf55babf9efd187562bc2610b97af9e6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fpaths.md::Module: paths::Entry Points::0",
+      "path": "04_modules/paths.md",
+      "breadcrumb": [
+        "Module: paths",
+        "Entry Points"
+      ],
+      "chunkSha256": "e12da9603d3ab23a286cd236aa1ef7da6547c7ce8b340c363b4fe4c142dd5936",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fpaths.md::Module: paths::Key Files::0",
+      "path": "04_modules/paths.md",
+      "breadcrumb": [
+        "Module: paths",
+        "Key Files"
+      ],
+      "chunkSha256": "b18b49d38ff7e27da9bd04830b81aa242f86b094eaf6e46971636ad3b93d7c89",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fpaths.md::Module: paths::Constraints::0",
+      "path": "04_modules/paths.md",
+      "breadcrumb": [
+        "Module: paths",
+        "Constraints"
+      ],
+      "chunkSha256": "d1d7ad8e3fb02a51d3e0f4d11be1393df09eb31f0bc1f3afcaf8d216ba241684",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fpaths.md::Module: paths::Scope Table::0",
+      "path": "04_modules/paths.md",
+      "breadcrumb": [
+        "Module: paths",
+        "Scope Table"
+      ],
+      "chunkSha256": "d617c21bac4a19fea3a1494f6708a04008720b32728a2e55e9798b90feaf7413",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-schema.md::project-schema::Responsibility::0",
+      "path": "04_modules/project-schema.md",
+      "breadcrumb": [
+        "project-schema",
+        "Responsibility"
+      ],
+      "chunkSha256": "214e18d803e7110ed9747bfd2682c0944b4823cecbbf3e998137de0b555c6376",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-schema.md::project-schema::Entry Points::0",
+      "path": "04_modules/project-schema.md",
+      "breadcrumb": [
+        "project-schema",
+        "Entry Points"
+      ],
+      "chunkSha256": "bb721c424b6d14f55d44f86b3f623be1a42054cbb6b6f34634074f29942a594a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-schema.md::project-schema::Key Files::0",
+      "path": "04_modules/project-schema.md",
+      "breadcrumb": [
+        "project-schema",
+        "Key Files"
+      ],
+      "chunkSha256": "f1cdad7775d89fdb3e93e50adaf5365618e4bd781a8e62c9d6cb1c87b5f9b53f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-schema.md::project-schema::Constraints::0",
+      "path": "04_modules/project-schema.md",
+      "breadcrumb": [
+        "project-schema",
+        "Constraints"
+      ],
+      "chunkSha256": "c6069b73b8a0a5ddc1fc1ddb35822ec174d966e743b1b38b1920216cb09b311c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-schema.md::project-schema::Scope Table::0",
+      "path": "04_modules/project-schema.md",
+      "breadcrumb": [
+        "project-schema",
+        "Scope Table"
+      ],
+      "chunkSha256": "01ac892237c5e1aeaf483739e01d70c602bded3141251072c749feeba571e6d9",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-sync.md::Module: project-sync::Responsibility::0",
+      "path": "04_modules/project-sync.md",
+      "breadcrumb": [
+        "Module: project-sync",
+        "Responsibility"
+      ],
+      "chunkSha256": "3e9c3ab4b13b86aca97b84962c222bb856d1693ca08a9341e4f4783731d06ce7",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-sync.md::Module: project-sync::Entry Points::0",
+      "path": "04_modules/project-sync.md",
+      "breadcrumb": [
+        "Module: project-sync",
+        "Entry Points"
+      ],
+      "chunkSha256": "4892fe9f18e6c168edf01647dcbb674fd1afc35f11bfb9518a62ccd8192d8c10",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-sync.md::Module: project-sync::Key Files::0",
+      "path": "04_modules/project-sync.md",
+      "breadcrumb": [
+        "Module: project-sync",
+        "Key Files"
+      ],
+      "chunkSha256": "13923a96ef0a1807a4ce3919be22dc0b1efb8214a0932b42245a9fe6aa05e249",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-sync.md::Module: project-sync::Constraints::0",
+      "path": "04_modules/project-sync.md",
+      "breadcrumb": [
+        "Module: project-sync",
+        "Constraints"
+      ],
+      "chunkSha256": "bc903e4181ce0b5c106dacf34fa07b5ea42c4cdbc1312f7f6971cf9ac14f4c0a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-sync.md::Module: project-sync::Scope Table::0",
+      "path": "04_modules/project-sync.md",
+      "breadcrumb": [
+        "Module: project-sync",
+        "Scope Table"
+      ],
+      "chunkSha256": "b8c342bbe4f9940b44368abab547b3c709c46b8d84bbc1b740dee999551a14a1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-tasks.md::project-tasks::Responsibility::0",
+      "path": "04_modules/project-tasks.md",
+      "breadcrumb": [
+        "project-tasks",
+        "Responsibility"
+      ],
+      "chunkSha256": "5026de4b9e892838f8905953816925cc908170111886b80f9637d9c3f5f38ad3",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-tasks.md::project-tasks::Entry Points::0",
+      "path": "04_modules/project-tasks.md",
+      "breadcrumb": [
+        "project-tasks",
+        "Entry Points"
+      ],
+      "chunkSha256": "3cea7628dc36cc8612bd1f06850df7614417fe7ad09238008957bc768abdc7d0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-tasks.md::project-tasks::Key Files::0",
+      "path": "04_modules/project-tasks.md",
+      "breadcrumb": [
+        "project-tasks",
+        "Key Files"
+      ],
+      "chunkSha256": "88b3cb54b7b0f34e0d806534d04bb4a828fe89acc06a98c48edb2e741b1287cb",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-tasks.md::project-tasks::Constraints::0",
+      "path": "04_modules/project-tasks.md",
+      "breadcrumb": [
+        "project-tasks",
+        "Constraints"
+      ],
+      "chunkSha256": "752ed20c55ea988780e719a49b716a281cb277d9f6eb35d8e615eca5bd6500ba",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-tasks.md::project-tasks::Scope Table::0",
+      "path": "04_modules/project-tasks.md",
+      "breadcrumb": [
+        "project-tasks",
+        "Scope Table"
+      ],
+      "chunkSha256": "3d0f70cbbd6b306f28fdc6fcf273df842e9c3f38cb025fe90b861fd662bb144a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-timeline.md::project-timeline::Responsibility::0",
+      "path": "04_modules/project-timeline.md",
+      "breadcrumb": [
+        "project-timeline",
+        "Responsibility"
+      ],
+      "chunkSha256": "7f8e0d8eaf84eba201848dafcbcce421d66034eee5972271a766f433eec4a90a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-timeline.md::project-timeline::Entry Points::0",
+      "path": "04_modules/project-timeline.md",
+      "breadcrumb": [
+        "project-timeline",
+        "Entry Points"
+      ],
+      "chunkSha256": "f52b8f9b703d1361293a355507bf7c22e2dedbe6395c72fcc86cb5dea891c8cd",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-timeline.md::project-timeline::Key Files::0",
+      "path": "04_modules/project-timeline.md",
+      "breadcrumb": [
+        "project-timeline",
+        "Key Files"
+      ],
+      "chunkSha256": "8438d1dc94fca2b6bc5df98bca5e9bc18a86df2b09d7d154710432f5a6c39ab6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-timeline.md::project-timeline::Constraints::0",
+      "path": "04_modules/project-timeline.md",
+      "breadcrumb": [
+        "project-timeline",
+        "Constraints"
+      ],
+      "chunkSha256": "c9d4dd27f83e6697398943a9a9e03699cb6f93a4ab98e277ddcf8ce78669f5f9",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fproject-timeline.md::project-timeline::Scope Table::0",
+      "path": "04_modules/project-timeline.md",
+      "breadcrumb": [
+        "project-timeline",
+        "Scope Table"
+      ],
+      "chunkSha256": "93f42a3b089d122e52627e498aa5d9cc2ae98eca5ef5fac91197ff29e1a9a157",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fscaffold.md::Module: scaffold::Responsibility::0",
+      "path": "04_modules/scaffold.md",
+      "breadcrumb": [
+        "Module: scaffold",
+        "Responsibility"
+      ],
+      "chunkSha256": "a51ee4f3c07521f4243278e4ad7ab277a9dcca521968295a360e5e12a2769f61",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fscaffold.md::Module: scaffold::Entry Points::0",
+      "path": "04_modules/scaffold.md",
+      "breadcrumb": [
+        "Module: scaffold",
+        "Entry Points"
+      ],
+      "chunkSha256": "b033c013cdee67feab8a55e3de677fba2febc0cc3954c1e43bec830ded33b9cd",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fscaffold.md::Module: scaffold::Key Files::0",
+      "path": "04_modules/scaffold.md",
+      "breadcrumb": [
+        "Module: scaffold",
+        "Key Files"
+      ],
+      "chunkSha256": "084cd0dadb96f4fefb90f0cdd5311b5305d6a2fda72489638c8efff933d93b20",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fscaffold.md::Module: scaffold::Constraints::0",
+      "path": "04_modules/scaffold.md",
+      "breadcrumb": [
+        "Module: scaffold",
+        "Constraints"
+      ],
+      "chunkSha256": "22438e5f0d8aba4061ba287e924865dc5de68401389747c794b1b6c5697f49e4",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fscaffold.md::Module: scaffold::Scope Table::0",
+      "path": "04_modules/scaffold.md",
+      "breadcrumb": [
+        "Module: scaffold",
+        "Scope Table"
+      ],
+      "chunkSha256": "0827ee890cbd4cd1b8434951f2a69848abefd3fdf23379a5d7e6989243aafb0b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsearch.md::Module: search::Responsibility::0",
+      "path": "04_modules/search.md",
+      "breadcrumb": [
+        "Module: search",
+        "Responsibility"
+      ],
+      "chunkSha256": "9951fd4e9918da26b7993e0a3dfc286bb14b012dc75f5b2af3d778554c89e44e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsearch.md::Module: search::Entry Points::0",
+      "path": "04_modules/search.md",
+      "breadcrumb": [
+        "Module: search",
+        "Entry Points"
+      ],
+      "chunkSha256": "975c442bb82c458c923773e278db6bacf7599151fb35eb497dd091175d2bf8a1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsearch.md::Module: search::Key Files::0",
+      "path": "04_modules/search.md",
+      "breadcrumb": [
+        "Module: search",
+        "Key Files"
+      ],
+      "chunkSha256": "e8ef1a8dd66850d4b911e0c3fe572d587ca72c35f0497efaef4caf71ea05222e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsearch.md::Module: search::Constraints::0",
+      "path": "04_modules/search.md",
+      "breadcrumb": [
+        "Module: search",
+        "Constraints"
+      ],
+      "chunkSha256": "9cc12685122d1aeae21e4200eee32b50b67930dac7ae6afd99e52f17b4b5c5cd",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsearch.md::Module: search::Lifecycle Filtering::0",
+      "path": "04_modules/search.md",
+      "breadcrumb": [
+        "Module: search",
+        "Lifecycle Filtering"
+      ],
+      "chunkSha256": "d57c7e26c8ea58fbf737bdbaaf85582e43f8ee4ca1448ba389d9906d2c5e3884",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsearch.md::Module: search::Scope Table::0",
+      "path": "04_modules/search.md",
+      "breadcrumb": [
+        "Module: search",
+        "Scope Table"
+      ],
+      "chunkSha256": "8d54d49d4b41947a877258855819506790edb51973fff1cf6dad0ab2545ca6bf",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fskills.md::skills::Responsibility::0",
+      "path": "04_modules/skills.md",
+      "breadcrumb": [
+        "skills",
+        "Responsibility"
+      ],
+      "chunkSha256": "457ffe5b58a150066ada328c0740f0b35e8bc95a9b9c716006bca9bf981668dc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fskills.md::skills::Entry Points::0",
+      "path": "04_modules/skills.md",
+      "breadcrumb": [
+        "skills",
+        "Entry Points"
+      ],
+      "chunkSha256": "0f8f658074ebfb3c85f2a5b126b35c3d4b7cbde1a58d6489c29479dfea96aaee",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fskills.md::skills::Key Files::0",
+      "path": "04_modules/skills.md",
+      "breadcrumb": [
+        "skills",
+        "Key Files"
+      ],
+      "chunkSha256": "8859e2b6c068b5bf4f5dc9e20a668740cb238d0a6f6214202288d3759b946e9c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fskills.md::skills::Constraints::0",
+      "path": "04_modules/skills.md",
+      "breadcrumb": [
+        "skills",
+        "Constraints"
+      ],
+      "chunkSha256": "0766c03b4c0989215cc8b094dc5812f571882d1b713d697a399dcb906c380671",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fskills.md::skills::Scope Table::0",
+      "path": "04_modules/skills.md",
+      "breadcrumb": [
+        "skills",
+        "Scope Table"
+      ],
+      "chunkSha256": "d5f52bf4bd9deb4d9e647abddcc82bda985fcc0a0deb2333f15c601c366f29b8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fslug.md::Module: slug::Responsibility::0",
+      "path": "04_modules/slug.md",
+      "breadcrumb": [
+        "Module: slug",
+        "Responsibility"
+      ],
+      "chunkSha256": "44de85abe16d870627c68605d8992010721e48217b1c499eb3c29ebf4ae7104e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fslug.md::Module: slug::Entry Points::0",
+      "path": "04_modules/slug.md",
+      "breadcrumb": [
+        "Module: slug",
+        "Entry Points"
+      ],
+      "chunkSha256": "faddeda5f3ac444bb176f28461f90963a0d8536bfac18916e3be2d266da40d36",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fslug.md::Module: slug::Key Files::0",
+      "path": "04_modules/slug.md",
+      "breadcrumb": [
+        "Module: slug",
+        "Key Files"
+      ],
+      "chunkSha256": "a7de74a69cb4abba2f5a0317414dd2fe4e571593764953d32e9dda6364d1c619",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fslug.md::Module: slug::Constraints::0",
+      "path": "04_modules/slug.md",
+      "breadcrumb": [
+        "Module: slug",
+        "Constraints"
+      ],
+      "chunkSha256": "ab3d2444cb1521f1eaa3a6b850371976d3ed2e86a2e124029f637bb0d9d11301",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fslug.md::Module: slug::Scope Table::0",
+      "path": "04_modules/slug.md",
+      "breadcrumb": [
+        "Module: slug",
+        "Scope Table"
+      ],
+      "chunkSha256": "212c309e6c1658a0f89623591388824e9f58064d6e9846672783a4eeae8abb37",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsync.md::Module: sync::Responsibility::0",
+      "path": "04_modules/sync.md",
+      "breadcrumb": [
+        "Module: sync",
+        "Responsibility"
+      ],
+      "chunkSha256": "1de173d4632d004bddce3d404cec56332c954fe892cb646c19d7b918238356e8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsync.md::Module: sync::Entry Points::0",
+      "path": "04_modules/sync.md",
+      "breadcrumb": [
+        "Module: sync",
+        "Entry Points"
+      ],
+      "chunkSha256": "4d2fd7043a7dc920076157355d2e79443d7ae192cb4ecea0793d4aa2d2f1f040",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsync.md::Module: sync::Key Files::0",
+      "path": "04_modules/sync.md",
+      "breadcrumb": [
+        "Module: sync",
+        "Key Files"
+      ],
+      "chunkSha256": "8f613fe211160c34e65808605aa5b04657c3aba15c74e30e0b4ad78ad2f08020",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsync.md::Module: sync::Constraints::0",
+      "path": "04_modules/sync.md",
+      "breadcrumb": [
+        "Module: sync",
+        "Constraints"
+      ],
+      "chunkSha256": "158599deb99cefd68dca3d9cc645f0df4b98271f8e9cc11cf69dfc6468f2c380",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fsync.md::Module: sync::Scope Table::0",
+      "path": "04_modules/sync.md",
+      "breadcrumb": [
+        "Module: sync",
+        "Scope Table"
+      ],
+      "chunkSha256": "ab5ca7d7333047656290d330702a0a59080cac655dd6135dc0d4dd4b0a7c7881",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-cli.md::task-cli::Responsibility::0",
+      "path": "04_modules/task-cli.md",
+      "breadcrumb": [
+        "task-cli",
+        "Responsibility"
+      ],
+      "chunkSha256": "9814ecba250d6f84042f45d0e0a7497166b8fd45dc0561ddea0f03cd9a7a4c44",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-cli.md::task-cli::Entry Points::0",
+      "path": "04_modules/task-cli.md",
+      "breadcrumb": [
+        "task-cli",
+        "Entry Points"
+      ],
+      "chunkSha256": "5b34fccdb6da9c92b2d81c2f718f25e5e158ef0dea6707ea4ddb212eb03b9676",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-cli.md::task-cli::Key Files::0",
+      "path": "04_modules/task-cli.md",
+      "breadcrumb": [
+        "task-cli",
+        "Key Files"
+      ],
+      "chunkSha256": "a8ef5f0d50f69542f557b23e266743ae6fd5123ad0dad229a2076d0a4c5010ff",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-cli.md::task-cli::Constraints::0",
+      "path": "04_modules/task-cli.md",
+      "breadcrumb": [
+        "task-cli",
+        "Constraints"
+      ],
+      "chunkSha256": "eb6df7152246c8f2db9fde9da590c73b4c9063f2d650e3afa208fe41e8abbac8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-cli.md::task-cli::Scope Table::0",
+      "path": "04_modules/task-cli.md",
+      "breadcrumb": [
+        "task-cli",
+        "Scope Table"
+      ],
+      "chunkSha256": "2fa5a4304e12984d6044230de72292c1d5161f65b84666d90ab1e4d1aafbfb42",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-scan.md::task-scan::Responsibility::0",
+      "path": "04_modules/task-scan.md",
+      "breadcrumb": [
+        "task-scan",
+        "Responsibility"
+      ],
+      "chunkSha256": "ed537d2b92ee37f3b24dcc91161c6d3d18799f6fc93ed34b3062c9eece4ce404",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-scan.md::task-scan::Entry Points::0",
+      "path": "04_modules/task-scan.md",
+      "breadcrumb": [
+        "task-scan",
+        "Entry Points"
+      ],
+      "chunkSha256": "fbaea19190b91172bf27f45044ababdbb6e1628169315e9edb245235808e8021",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-scan.md::task-scan::Key Files::0",
+      "path": "04_modules/task-scan.md",
+      "breadcrumb": [
+        "task-scan",
+        "Key Files"
+      ],
+      "chunkSha256": "0adf134a90aed8651c65ee244d1a7f5b65914c097aad3d67361fc65dcf9dabb0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-scan.md::task-scan::Constraints::0",
+      "path": "04_modules/task-scan.md",
+      "breadcrumb": [
+        "task-scan",
+        "Constraints"
+      ],
+      "chunkSha256": "9c5003bc968e804b17e7aa0f4c5c37ff5e7e6f51de693c7415d7132ce43faa4d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-scan.md::task-scan::Scope Table::0",
+      "path": "04_modules/task-scan.md",
+      "breadcrumb": [
+        "task-scan",
+        "Scope Table"
+      ],
+      "chunkSha256": "eee51cef442adcf4fc000f2e4f2e7acafeb9c68198a65263e5a496622e36af6c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-sync.md::Module: task-sync::Responsibility::0",
+      "path": "04_modules/task-sync.md",
+      "breadcrumb": [
+        "Module: task-sync",
+        "Responsibility"
+      ],
+      "chunkSha256": "7b5f104c7c5d0238a627afaba7d1f3435a7e63103b4b5eafb2101d639e3fab62",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-sync.md::Module: task-sync::Entry Points::0",
+      "path": "04_modules/task-sync.md",
+      "breadcrumb": [
+        "Module: task-sync",
+        "Entry Points"
+      ],
+      "chunkSha256": "31acc2ad5d6d202ca0717e3e1d2b42ea38441749b7a7dbfe2b410eb77075e9ea",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-sync.md::Module: task-sync::Key Files::0",
+      "path": "04_modules/task-sync.md",
+      "breadcrumb": [
+        "Module: task-sync",
+        "Key Files"
+      ],
+      "chunkSha256": "70fe47a651643ad24626bd888a64a83e8a4e329b639be1342d44e7588532cc7f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-sync.md::Module: task-sync::Constraints::0",
+      "path": "04_modules/task-sync.md",
+      "breadcrumb": [
+        "Module: task-sync",
+        "Constraints"
+      ],
+      "chunkSha256": "2ef3fdd5eda8ad347f903950563d1669b6b842e65ef5ae92d2c893ee28b8d2d0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-sync.md::Module: task-sync::Scope Table::0",
+      "path": "04_modules/task-sync.md",
+      "breadcrumb": [
+        "Module: task-sync",
+        "Scope Table"
+      ],
+      "chunkSha256": "cc3b5e90a190683157618ab6c4be47d45d88ade3d6ccd8e8d0e8cafb5a74bc07",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-validator.md::task-validator::Responsibility::0",
+      "path": "04_modules/task-validator.md",
+      "breadcrumb": [
+        "task-validator",
+        "Responsibility"
+      ],
+      "chunkSha256": "60834313e67e27c7302bf4583427d04ac3467758001c49a6b2ef229005476c6e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-validator.md::task-validator::Entry Points::0",
+      "path": "04_modules/task-validator.md",
+      "breadcrumb": [
+        "task-validator",
+        "Entry Points"
+      ],
+      "chunkSha256": "9b0f76a402c8e29086bc569cbfd3b1941170b7067dcf77bcc23472d5d1b98d33",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-validator.md::task-validator::Key Files::0",
+      "path": "04_modules/task-validator.md",
+      "breadcrumb": [
+        "task-validator",
+        "Key Files"
+      ],
+      "chunkSha256": "36c598e4f217a3402b697d7f70fc6a1938ea6cda76d2e8f5ade3b1602d8a2b61",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-validator.md::task-validator::Constraints::0",
+      "path": "04_modules/task-validator.md",
+      "breadcrumb": [
+        "task-validator",
+        "Constraints"
+      ],
+      "chunkSha256": "140b6200d7ba917089a8e4052c2c72582f01f468415aad23ec9cfb1e6278442d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftask-validator.md::task-validator::Scope Table::0",
+      "path": "04_modules/task-validator.md",
+      "breadcrumb": [
+        "task-validator",
+        "Scope Table"
+      ],
+      "chunkSha256": "0e16cd37986f87681641f7ab4855a86fe8b16d60176307615d213c6b40112130",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftriage.md::Module: triage::Responsibility::0",
+      "path": "04_modules/triage.md",
+      "breadcrumb": [
+        "Module: triage",
+        "Responsibility"
+      ],
+      "chunkSha256": "2caf128d084ea5f627897c1653d3485fa6067cdb9dca18415af4a2d93003c670",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftriage.md::Module: triage::Entry Points::0",
+      "path": "04_modules/triage.md",
+      "breadcrumb": [
+        "Module: triage",
+        "Entry Points"
+      ],
+      "chunkSha256": "1f6c408cbafd8b96105b109e82031b7a47881a82a4fe2139dd5e9364a3f345b1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftriage.md::Module: triage::Key Files::0",
+      "path": "04_modules/triage.md",
+      "breadcrumb": [
+        "Module: triage",
+        "Key Files"
+      ],
+      "chunkSha256": "c3519d6f246f1f265a42a0f92776aa8863d16e154ef739fb22ae12c874ad8496",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftriage.md::Module: triage::Constraints::0",
+      "path": "04_modules/triage.md",
+      "breadcrumb": [
+        "Module: triage",
+        "Constraints"
+      ],
+      "chunkSha256": "d1ce45e675e13d0f621bc7d3eab930cb205579cf481cb032deb6c345b2ede968",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftriage.md::Module: triage::Scope Table::0",
+      "path": "04_modules/triage.md",
+      "breadcrumb": [
+        "Module: triage",
+        "Scope Table"
+      ],
+      "chunkSha256": "3c500aa9e566b9d418be9db7289716775199199d5b3f8a656e23db1b514f43a4",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Responsibility::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Responsibility"
+      ],
+      "chunkSha256": "9d6b32593f05d80efb93e86c2f284bd459cf23ba7e359744ae2906edffef02df",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Entry Points::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Entry Points"
+      ],
+      "chunkSha256": "8d8515b70367c0f1fba5a842545ba89cb179efe82c6356fe52eeeea7b55a8525",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Key Files::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Key Files"
+      ],
+      "chunkSha256": "fb7e3a78fb1f226c8d4638d8bc097025f94d82717010b7d65004c7d36ac65120",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Constraints::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Constraints"
+      ],
+      "chunkSha256": "5980f8a54effb56a57395e0c2b5ba2452ea9606c1d92c1a40363e7f26b431daf",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Lifecycle Types::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Lifecycle Types"
+      ],
+      "chunkSha256": "b270c8f0b23b755da819bdb610c6e32e5fc7edc0e58cb71f94d77955931959b6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::LIST.md Types::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "LIST.md Types"
+      ],
+      "chunkSha256": "e65a9fc9a2b230cfb3733ff46fdcc00e90e487b1306d0002371531d845eeabc8",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Project Sync Types::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Project Sync Types"
+      ],
+      "chunkSha256": "2935850e3da1939fd6d78f5f61537b334981b0915a2129e072efd94f06eee273",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::External Context Types::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "External Context Types"
+      ],
+      "chunkSha256": "b00a947fef62180a83014f40f4a199813f2d7fd4fa4dae7dc19480d5ba09c2fb",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Ftypes.md::Module: types::Scope Table::0",
+      "path": "04_modules/types.md",
+      "breadcrumb": [
+        "Module: types",
+        "Scope Table"
+      ],
+      "chunkSha256": "4130e8ec3f744b340f6807b6b789da3dab8a02a85f01ac8b9ca3a4f9eca4011f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fwiki-week.md::wiki-week::Responsibility::0",
+      "path": "04_modules/wiki-week.md",
+      "breadcrumb": [
+        "wiki-week",
+        "Responsibility"
+      ],
+      "chunkSha256": "ec5f4f18ae0a8d885a53c7a66ee76bea17afa0852a80c761065e1fc663c2af74",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fwiki-week.md::wiki-week::Entry Points::0",
+      "path": "04_modules/wiki-week.md",
+      "breadcrumb": [
+        "wiki-week",
+        "Entry Points"
+      ],
+      "chunkSha256": "556e2a33136f990dd40ebffa19509ff66a0d769403f3f5eb7242f58fe28f95b2",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fwiki-week.md::wiki-week::Key Files::0",
+      "path": "04_modules/wiki-week.md",
+      "breadcrumb": [
+        "wiki-week",
+        "Key Files"
+      ],
+      "chunkSha256": "3c30aabf720797e374caa6affa762e35e66d8c8e7929c086949fc655691cb03b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fwiki-week.md::wiki-week::Constraints::0",
+      "path": "04_modules/wiki-week.md",
+      "breadcrumb": [
+        "wiki-week",
+        "Constraints"
+      ],
+      "chunkSha256": "2551e5d1cd3552897ac3fe5a2fb3464d4384e4cdd0ac64ab58a5733c48ac1875",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fwiki-week.md::wiki-week::Scope Table::0",
+      "path": "04_modules/wiki-week.md",
+      "breadcrumb": [
+        "wiki-week",
+        "Scope Table"
+      ],
+      "chunkSha256": "316ad7402b6240dc4b55074ae310b08d49cbfd59b1df5ce892a96154f7960cfc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow-gate.md::workflow-gate::Responsibility::0",
+      "path": "04_modules/workflow-gate.md",
+      "breadcrumb": [
+        "workflow-gate",
+        "Responsibility"
+      ],
+      "chunkSha256": "d1f1d1fab408aa7e9b9c050e2959664c4e809a10f893ac98d724b37077553ec1",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow-gate.md::workflow-gate::Entry Points::0",
+      "path": "04_modules/workflow-gate.md",
+      "breadcrumb": [
+        "workflow-gate",
+        "Entry Points"
+      ],
+      "chunkSha256": "7557c181999ea20e764ddaa40771f7bcab35be561c18581121d10c5605984e14",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow-gate.md::workflow-gate::Key Files::0",
+      "path": "04_modules/workflow-gate.md",
+      "breadcrumb": [
+        "workflow-gate",
+        "Key Files"
+      ],
+      "chunkSha256": "eab0ab9f92477dfcdb191ffb071083f4bfb0d059756efa50de5582fda5c513cc",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow-gate.md::workflow-gate::Constraints::0",
+      "path": "04_modules/workflow-gate.md",
+      "breadcrumb": [
+        "workflow-gate",
+        "Constraints"
+      ],
+      "chunkSha256": "e1f40e0b6ee48ac654a78653da4646f78052d53dce28810fd31b552be394504b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow-gate.md::workflow-gate::Scope Table::0",
+      "path": "04_modules/workflow-gate.md",
+      "breadcrumb": [
+        "workflow-gate",
+        "Scope Table"
+      ],
+      "chunkSha256": "b2fc9df5bea99bb3b45530b99b0fbe5a837589ecdfcd190a16157f6ee141c09f",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow.md::workflow::Responsibility::0",
+      "path": "04_modules/workflow.md",
+      "breadcrumb": [
+        "workflow",
+        "Responsibility"
+      ],
+      "chunkSha256": "f967d2f9b31166b53d05094956012b2daa016fcd911bd72f1d316fca0f15320e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow.md::workflow::Entry Points::0",
+      "path": "04_modules/workflow.md",
+      "breadcrumb": [
+        "workflow",
+        "Entry Points"
+      ],
+      "chunkSha256": "a552d94c65ceece820d2766ce15d0f90dcf5d74c726d65169739361dffc03de2",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow.md::workflow::Key Files::0",
+      "path": "04_modules/workflow.md",
+      "breadcrumb": [
+        "workflow",
+        "Key Files"
+      ],
+      "chunkSha256": "85e6f8eeabd5de8bca23c85456cc3cea05c2f9a4c5aea243a48c516a7df45ed9",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow.md::workflow::Constraints::0",
+      "path": "04_modules/workflow.md",
+      "breadcrumb": [
+        "workflow",
+        "Constraints"
+      ],
+      "chunkSha256": "f346b58e47681dd7eaf1cd137da21b9f829b07f707d248fba644b8dffddd1f4c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "04_modules%2Fworkflow.md::workflow::Scope Table::0",
+      "path": "04_modules/workflow.md",
+      "breadcrumb": [
+        "workflow",
+        "Scope Table"
+      ],
+      "chunkSha256": "52896ee612ba8e86e6b9fbf0b2b37f8ccd34b53b3c6fe4a555b55701dc482ae0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fexternal-context.md::External Context::Overview::0",
+      "path": "06_features/external-context.md",
+      "breadcrumb": [
+        "External Context",
+        "Overview"
+      ],
+      "chunkSha256": "c35a7d829d79e098ed07076c504451cd9a064c2428cfc635f07547d4c6b87e95",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fexternal-context.md::External Context::Architecture::0",
+      "path": "06_features/external-context.md",
+      "breadcrumb": [
+        "External Context",
+        "Architecture"
+      ],
+      "chunkSha256": "a35bb9b6332dce4f583ca5a55bb2e10b1ea62cd2a86510c9e2cd9bdd5875bd21",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fexternal-context.md::External Context::Key Files::0",
+      "path": "06_features/external-context.md",
+      "breadcrumb": [
+        "External Context",
+        "Key Files"
+      ],
+      "chunkSha256": "6d813867afa3d910424194a4c499f84acab9e84d6ae66763f6d11c69872136b7",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fexternal-context.md::External Context::Implementation Notes::0",
+      "path": "06_features/external-context.md",
+      "breadcrumb": [
+        "External Context",
+        "Implementation Notes"
+      ],
+      "chunkSha256": "6bd8294c343fd846d07307a6e680a97632cfea3d94a17d9ca83a627c4b1587ea",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fexternal-context.md::External Context::Dependencies::0",
+      "path": "06_features/external-context.md",
+      "breadcrumb": [
+        "External Context",
+        "Dependencies"
+      ],
+      "chunkSha256": "24e75d6302591619392741784f94ea6fd98075dcdd75925855a90d05eb1f65f5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ffuture-mode-project-review.md::Future Mode Project Review::Overview::0",
+      "path": "06_features/future-mode-project-review.md",
+      "breadcrumb": [
+        "Future Mode Project Review",
+        "Overview"
+      ],
+      "chunkSha256": "dd9cd61f1626e448f6759ea4ee5d1d84c11841f4e46bfda534adbf81477538ac",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ffuture-mode-project-review.md::Future Mode Project Review::Architecture::0",
+      "path": "06_features/future-mode-project-review.md",
+      "breadcrumb": [
+        "Future Mode Project Review",
+        "Architecture"
+      ],
+      "chunkSha256": "c1ad2962beea93bb08179b202bb35897a5576527767c151aed26df4b23d52d10",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ffuture-mode-project-review.md::Future Mode Project Review::Key Files::0",
+      "path": "06_features/future-mode-project-review.md",
+      "breadcrumb": [
+        "Future Mode Project Review",
+        "Key Files"
+      ],
+      "chunkSha256": "0ffc5ae136b4082891fb60782f25514269d0021c358613af7558df69b2182f58",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ffuture-mode-project-review.md::Future Mode Project Review::Implementation Notes::0",
+      "path": "06_features/future-mode-project-review.md",
+      "breadcrumb": [
+        "Future Mode Project Review",
+        "Implementation Notes"
+      ],
+      "chunkSha256": "166ede1cef87ac8322c64f8616e49f4e94011bd6dbbfa486d604cad700afe79c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ffuture-mode-project-review.md::Future Mode Project Review::Dependencies::0",
+      "path": "06_features/future-mode-project-review.md",
+      "breadcrumb": [
+        "Future Mode Project Review",
+        "Dependencies"
+      ],
+      "chunkSha256": "8e058067ca0d2bd88a51bba064363738f90d0055290fe04d80d16116ac1da3ea",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fgraph-first-architecture.md::Graph-First Architecture::Overview::0",
+      "path": "06_features/graph-first-architecture.md",
+      "breadcrumb": [
+        "Graph-First Architecture",
+        "Overview"
+      ],
+      "chunkSha256": "e363581887e433177a2e18c67896adbcd447fffa3a9dd7724b695f6af095ba22",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fgraph-first-architecture.md::Graph-First Architecture::Architecture::0",
+      "path": "06_features/graph-first-architecture.md",
+      "breadcrumb": [
+        "Graph-First Architecture",
+        "Architecture"
+      ],
+      "chunkSha256": "cfa554a5b01dbca4cee6ccb949716af311e8c040d19abda0e0805c70b3a3a0fe",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fgraph-first-architecture.md::Graph-First Architecture::Key Files::0",
+      "path": "06_features/graph-first-architecture.md",
+      "breadcrumb": [
+        "Graph-First Architecture",
+        "Key Files"
+      ],
+      "chunkSha256": "50b4900749491acb685ee1951a360a40658f73f60a5ec87b21b91e19a108223c",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fgraph-first-architecture.md::Graph-First Architecture::Implementation Notes::0",
+      "path": "06_features/graph-first-architecture.md",
+      "breadcrumb": [
+        "Graph-First Architecture",
+        "Implementation Notes"
+      ],
+      "chunkSha256": "a1969fd7eb3b9975ebf426ea671ebfcd4776cfa3d6d33fc944b21ca1e68eb451",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fgraph-first-architecture.md::Graph-First Architecture::Dependencies::0",
+      "path": "06_features/graph-first-architecture.md",
+      "breadcrumb": [
+        "Graph-First Architecture",
+        "Dependencies"
+      ],
+      "chunkSha256": "b4af9dfe45d879ea4db254aa5fd5c2008e15f9dabe2470ef77bb81e54ed73a35",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Findex.md::06 Features::Overview::0",
+      "path": "06_features/index.md",
+      "breadcrumb": [
+        "06 Features",
+        "Overview"
+      ],
+      "chunkSha256": "5de957eb3f93c346c98a164c9195bc188284ea385e73863657a5a8d13448d44b",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ftaskwarrior.md::Taskwarrior Integration::Overview::0",
+      "path": "06_features/taskwarrior.md",
+      "breadcrumb": [
+        "Taskwarrior Integration",
+        "Overview"
+      ],
+      "chunkSha256": "ddc0bc4070f4915a147a5d9d26ac1118959ce85d95078e7d84722434c74de375",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ftaskwarrior.md::Taskwarrior Integration::Architecture::0",
+      "path": "06_features/taskwarrior.md",
+      "breadcrumb": [
+        "Taskwarrior Integration",
+        "Architecture"
+      ],
+      "chunkSha256": "dc88e3c4ddaed0f62008dfdee8a9f5ef0bfdbbc1dc350bff9c5e8f21a39b11f6",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ftaskwarrior.md::Taskwarrior Integration::Key Files::0",
+      "path": "06_features/taskwarrior.md",
+      "breadcrumb": [
+        "Taskwarrior Integration",
+        "Key Files"
+      ],
+      "chunkSha256": "6aeaea262750d830166b21909e2a4d1b07a9c51bc3b7500889fe0102db825514",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ftaskwarrior.md::Taskwarrior Integration::Implementation Notes::0",
+      "path": "06_features/taskwarrior.md",
+      "breadcrumb": [
+        "Taskwarrior Integration",
+        "Implementation Notes"
+      ],
+      "chunkSha256": "a85984f817edfffff16ce513e58770d31531d5f6e728bba914b72d9eb3506f9d",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Ftaskwarrior.md::Taskwarrior Integration::Dependencies::0",
+      "path": "06_features/taskwarrior.md",
+      "breadcrumb": [
+        "Taskwarrior Integration",
+        "Dependencies"
+      ],
+      "chunkSha256": "9851533ddc5d4765b3bbea93b93ed51e5b47a2ada2ba46cc7daa02407ccdc7aa",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fworkflow-generation.md::Workflow Generation::Overview::0",
+      "path": "06_features/workflow-generation.md",
+      "breadcrumb": [
+        "Workflow Generation",
+        "Overview"
+      ],
+      "chunkSha256": "314076aa84463ac66ac58cbd27589762c636014df3fef64458a65b296fd68a94",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fworkflow-generation.md::Workflow Generation::Architecture::0",
+      "path": "06_features/workflow-generation.md",
+      "breadcrumb": [
+        "Workflow Generation",
+        "Architecture"
+      ],
+      "chunkSha256": "ac928fa809332dd010442df46c0fcfb8226331d15beb60441452d26726c7f414",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fworkflow-generation.md::Workflow Generation::Key Files::0",
+      "path": "06_features/workflow-generation.md",
+      "breadcrumb": [
+        "Workflow Generation",
+        "Key Files"
+      ],
+      "chunkSha256": "31aab16045e9e688e416cdcee381b4314d84541292feca044f4ef44eac2fe6f0",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fworkflow-generation.md::Workflow Generation::Implementation Notes::0",
+      "path": "06_features/workflow-generation.md",
+      "breadcrumb": [
+        "Workflow Generation",
+        "Implementation Notes"
+      ],
+      "chunkSha256": "da81972865e3e093f8e224ab4bb9dcf2392891451a6243fb1f5119b2f120b7b5",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "06_features%2Fworkflow-generation.md::Workflow Generation::Dependencies::0",
+      "path": "06_features/workflow-generation.md",
+      "breadcrumb": [
+        "Workflow Generation",
+        "Dependencies"
+      ],
+      "chunkSha256": "70308dce4b4843dff65111a04b71247b9ee9fcec878662f452777a514d34717e",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    }
+  ]
+}

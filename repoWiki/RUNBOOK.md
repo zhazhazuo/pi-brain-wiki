@@ -40,6 +40,20 @@ Agent-optimized knowledge base for pi-brain-wiki project.
 - [graph](./04_modules/graph.md) - Vault graph discovery and PKB bridging
 - [context-resolve](./04_modules/context-resolve.md) - External context registry and env resolution
 - [context-gather](./04_modules/context-gather.md) - Bounded external repo gather recipes
+- [context-gather-agent](./04_modules/context-gather-agent.md) - Isolated Pi subagent for external repo context briefs
+- [context-guards](./04_modules/context-guards.md) - Pre-flight guard for external repo path interception
+- [context-guide](./04_modules/context-guide.md) - External context catalog and access hint formatting
+- [integration](./04_modules/integration.md) - Source integration state transition and page marking
+- [skills](./04_modules/skills.md) - Package skills directory resolution and SKILL.md discovery
+- [project-schema](./04_modules/project-schema.md) - Project/ folder templates and frontmatter validation
+- [project-tasks](./04_modules/project-tasks.md) - Structured task block parsing and rendering
+- [project-timeline](./04_modules/project-timeline.md) - Append-only timeline entry formatting
+- [task-cli](./04_modules/task-cli.md) - Taskwarrior CLI execution wrapper
+- [task-scan](./04_modules/task-scan.md) - Vault scanner for task promotion proposals
+- [task-validator](./04_modules/task-validator.md) - Promotion payload validation engine
+- [wiki-week](./04_modules/wiki-week.md) - Weekly dashboard rendering
+- [workflow](./04_modules/workflow.md) - Workflow page generation and conflict detection
+- [workflow-gate](./04_modules/workflow-gate.md) - Workflow trigger matching and routing
 - [slug](./04_modules/slug.md) - Slug and ID generation utilities
 - [types](./04_modules/types.md) - Shared TypeScript type definitions
 - [sync](./04_modules/sync.md) - PARA vault folder sync to wiki topics

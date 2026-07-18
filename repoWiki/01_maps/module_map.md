@@ -24,6 +24,20 @@ flowchart LR
   Graph[src/graph.ts]
   ContextResolve[src/context-resolve.ts]
   ContextGather[src/context-gather.ts]
+  ContextGatherAgent[src/context-gather-agent.ts]
+  ContextGuards[src/context-guards.ts]
+  ContextGuide[src/context-guide.ts]
+  Integration[src/integration.ts]
+  Skills[src/skills.ts]
+  ProjectSchema[src/project-schema.ts]
+  ProjectTasks[src/project-tasks.ts]
+  ProjectTimeline[src/project-timeline.ts]
+  TaskCli[src/task-cli.ts]
+  TaskScan[src/task-scan.ts]
+  TaskValidator[src/task-validator.ts]
+  WikiWeek[src/wiki-week.ts]
+  Workflow[src/workflow.ts]
+  WorkflowGate[src/workflow-gate.ts]
   ObsidianIo[src/obsidian-io.ts]
 
   Index --> Capture
@@ -48,7 +62,18 @@ flowchart LR
   Index --> ContextResolve
   Index --> ContextGather
   ContextGather --> ContextResolve
+  ContextGather --> ContextGatherAgent
+  ContextGather --> ContextGuide
   ContextResolve --> Config
+  ContextGuards --> Config
+  Integration --> Capture
+  Workflow --> WorkflowGate
+  TaskSync --> TaskCli
+  TaskSync --> TaskValidator
+  TaskScan --> TaskValidator
+  ProjectSync --> ProjectSchema
+  ProjectSync --> ProjectTasks
+  ProjectSync --> ProjectTimeline
   Index -.-> ObsidianClient[src/obsidian-client.ts]
   Index --> ObsidianIo
   ObsidianIo --> ObsidianClient
@@ -94,6 +119,20 @@ flowchart LR
 | graph | extensions/brain-wiki/src/graph.ts | current |
 | context-resolve | extensions/brain-wiki/src/context-resolve.ts | current |
 | context-gather | extensions/brain-wiki/src/context-gather.ts | current |
+| context-gather-agent | extensions/brain-wiki/src/context-gather-agent.ts | current |
+| context-guards | extensions/brain-wiki/src/context-guards.ts | current |
+| context-guide | extensions/brain-wiki/src/context-guide.ts | current |
+| integration | extensions/brain-wiki/src/integration.ts | current |
+| skills | extensions/brain-wiki/src/skills.ts | current |
+| project-schema | extensions/brain-wiki/src/project-schema.ts | current |
+| project-tasks | extensions/brain-wiki/src/project-tasks.ts | current |
+| project-timeline | extensions/brain-wiki/src/project-timeline.ts | current |
+| task-cli | extensions/brain-wiki/src/task-cli.ts | current |
+| task-scan | extensions/brain-wiki/src/task-scan.ts | current |
+| task-validator | extensions/brain-wiki/src/task-validator.ts | current |
+| wiki-week | extensions/brain-wiki/src/wiki-week.ts | current |
+| workflow | extensions/brain-wiki/src/workflow.ts | current |
+| workflow-gate | extensions/brain-wiki/src/workflow-gate.ts | current |
 | obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | current |
 | obsidian-io | extensions/brain-wiki/src/obsidian-io.ts | current |
 | obsidian-fs | extensions/brain-wiki/src/obsidian-fs.ts | **proposed** |

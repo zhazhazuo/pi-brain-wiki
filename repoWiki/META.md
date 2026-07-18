@@ -3,9 +3,9 @@
 <!-- Auto-managed by knowledge-base skills. Do not edit manually. -->
 
 ```
-schema_version:  1
+schema_version:  2
 generated:       2026-05-05
- last_synced:     2026-06-22
+ last_synced:     2026-06-25
  last_commit:     1380663
  docs_tree_hash:  f1744b2606ddc24ef0e2734e1a3dce75f11a10fc
 ```
