@@ -10,6 +10,8 @@ Every wiki session starts by reading these files in order:
 6. **`Wiki/meta/workflows.md`** — active/draft workflow route page
 7. **`LIST.md`** — the inbound command center: pending items, sources to capture, tasks, ideas
 
+8. **PKB search (on demand):** if this session will reason about what Walker already knows — `wiki-workshop` Phase 3, `wiki-map` deep dives, `wiki-intel` coverage gaps — load `instructions/mini-search.md` and ensure the PARA scopes are indexed per its recipe. Skip for wiki-only queries.
+
 Never skip this. Never edit without re-orienting to current wiki state.
 
 For source or integration work, follow this discovery order:

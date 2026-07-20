@@ -57,3 +57,4 @@ Same as review, plus:
 - LIST.md aging report: items by age bucket (<3d, <1w, <2w, 2w+)
 - Check Draft/ maturity — any seedlings ready to become evergreen?
 - Check wiki topic coverage — are there gaps that need sources?
+- **PKB coverage-gap analysis (optional):** load `brain-wiki/instructions/mini-search.md`, index `pkb-area` per its recipe (hard gate), and for wiki topics that look thin run `ctx_search` with `source: "pkb-area"` and the topic's terms. If a topic exists but no PKB note is findable, flag it as a coverage gap. If PKB notes exist but no wiki topic distills them, flag it as a distillation gap (candidate workshop session). Never omit `source` — context-mode's store is shared with web fetches and session memory.

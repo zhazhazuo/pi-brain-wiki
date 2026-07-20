@@ -21,20 +21,23 @@ Load this skill when Walker says:
 | File | When to load |
 |------|-------------|
 | `instructions/startup.md` | **Always first.** Session startup checklist |
-| `instructions/protocol.md` | The 4 phases: surface LIST.md → receive source → discuss → write |
-| `instructions/rules.md` | Always active. Absorption loop, integration targets, anti-cramming, contradictions, reactivation |
-| `instructions/checklist.md` | During Phase 4. Source processing checklist to ensure nothing is missed |
+| `instructions/protocol.md` | The 5 phases: receive → orient → understand & connect → discuss → write |
+| `instructions/platform.md` | **During Phase 3.** The Understand & Connect phase in full |
+| `instructions/rules.md` | Always active. Absorption loop, integration targets, platform-mandatory, anti-cramming, contradictions, reactivation |
+| `instructions/checklist.md` | During Phase 5. Source processing checklist to ensure nothing is missed |
 
 ## Quick Reference
 
 **Always:**
 - Follow the shared `brain-wiki` rules from the local skill bundle if they are already active; do not block on a separate skill load
 - Follow the absorption loop — re-read before editing
-- Discuss key takeaways with Walker before writing (Phase 3 is mandatory)
+- Build the platform in Phase 3 before discussing takeaways — supervised distillation starts from a shared understanding, not a raw source
+- Discuss key takeaways with Walker before writing (Phase 4 is mandatory)
 - Include Integration Targets on every summary page
 - Apply concrete noun test before creating new topics
 
 **Never:**
+- Skip the platform phase (Phase 3) — it is mandatory; the whole point of the workshop is understanding together, not filing
 - Skip the discussion phase — supervised distillation is the point
 - Silently resolve contradictions — flag and ask Walker
 - Write to Area/ or Resource/ — those are Walker's PKB

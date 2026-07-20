@@ -29,8 +29,8 @@ Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates 
 | "Where did I read about Z?" | **Map** | `wiki_search` matches on title, aliases, summary text, headings, tags |
 | "What topics are related to X?" | **Map** | Reads topic page → follows wikilinks → surfaces connected knowledge |
 | "Is there conflicting info about X?" | **Map** | Surfaces contradictions across summaries and topics, cites both sides |
-| "I found this article/video/paper" | **Workshop** | `wiki_capture_source` → creates inbox packet + summary stub → supervised integration |
-| "Integrate this into the wiki" | **Workshop** | Absorption loop: re-read targets → discuss takeaways → get confirmation → write |
+| "I found this article/video/paper" | **Workshop** | `wiki_capture_source` → inbox packet + summary stub → Phase 3 builds a platform connecting it to your PKB → supervised integration |
+| "Integrate this into the wiki" | **Workshop** | Absorption loop: orient → understand & connect (PKB search) → discuss takeaways → get confirmation → write |
 | "This topic page is thin, enrich it" | **Workshop** | Reads existing summaries that informed it → identifies gaps → proposes edits → confirms with Walker |
 | "Create a new topic page for X" | **Workshop** | Concrete noun test → `wiki_ensure_page` → write with substance → anti-thinning |
 | "Two sources disagree, reconcile" | **Workshop** | Flags both claims as `contested`, surfaces to Walker, waits for input |
@@ -48,6 +48,8 @@ Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates 
 | **Read** from the wiki | Map |
 | **Write** to the wiki (with Walker supervising) | Workshop |
 | **Reflect** on activity and plan ahead | Intelligence |
+
+**PKB mini-search** — all three agents can full-text search the user's PKB (`Area/`, `Resource/`, `Draft/`, `Project/`, `LIST.md`) via the external `context-mode` MCP server, per a shared convention in `brain-wiki/instructions/mini-search.md`. It is mandatory for the Workshop's Phase 3 (Understand & Connect) and recommended for Map deep dives and Intelligence coverage-gap analysis. Read-only; degrades gracefully when `context-mode` is absent.
 
 **Handoff pattern:**
 

@@ -6,7 +6,15 @@ Before editing any page, re-read it. Before starting any session, re-read the in
 
 If you can't re-read (page doesn't exist yet), that's fine — you're creating. But if the page exists and you're updating it, read it first.
 
-## 2. Integration Targets on every summary
+## 2. The platform is mandatory
+
+Every ingest runs Phase 3 (Understand & Connect) before Phase 4 (Discuss) and Phase 5 (Write). The platform teaches the new content at concept level and connects it to what Walker already knows via PKB search (`brain-wiki/instructions/mini-search.md`). Skipping Phase 3 reverts the workshop to filing.
+
+Depth scales with source weight (Trivial / Substantial / Heavy — see `protocol.md` and `platform.md`), but presence never scales to zero. Even a trivial source gets a one-line platform.
+
+The platform is a conversational artifact, not a wiki page. Do not write it to `Wiki/`.
+
+## 3. Integration Targets on every summary
 
 Every summary page MUST have an `## Integration targets` section listing which topic pages this source should affect:
 
@@ -19,7 +27,7 @@ Every summary page MUST have an `## Integration targets` section listing which t
 
 This is the bridge between "what this source says" and "what it means for our knowledge."
 
-## 3. Concrete noun test before new pages
+## 4. Concrete noun test before new pages
 
 Before creating any topic page, ask: **"X is a ___"**
 
@@ -29,15 +37,15 @@ Before creating any topic page, ask: **"X is a ___"**
 
 When in doubt, add information to an existing topic rather than creating a thin new one.
 
-## 4. Anti-cramming
+## 5. Anti-cramming
 
 If you're about to add a third paragraph about a sub-topic to an existing topic page, that sub-topic probably deserves its own page. Create it.
 
-## 5. Anti-thinning
+## 6. Anti-thinning
 
 Every edit must make the page meaningfully richer. A stub with 3 vague sentences is a failure. If you create a page, give it substance immediately.
 
-## 6. One-way links to PARA
+## 7. One-way links to PARA
 
 Wiki pages link into Area/ (PKB) or Resource/ (external) with context annotations:
 
@@ -49,7 +57,7 @@ See [[Project/Widget Launch]] (status: active, deadline May 15).
 
 Never the reverse. Never modify PARA files.
 
-## 7. Writing standards apply
+## 8. Writing standards apply
 
 Follow all rules from `brain-wiki` skill:
 - Encyclopedic tone, no editorial voice
@@ -58,7 +66,7 @@ Follow all rules from `brain-wiki` skill:
 - Attribution over assertion
 - Length targets: summaries 20-40 lines, topics 5-20 lines
 
-## 8. Status management
+## 9. Status management
 
 | Action | Status Change |
 |--------|--------------|
@@ -70,7 +78,7 @@ Follow all rules from `brain-wiki` skill:
 | Newer source replaces older | older → `superseded`, link back |
 | New source integrated into consumed topic | topic → `integrated` (reactivated), log `refactor` event noting reactivation |
 
-## 9. Discuss contradictions, don't silently resolve
+## 10. Discuss contradictions, don't silently resolve
 
 If you find that a source contradicts what the wiki currently says:
 
@@ -79,7 +87,7 @@ If you find that a source contradicts what the wiki currently says:
 3. Wait for Walker's input before reconciling
 4. Never silently pick one side
 
-## 10. Reactivation rule
+## 11. Reactivation rule
 
 When integrating a new source into a topic that is currently `consumed`:
 

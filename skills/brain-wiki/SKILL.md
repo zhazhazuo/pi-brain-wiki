@@ -18,10 +18,12 @@ Load these on demand — don't read them all upfront. The skill tells you which 
 | `instructions/writing-standards.md` | Before writing any wiki page. Tone, quotes, length targets, anti-cramming, anti-thinning, concrete noun test |
 | `instructions/frontmatter.md` | When creating or editing page frontmatter. Conventions for each page type |
 | `instructions/page-lifecycle.md` | When changing page status. Lifecycle states, transitions, reactivation |
+| `instructions/mini-search.md` | **On demand** when the session reasons about PKB content. Full-text search over `Area/`/`Resource/`/`Draft/`/`Project/` via `context-mode`. Mandatory for `wiki-workshop` Phase 3 |
 
 ## Startup (Mandatory)
 
 Every session: load `instructions/startup.md`, follow the startup checklist, read LIST.md, surface unprocessed items to Walker before doing anything else.
+If the session will reason about PKB content (what the user already knows), also load `instructions/mini-search.md` — it defines the `context-mode`-based PKB full-text search convention. This is mandatory for `wiki-workshop` Phase 3 and recommended for `wiki-map` deep dives and `wiki-intel` coverage-gap analysis. Skip it for wiki-only queries.
 If a downstream skill cannot resolve `brain-wiki` as a separate activation, it must continue with the copied startup/rules files in that skill instead of blocking the session.
 
 ## Core Rules (Always Active)

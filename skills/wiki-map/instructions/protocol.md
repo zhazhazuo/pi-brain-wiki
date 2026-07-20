@@ -59,7 +59,9 @@ Read specific sections cited by the topics
 Add Area/ depth to the synthesis
 ```
 
-Always return the most useful answer at the shallowest level. If the topic summary answers the question, stop. Don't read Area/ or Resource/ just because you can.
+**PKB mini-search option (recommended for long Area/ pages):** instead of reading a whole Area/ page, load `brain-wiki/instructions/mini-search.md`, index `pkb-area` per its recipe (hard gate — `ctx_search` over an un-indexed scope returns "No results found" for terms that exist), and run `ctx_search` with `source: "pkb-area"` and the question's terms. You get only the matched windows, not the full page bytes — cheaper and often sufficient for lexical questions. Fall back to a full `read` only when the match is ambiguous. Never omit `source` — context-mode's store is shared with web fetches and session memory.
+
+Always return the most useful answer at the shallowest level. If the topic summary answers the question, stop. Don't read Area/ or Resource/ just because you can. When Area/ depth is needed and the page is long, prefer `ctx_search` over `pkb-area` (see mini-search option above) before reading the full file.
 
 ## Cross-referencing LIST.md
 
