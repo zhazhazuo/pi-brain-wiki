@@ -47,7 +47,7 @@ Compose a bridging narrative with three explicit parts:
 
 The platform is the scaffolding that lets Walker react from a shared frame, not from a raw source dump.
 
-Output: a platform block, in teaching voice, with PKB citations and a clearly marked edge.
+Output: a platform block, in teaching voice, with PKB citations and a clearly marked edge. Each distinct edge should be phrased as a concrete question or tension — it will become a frontmatter `edges:` entry (`id`, `text`, `state: open`, optional `targets`) and appear in the generated `meta/edges.md` learning frontier.
 
 ### 3.4 Present and invite reaction
 
@@ -88,7 +88,7 @@ The absorption loop and supervision requirements remain.
 
 ## What the platform is NOT
 
-- **Not a wiki page.** The platform is a conversational artifact scoped to this ingest. It is not written to `Wiki/`. If Walker asks to persist it, defer to a follow-up — not a v1 behavior.
-- **Not a source summary.** The summary page is written in Phase 5. The platform is the bridge, not the record.
+- **Not disposable.** The platform starts as a conversational artifact, but it is persisted in Phase 5 as the `## Bridge` section of the summary page, with each edge recorded in frontmatter `edges:`. A platform that never reaches the page is a failed workshop.
+- **Not a source summary.** The full summary page content is written in Phase 5. The Bridge is the bridge, not the record.
 - **Not paraphrase.** 3.1 synthesizes at concept level; it must not restate the source verbatim.
 - **Not autonomous.** 3.4 always invites Walker's reaction before Phase 4.

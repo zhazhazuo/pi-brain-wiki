@@ -52,8 +52,12 @@ Specific, actionable next steps with reasoning, grounded in LIST.md state.
 
 ### Lifecycle Backlog
 
-#### Awaiting Recall review (integrated → consumed)
+#### Awaiting graduation (integrated → consumed)
 - [[summaries/Source-A]] — integrated 16 days ago, no PKB entry found
+
+#### Learning frontier (open edges)
+- [edge-1] "How does X reconcile with Y?" — [[summaries/Source-A]], open 21d
+- [edge-2] "..." — [[summaries/Source-B]], exploring 7d
 
 #### Awaiting clearing (archived → cleared)
 - [[summaries/Source-C]] — PKB covered: [[Area/1 CS/17 AI/LLM Memory]]

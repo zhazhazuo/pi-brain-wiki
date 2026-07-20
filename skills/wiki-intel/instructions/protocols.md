@@ -16,9 +16,13 @@
 6. Read recent wiki events → what knowledge was recently added/updated
 7. Read Draft/ maturity → "ready to file" candidates
 8. Check lifecycle backlog from `wiki_scan_activity` output:
-   - Integrated entries awaiting Recall review (2+ weeks old)
+   - Integrated entries awaiting graduation (2+ weeks old)
    - Archived entries that may be clearable
    - Consumed topics with new sources (needs reactivation)
+9. Read wiki/meta/edges.md → the learning frontier:
+   - Open edges by age — what Walker has captured but not yet internalized
+   - Exploring edges — partial progress worth continuing
+   - Old open edges (30d+) are graduation candidates; recommend them explicitly
 
 Synthesize into:
 - LIST.md health: backlog size, oldest item, un-captured sources
@@ -52,6 +56,7 @@ Synthesize into:
 
 Same as review, plus:
 - Compare activity against stated priorities (Project/ frontmatter)
+- Frontier review: open edges from meta/edges.md — which edges are aging untouched, which topics carry the most unresolved edges
 - Identify "always postponed" items in LIST.md — items that persist across weeks
 - Category trend analysis: is the mix of LIST.md items shifting? More sources vs. more tasks?
 - LIST.md aging report: items by age bucket (<3d, <1w, <2w, 2w+)

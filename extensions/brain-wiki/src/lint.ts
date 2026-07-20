@@ -4,6 +4,7 @@ import { arrayOfStrings, buildBacklinks, buildRegistry, scanWikiPages } from "./
 import { GRACE_PERIODS } from "./lifecycle.ts";
 import { metaPath, normalizeWikiLinkTarget, vaultRoot } from "./paths.ts";
 import type { BacklinksData, LintIssue, LintRun, ParsedPage, RegistryData } from "./types.ts";
+import { EDGE_STATES } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
 
 const SUMMARY_REQUIRED = [
@@ -85,6 +86,7 @@ export async function runLint(
   }
 
   if (mode === "frontmatter" || mode === "all") allIssues.push(...lintFrontmatter(pages));
+  if (mode === "edges" || mode === "all") allIssues.push(...lintEdges(pages));
   if (mode === "duplicates" || mode === "all") allIssues.push(...lintDuplicates(registry));
   if (mode === "coverage" || mode === "all") allIssues.push(...lintCoverage(registry, backlinks, bodyByPath));
   if (mode === "staleness" || mode === "all") allIssues.push(...lintStaleness(registry));
@@ -103,6 +105,7 @@ export async function runLint(
       duplicates: allIssues.filter((issue) => issue.kind === "duplicate").length,
       coverage: allIssues.filter((issue) => issue.kind === "coverage").length,
       staleness: allIssues.filter((issue) => issue.kind === "staleness").length,
+      edges: allIssues.filter((issue) => issue.kind === "edges").length,
     },
     issues,
   };
@@ -132,6 +135,7 @@ export function renderLintReport(run: LintRun): string {
     `- duplicates: ${run.counts.duplicates}`,
     `- coverage: ${run.counts.coverage}`,
     `- staleness: ${run.counts.staleness}`,
+    `- edges: ${run.counts.edges}`,
     "",
     "## Issues",
     "",
@@ -235,6 +239,83 @@ function lintOrphans(registry: RegistryData, backlinks: BacklinksData): LintIssu
       }
       return [];
     });
+}
+
+function lintEdges(pages: ParsedPage[]): LintIssue[] {
+  const issues: LintIssue[] = [];
+
+  for (const page of pages) {
+    if (isArchivedOrCleared(page)) continue;
+    const pageType = String(page.frontmatter.type || "");
+    if (pageType !== "summary") continue;
+
+    const status = String(page.frontmatter.status || "");
+    const graduated = status === "integrated" || status === "consumed";
+    const hasEdges = hasOwn(page.frontmatter, "edges");
+
+    if (graduated && !hasEdges) {
+      issues.push({
+        kind: "edges",
+        severity: "warning",
+        path: page.relativePath,
+        message:
+          "Integrated summary has no `edges:` frontmatter — record knowledge-boundary edges, or set `edges: []` explicitly when the source opens none.",
+      });
+    }
+
+    if (hasEdges) {
+      const edges = page.frontmatter.edges;
+      if (edges !== null && !Array.isArray(edges)) {
+        issues.push({
+          kind: "edges",
+          severity: "error",
+          path: page.relativePath,
+          message: "`edges:` must be a list of edge objects.",
+      });
+      } else if (Array.isArray(edges)) {
+        for (const [index, edge] of edges.entries()) {
+          if (!edge || typeof edge !== "object" || typeof (edge as Record<string, unknown>).text !== "string" || !String((edge as Record<string, unknown>).text).trim()) {
+            issues.push({
+              kind: "edges",
+              severity: "error",
+              path: page.relativePath,
+              message: `Edge #${index + 1} is missing a non-empty \`text\` field.`,
+            });
+            continue;
+          }
+          const state = String((edge as Record<string, unknown>).state ?? "open");
+          if (!(EDGE_STATES as readonly string[]).includes(state)) {
+            issues.push({
+              kind: "edges",
+              severity: "error",
+              path: page.relativePath,
+              message: `Edge #${index + 1} has invalid state \`${state}\` (expected: ${EDGE_STATES.join(", ")}).`,
+            });
+          }
+          if (state === "resolved" && !(edge as Record<string, unknown>).resolved_at) {
+            issues.push({
+              kind: "edges",
+              severity: "info",
+              path: page.relativePath,
+              message: `Edge #${index + 1} is resolved but has no \`resolved_at\` date.`,
+            });
+          }
+        }
+      }
+    }
+
+    if (graduated && !/^## Bridge\s*$/m.test(page.body)) {
+      issues.push({
+        kind: "edges",
+        severity: "info",
+        path: page.relativePath,
+        message:
+          "Integrated summary has no `## Bridge` section — the learning platform was not persisted.",
+      });
+    }
+  }
+
+  return issues;
 }
 
 function lintFrontmatter(pages: ParsedPage[]): LintIssue[] {

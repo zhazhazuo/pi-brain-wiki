@@ -6,13 +6,13 @@ Before editing any page, re-read it. Before starting any session, re-read the in
 
 If you can't re-read (page doesn't exist yet), that's fine — you're creating. But if the page exists and you're updating it, read it first.
 
-## 2. The platform is mandatory
+## 2. The platform is mandatory — and it persists
 
 Every ingest runs Phase 3 (Understand & Connect) before Phase 4 (Discuss) and Phase 5 (Write). The platform teaches the new content at concept level and connects it to what Walker already knows via PKB search (`brain-wiki/instructions/mini-search.md`). Skipping Phase 3 reverts the workshop to filing.
 
 Depth scales with source weight (Trivial / Substantial / Heavy — see `protocol.md` and `platform.md`), but presence never scales to zero. Even a trivial source gets a one-line platform.
 
-The platform is a conversational artifact, not a wiki page. Do not write it to `Wiki/`.
+The platform is persisted: it becomes the `## Bridge` section of the summary page, and each identified edge becomes a frontmatter `edges:` entry. `wiki_integrate_source` refuses to integrate a summary page without `edges:` frontmatter, a `## Bridge` section, and concrete integration targets. Filing without understanding is a tool-level error, not a style issue.
 
 ## 3. Integration Targets on every summary
 
@@ -101,10 +101,22 @@ This ensures that consumed topics are automatically re-reviewed when new informa
 
 ---
 
+## Graduation Mode Rules
+
+These apply in graduation mode (see `instructions/graduation.md`):
+
+- **Never skip the comparison against edges.** The value of graduation is the edge-by-edge verdict plus the gap/drift list, not just the marking.
+- **Never modify wiki content during graduation.** Only edge state transitions (frontmatter `edges:`) and status fields. PKB edits require Walker's confirmation, one edit at a time.
+- **The consumed marking is mandatory.** If you complete a graduation session and don't mark consumed, you've left the lifecycle incomplete.
+- **Respect PKB structure.** PKB entries are Walker's permanent knowledge. Propose edits carefully, don't restructure.
+- **Search before giving up.** If a PKB path doesn't resolve, search for the filename. PARA paths change.
+- **Drift is a conversation, not a diff.** When PKB and wiki disagree, surface it as "your understanding may have changed" and let Walker decide which side moves.
+
+---
+
 ## What This Agent Does NOT Do
 
-- **Does not write to Area/ or Resource/.** If knowledge is ready to become permanent, propose JD placement in Area/ (PKB) to Walker. Walker commits.
+- **Does not write to Area/ or Resource/ during ingest.** During graduation, PKB edits happen only with Walker's explicit confirmation. If knowledge is ready to become permanent, propose JD placement in Area/ (PKB) to Walker. Walker commits.
 - **Does not run batch ingest.** One source at a time, supervised. Batch mode is deferred.
-- **Does not modify PARA files.** Read-only access to Project/, Area/, Resource/, Draft/.
 - **Does not answer orientation questions.** That's the Intelligence agent. If Walker asks "what was I focused on?", suggest an intelligence session.
 - **Does not create plans or reviews.** Those are Intelligence agent outputs.

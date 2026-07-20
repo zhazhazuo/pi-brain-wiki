@@ -142,10 +142,29 @@ async function computeLifecycleBacklog(root: string): Promise<LifecycleBacklog> 
     }
   }
 
+  const openEdges: LifecycleBacklog["openEdges"] = [];
+  for (const entry of registry.pages) {
+    for (const edge of entry.edges) {
+      if (edge.state === "resolved") continue;
+      const created = edge.created ?? entry.updated;
+      const createdMs = created ? new Date(created).getTime() : NaN;
+      openEdges.push({
+        path: entry.path,
+        title: entry.title,
+        edgeId: edge.id,
+        text: edge.text,
+        state: edge.state,
+        daysSinceCreated: Number.isNaN(createdMs) ? 0 : Math.max(0, Math.floor((now - createdMs) / 86_400_000)),
+      });
+    }
+  }
+  openEdges.sort((a, b) => b.daysSinceCreated - a.daysSinceCreated);
+
   return {
     integratedAwaitingRecall,
     consumedReactivated: [],
     clearableCandidates,
+    openEdges,
   };
 }
 

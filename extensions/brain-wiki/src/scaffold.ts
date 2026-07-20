@@ -20,6 +20,7 @@ captured_at: {{captured_at}}
 integrated_at:
 consumed_at:
 pkb_refs:
+edges: []
 origin_type: {{origin_type}}
 origin_value: {{origin_value}}
 manifest_path: {{manifest_path}}
@@ -37,6 +38,14 @@ summary:
 
 ## Executive summary
 
+## Bridge
+
+**What you already know:** PKB notes this source connects to, cited by path.
+
+**What is genuinely new:** what this source adds, refines, or contradicts.
+
+**Where the edge is:** the tension, gap, or extension at the knowledge boundary.
+
 ## Main claims
 
 ## Important details and data points
@@ -47,6 +56,10 @@ summary:
 
 ## Integration targets
 - [[topics/...]] — what this source affects
+
+## Edges
+Record each knowledge-boundary question in frontmatter \`edges:\` as
+\`- id: edge-N, text: ..., state: open|exploring|resolved\`.
 
 ## Open questions
 
@@ -232,9 +245,10 @@ captured → integrated → consumed → archived → cleared
 ### Consumed pages
 
 When Walker confirms knowledge is in the PKB:
-1. Run Recall comparison (or /wiki-consumed command)
-2. Page status → \`consumed\`
-3. Frontmatter gains \`consumed_at\` and \`pkb_refs\`
+1. Run a graduation session (workshop skill) or /wiki-consumed command
+2. Resolve edges the PKB now answers (frontmatter \`edges:\` → \`state: resolved\`, \`resolved_at\`, \`pkb_ref\`)
+3. Page status → \`consumed\`
+4. Frontmatter gains \`consumed_at\` and \`pkb_refs\`
 
 ### Reactivation
 
@@ -270,6 +284,7 @@ If a new source integrates into a consumed topic, the topic flips back to integr
 Lint enforces page-type contracts:
 
 - \`summary\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`captured_at\`, \`origin_type\`, \`origin_value\`, \`manifest_path\`, \`raw_path\`, \`source_ids\`, and \`summary\`
+- Integrated summaries must also carry the learning artifacts: \`edges:\` frontmatter, a \`## Bridge\` section, and concrete \`## Integration targets\` (enforced by wiki_integrate_source and lint mode \`edges\`)
 - \`topic\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`updated\`, \`source_ids\`, and \`summary\`
 - \`plan\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`date\`, and \`updated\`
 - \`review\` requires \`id\`, \`type\`, \`title\`, \`status\`, \`period\`, and \`updated\`

@@ -132,6 +132,7 @@ const LINT_MODE_ENUM = StringEnum([
   "duplicates",
   "coverage",
   "staleness",
+  "edges",
   "graph",
   "all",
 ] as const);
@@ -385,12 +386,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_integrate_source",
     label: "Wiki Integrate Source",
     description:
-      "Finalize a captured source after graph work by marking the source packet, summary page, and selected topic pages as integrated.",
+      "Finalize a captured source after graph work by marking the source packet, summary page, and selected topic pages as integrated. Requires the summary page to carry the learning artifacts: `edges:` frontmatter, a `## Bridge` section, and concrete `## Integration targets`.",
     promptSnippet:
       "Integrate a captured source only after graph discovery or bridging has identified concrete target pages",
     promptGuidelines: [
       "Run wiki_search, wiki_graph_find, wiki_graph_traverse, or wiki_graph_bridge before calling this tool.",
       "Provide the sourceId and at least one concrete target page path.",
+      "Before integrating, complete the summary page's learning artifacts: record edges in frontmatter, fill the ## Bridge section, and replace placeholder integration targets with real page links.",
       "Use this tool to transition the source state from integration_pending to integrated.",
     ],
     parameters: Type.Object({
@@ -1856,6 +1858,18 @@ function formatActivity(
       );
     } else {
       lines.push(`  Clearable: none`);
+    }
+    if (result.lifecycle.openEdges.length > 0) {
+      lines.push(
+        `  Open edges (learning frontier): ${result.lifecycle.openEdges.length}`,
+      );
+      for (const edge of result.lifecycle.openEdges.slice(0, 5)) {
+        lines.push(
+          `    - [${edge.state}] ${edge.text} — ${edge.title} (${edge.daysSinceCreated}d)`,
+        );
+      }
+    } else {
+      lines.push(`  Open edges: none`);
     }
   }
 

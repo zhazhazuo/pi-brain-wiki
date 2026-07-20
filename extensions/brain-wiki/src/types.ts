@@ -183,6 +183,45 @@ export interface ParsedPage {
   wordCount: number;
 }
 
+export const EDGE_STATES = ["open", "exploring", "resolved"] as const;
+export type EdgeState = (typeof EDGE_STATES)[number];
+
+export interface Edge {
+  id: string;
+  text: string;
+  state: EdgeState;
+  targets?: string[];
+  created?: string;
+  resolved_at?: string;
+  pkb_ref?: string;
+}
+
+export interface EdgeRecord {
+  pagePath: string;
+  pageTitle: string;
+  pageStatus?: string;
+  edgeId: string;
+  text: string;
+  state: string;
+  targets: string[];
+  created?: string;
+  resolvedAt?: string;
+  pkbRef?: string;
+  daysSinceCreated: number;
+}
+
+export interface EdgesData {
+  version: number;
+  generatedAt: string;
+  counts: {
+    total: number;
+    open: number;
+    exploring: number;
+    resolved: number;
+  };
+  edges: EdgeRecord[];
+}
+
 export interface RegistryEntry {
   id: string;
   type: WikiPageType;
@@ -196,6 +235,7 @@ export interface RegistryEntry {
   sourceIds: string[];
   consumedAt?: string;
   pkbRefs?: string[];
+  edges: Edge[];
   linksOut: string[];
   headings: string[];
   wordCount: number;
@@ -262,6 +302,7 @@ export interface LintRun {
     duplicates: number;
     coverage: number;
     staleness: number;
+    edges: number;
   };
   issues: LintIssue[];
   reportPath?: string;
@@ -483,6 +524,7 @@ export interface LifecycleBacklog {
   integratedAwaitingRecall: Array<{ path: string; title: string; status: string; integratedAt?: string; daysSinceIntegration: number }>;
   consumedReactivated: Array<{ path: string; title: string; consumedAt: string; newSourceIds: string[] }>;
   clearableCandidates: Array<{ path: string; title: string; reason: "pkb-covered" | "superseded" | "no-active-links"; pkbRefs?: string[] }>;
+  openEdges: Array<{ path: string; title: string; edgeId: string; text: string; state: string; daysSinceCreated: number }>;
 }
 
 // ── PARA Integration Types ─────────────────────────────────────

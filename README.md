@@ -6,7 +6,7 @@
 A Pi-native implementation of the LLM Wiki pattern, adapted for personal knowledge management over a PARA + Johnny Decimal vault.
 
 - **Pi extension** for deterministic operations, guardrails, and generated metadata
-- **Agent skills** for map, workshop, intelligence, recall, and learned workflow routing
+- **Agent skills** for map, workshop (ingest + graduation), intelligence, and learned workflow routing
 - **PARA integration** — Wiki as knowledge graph layer over your vault
 - A markdown vault structure (`Wiki/`) that accumulates knowledge over time
 
@@ -15,8 +15,8 @@ A Pi-native implementation of the LLM Wiki pattern, adapted for personal knowled
 Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates a persistent comprehension layer — the `Wiki/` folder — where sources are captured, summarized, and interlinked. Specialized agents maintain it:
 
 - **Map agent** — queries what the wiki knows, progressive disclosure
-- **Workshop agent** — supervised source ingest and integration
-- **Intelligence agent** — activity analysis, plans, and reviews
+- **Workshop agent** — supervised source ingest and integration, plus graduation of wiki knowledge into the PKB
+- **Intelligence agent** — activity analysis, plans, reviews, and the learning frontier (open edges)
 - **Workflow Extract skill** — proposes reusable workflow specs from repeated patterns
 - **Workflow Invoke skill** — routes user requests through learned workflow pages
 
@@ -35,6 +35,7 @@ Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates 
 | "Create a new topic page for X" | **Workshop** | Concrete noun test → `wiki_ensure_page` → write with substance → anti-thinning |
 | "Two sources disagree, reconcile" | **Workshop** | Flags both claims as `contested`, surfaces to Walker, waits for input |
 | "Refine this topic without new source" | **Workshop** | Re-read topic + its source pages → identify what's missing → propose improvements |
+| "I've internalized this, check my PKB coverage" | **Workshop** (graduation) | Compares wiki vs PKB against the page's open edges → gap/drift list → confirmed PKB edits → resolved edges → `consumed` |
 | "What was I focused on this week?" | **Intelligence** | `wiki_scan_activity` → synthesizes activity clusters, not file lists |
 | "What should I work on next?" | **Intelligence** | Reads activity + LIST.md + Project/ frontmatter → prioritized, timeboxed plan |
 | "Give me a weekly/monthly review" | **Intelligence** | Period review: compares activity vs. stated priorities, flags neglected areas |

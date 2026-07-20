@@ -23,11 +23,14 @@ When processing a new source, complete ALL of these steps:
 - [ ] Present Integration Targets
 - [ ] Get Walker confirmation only if the source is contradictory, ambiguous, or introduces a new topic
 - [ ] **Phase 5 — Write:**
-- [ ] Write/update summary page with full content
+- [ ] Write/update summary page with full content, including:
+- [ ] `## Bridge` section — the Phase 3 platform (known / new / edge), with PKB citations
+- [ ] frontmatter `edges:` — one entry per knowledge-boundary question (id, text, state, targets, created)
+- [ ] `## Integration targets` — concrete page links, no `[[topics/...]]` placeholders
 - [ ] `wiki_ensure_page` for any new topics (concrete noun test!)
 - [ ] Re-read each target topic → then update it
 - [ ] Apply anti-cramming (split if growing) and anti-thinning (add real substance)
-- [ ] Set summary status to `integrated`
+- [ ] Set summary status to `integrated` via `wiki_integrate_source` (validates Bridge + edges + targets)
 - [ ] `wiki_log_event kind=integrate`
 - [ ] Append agent line to LIST.md: "  A YYYY-MM-DDTHH:MM → Integrated into [[topics/...]]"
 - [ ] Toggle the LIST.md item [ ] → [x] if this session was prompted by a LIST.md source

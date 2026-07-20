@@ -57,6 +57,8 @@ This is the supervised comprehension step. Build a shared conceptual platform be
     - Hard gate if the source contradicts PKB/wiki, implies a new topic, or the edge is ambiguous
 ```
 
+**Persist the platform.** The platform is not disposable chat output. In Phase 5 it becomes the `## Bridge` section of the summary page, and each edge identified in 3.3 becomes an entry in the page's frontmatter `edges:` list (`- id: edge-N, text: ..., state: open, targets: [...]`). `wiki_integrate_source` refuses to integrate a summary page that lacks them.
+
 **Scaling:** Trivial sources use single-sentence explain + scoped `pkb-area` search + 2-3 line platform, and fold reaction into Phase 4. Substantial and Heavy sources run the full protocol.
 
 **Hard gate:** if the source produced concrete integration targets in Phase 2, you must complete `wiki_graph_traverse` or `wiki_graph_bridge` and Phase 3 before editing any summary or topic page.
@@ -82,14 +84,17 @@ Grounded in the platform, discuss what this source means for the wiki:
 After the takeaways and targets are clear, and after confirmation only when needed:
 
 ```
-1. Write or update the summary page (full content, including Integration Targets)
+1. Write or update the summary page (full content), including:
+   - `## Bridge` section — the platform from Phase 3 (already known / genuinely new / where the edge is), with PKB citations
+   - frontmatter `edges:` — one entry per knowledge-boundary question: id, text, state (open|exploring), optional targets, created date
+   - `## Integration targets` — concrete page links, no `[[topics/...]]` placeholders
 2. Use wiki_ensure_page before creating any new topic
 3. Update each Integration Target topic page
    - Re-read the topic first (absorption loop!)
    - Add new information with source citations
    - Apply anti-cramming: if a sub-topic is growing, propose a new page
    - Apply anti-thinning: every edit adds real substance
-4. Set summary status to "integrated"
+4. Set summary status to "integrated" via wiki_integrate_source (it validates Bridge, edges, and Integration targets)
 5. wiki_log_event kind=integrate
 6. Append agent line to LIST.md: "  A YYYY-MM-DDTHH:MM → Integrated into [[topics/...]]"
 7. Toggle the LIST.md item [ ] → [x] if this session was prompted by a LIST.md source
@@ -113,3 +118,9 @@ Walker may also start a workshop session to refine an existing topic without a n
 7. `wiki_log_event kind=refactor`
 
 This is the same protocol minus the capture step. The absorption loop, Phase 3, and supervision requirements all still apply.
+
+---
+
+## Graduation Mode (wiki → PKB)
+
+When Walker has internalized wiki knowledge and wants it reflected in their PKB, switch to graduation mode: compare the wiki source against PKB entries **against the page's open edges**, propose PKB edits, close resolved edges in frontmatter, and mark the page consumed. See `instructions/graduation.md`.

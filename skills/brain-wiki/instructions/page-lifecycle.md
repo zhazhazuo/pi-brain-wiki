@@ -10,12 +10,12 @@ captured → integrated → consumed → archived → cleared
 |--------|---------|-------------|
 | `captured` | Source ingested but not integrated into topics | Auto-set on capture |
 | `integrated` | Content woven into wiki; page is authoritative | Set after integration complete |
-| `consumed` | Walker has internalized this; PKB is the source of truth | Set via Recall skill or `/wiki-consumed` command |
+| `consumed` | Walker has internalized this; PKB is the source of truth | Set via workshop graduation mode or `/wiki-consumed` command |
 | `draft` | Topic page exists but not yet authoritative | Set on topic creation |
 | `contested` | Two sources openly disagree; resolution pending | Set when contradiction flagged |
 | `superseded` | Newer source has replaced this page's claims | Old page kept for provenance |
 | `archived` | Retired; excluded from search and lint by default | Set when knowledge is fully in PKB and no longer needed in wiki |
-| `cleared` | Removed from wiki; preserved during grace period | Set by Recall/Intelligence when archiving clears old entries |
+| `cleared` | Removed from wiki; preserved during grace period | Set by Workshop/Intelligence when archiving clears old entries |
 
 ## Reactivation
 

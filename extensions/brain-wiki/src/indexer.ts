@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { loadConfig } from "./config.ts";
 import { parsePage } from "./frontmatter.ts";
 import { metaPath, toRelative } from "./paths.ts";
-import type { BacklinksData, BacklinksRecord, ParsedPage, RegistryData, RegistryEntry, WikiPageType } from "./types.ts";
+import type { BacklinksData, BacklinksRecord, Edge, EdgeRecord, EdgesData, ParsedPage, RegistryData, RegistryEntry, WikiPageType } from "./types.ts";
 import type { ObsidianClient } from "./obsidian-client.ts";
 
 const PAGE_ORDER: WikiPageType[] = ["summary", "topic", "plan", "review", "workflow"];
@@ -39,6 +39,7 @@ export function buildRegistry(pages: ParsedPage[]): RegistryData {
       sourceIds: arrayOfStrings(page.frontmatter.source_ids),
       consumedAt: typeof page.frontmatter.consumed_at === "string" && page.frontmatter.consumed_at ? page.frontmatter.consumed_at : undefined,
       pkbRefs: pkbRefs.length > 0 ? pkbRefs : undefined,
+      edges: parseEdges(page.frontmatter.edges),
       linksOut: [...new Set(page.normalizedLinks)],
       headings: page.headings,
       wordCount: page.wordCount,
@@ -149,6 +150,10 @@ export async function rebuildRegistryAndIndex(
   await writeFile(metaPath(root, "backlinks.json"), `${JSON.stringify(backlinks, null, 2)}\n`, "utf8");
   await writeFile(metaPath(root, "index.md"), renderIndexMarkdown(registry, config.title), "utf8");
 
+  const edges = collectEdges(registry);
+  await writeFile(metaPath(root, "edges.json"), `${JSON.stringify(edges, null, 2)}\n`, "utf8");
+  await writeFile(metaPath(root, "edges.md"), renderEdgesMarkdown(edges), "utf8");
+
   return {
     registry,
     backlinks,
@@ -156,6 +161,8 @@ export async function rebuildRegistryAndIndex(
       toRelative(root, metaPath(root, "registry.json")),
       toRelative(root, metaPath(root, "backlinks.json")),
       toRelative(root, metaPath(root, "index.md")),
+      toRelative(root, metaPath(root, "edges.json")),
+      toRelative(root, metaPath(root, "edges.md")),
     ],
   };
 }
@@ -180,6 +187,141 @@ async function walkMarkdownFiles(dir: string): Promise<string[]> {
 
 export function arrayOfStrings(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+export function parseEdges(value: unknown): Edge[] {
+  if (!Array.isArray(value)) return [];
+  const edges: Edge[] = [];
+  for (const [index, item] of value.entries()) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    if (typeof record.text !== "string" || !record.text.trim()) continue;
+    edges.push({
+      id: typeof record.id === "string" && record.id.trim() ? record.id : `edge-${index + 1}`,
+      text: record.text.trim(),
+      state: (typeof record.state === "string" && record.state.trim() ? record.state.trim() : "open") as Edge["state"],
+      targets: arrayOfStrings(record.targets).length > 0 ? arrayOfStrings(record.targets) : undefined,
+      created: asDateString(record.created),
+      resolved_at: asDateString(record.resolved_at),
+      pkb_ref: typeof record.pkb_ref === "string" && record.pkb_ref ? record.pkb_ref : undefined,
+    });
+  }
+  return edges;
+}
+
+function asDateString(value: unknown): string | undefined {
+  if (typeof value === "string" && value) return value;
+  // gray-matter parses unquoted YAML dates into Date objects
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  return undefined;
+}
+
+export function collectEdges(registry: RegistryData, now = Date.now()): EdgesData {
+  const records: EdgeRecord[] = [];
+  for (const page of registry.pages) {
+    for (const edge of page.edges) {
+      const created = edge.created ?? page.updated;
+      const createdMs = created ? new Date(created).getTime() : NaN;
+      records.push({
+        pagePath: page.path,
+        pageTitle: page.title,
+        pageStatus: page.status,
+        edgeId: edge.id,
+        text: edge.text,
+        state: edge.state,
+        targets: edge.targets ?? [],
+        created,
+        resolvedAt: edge.resolved_at,
+        pkbRef: edge.pkb_ref,
+        daysSinceCreated: Number.isNaN(createdMs) ? 0 : Math.max(0, Math.floor((now - createdMs) / 86_400_000)),
+      });
+    }
+  }
+
+  const count = (state: string) => records.filter((record) => record.state === state).length;
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    counts: {
+      total: records.length,
+      open: count("open"),
+      exploring: count("exploring"),
+      resolved: count("resolved"),
+    },
+    edges: records.sort((a, b) => b.daysSinceCreated - a.daysSinceCreated),
+  };
+}
+
+const RECENTLY_RESOLVED_DAYS = 30;
+
+export function renderEdgesMarkdown(data: EdgesData): string {
+  const lines: string[] = [
+    "# Edges — Learning Frontier",
+    "",
+    `Generated: ${data.generatedAt}`,
+    "",
+    `Open: ${data.counts.open} · Exploring: ${data.counts.exploring} · Resolved: ${data.counts.resolved}`,
+    "",
+    "Edges are knowledge-boundary questions recorded on summary pages. Open and exploring",
+    "edges are the learning frontier; resolve them through graduation (recall) sessions.",
+    "",
+  ];
+
+  const renderGroup = (heading: string, group: EdgeRecord[], empty: string) => {
+    lines.push(`## ${heading}`, "");
+    if (group.length === 0) {
+      lines.push(empty, "");
+      return;
+    }
+    let lastPage = "";
+    for (const record of group) {
+      if (record.pagePath !== lastPage) {
+        lastPage = record.pagePath;
+        lines.push(`### [[${record.pagePath.replace(/\.md$/, "")}|${record.pageTitle}]]`, "");
+      }
+      const age = record.daysSinceCreated > 0 ? ` _(${record.daysSinceCreated}d)_` : "";
+      const targets = record.targets.length > 0 ? ` — targets: ${record.targets.join(", ")}` : "";
+      lines.push(`- ${record.text}${age}${targets}`);
+    }
+    lines.push("");
+  };
+
+  const byPageAge = (a: EdgeRecord, b: EdgeRecord) =>
+    a.pagePath.localeCompare(b.pagePath) || b.daysSinceCreated - a.daysSinceCreated;
+
+  renderGroup(
+    "Open edges",
+    data.edges.filter((record) => record.state === "open").sort(byPageAge),
+    "_No open edges._",
+  );
+  renderGroup(
+    "Exploring",
+    data.edges.filter((record) => record.state === "exploring").sort(byPageAge),
+    "_No edges currently being explored._",
+  );
+
+  const recentlyResolved = data.edges
+    .filter((record) => record.state === "resolved" && record.resolvedAt)
+    .filter((record) => {
+      const resolvedMs = new Date(record.resolvedAt as string).getTime();
+      return !Number.isNaN(resolvedMs) && Date.now() - resolvedMs <= RECENTLY_RESOLVED_DAYS * 86_400_000;
+    })
+    .sort((a, b) => String(b.resolvedAt).localeCompare(String(a.resolvedAt)));
+
+  lines.push("## Recently resolved (30 days)", "");
+  if (recentlyResolved.length === 0) {
+    lines.push("_None recently._", "");
+  } else {
+    for (const record of recentlyResolved) {
+      const pkb = record.pkbRef ? ` → ${record.pkbRef}` : "";
+      lines.push(`- ${record.text} — [[${record.pagePath.replace(/\.md$/, "")}|${record.pageTitle}]]${pkb}`);
+    }
+    lines.push("");
+  }
+
+  return `${lines.join("\n").trimEnd()}\n`;
 }
 
 function inferTypeFromPath(relativePath: string): WikiPageType {
