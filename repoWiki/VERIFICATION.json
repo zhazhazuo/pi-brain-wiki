@@ -116,7 +116,7 @@
         "Feature Map",
         "Overview"
       ],
-      "chunkSha256": "d3f9e0df35de5f085bbd0bb14162109e346b09e25930aaca4be4fa4a7aca7bf7",
+      "chunkSha256": "4963430774c86b0afbea0d338b1f376b2dbd604201042e80191ccde14fd4b8ea",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -128,7 +128,7 @@
         "Feature Map",
         "Overview"
       ],
-      "chunkSha256": "b6b60ca31373efe920fafe30cc5f3425e262248fd309abf205e5362d9758c07c",
+      "chunkSha256": "0385aa404a1ebc72e701dbbd713c81215a72469cb01230980c749b9de0e0e1dd",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -140,7 +140,7 @@
         "Feature Map",
         "Overview"
       ],
-      "chunkSha256": "dc7b0fcedde87892f8c1adf28ad3837cf8a47119f590394f19eac07915d58e95",
+      "chunkSha256": "1954c904a0dc6550f4212efd0a11a9bb6a97ed5c4f45525316d327db982cdf52",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -164,7 +164,7 @@
         "Module Map",
         "Overview"
       ],
-      "chunkSha256": "b39122f1f509f6ab640de65671b669d64d9ebee9f46da002470be52f96f58125",
+      "chunkSha256": "c1009d0b9faff663ee771b63b832feab2f0f0b6731e6c5ec3a9a9feb522515d0",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -176,7 +176,7 @@
         "Module Map",
         "Overview"
       ],
-      "chunkSha256": "e6d682b278609ca2b463ecc604789eeb7085b1671dd13054a3567b319d52d015",
+      "chunkSha256": "451f513952412b62dae0d1b621b0030251f5bc8af250ecd17232e4420e607a06",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -632,7 +632,7 @@
         "File Index",
         "extensions/brain-wiki/src/"
       ],
-      "chunkSha256": "88a29461e7c6d6307b7dc018655ad5c0132d5e9eb118b15bc39c6cc6190bb66f",
+      "chunkSha256": "8eb60f7c7c55d3cd9645feb4be15ce36c4647f3642f187b3ced36f07d68a2914",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -644,7 +644,7 @@
         "File Index",
         "extensions/brain-wiki/src/"
       ],
-      "chunkSha256": "0347cbebc230311337a2190754514722eee59372e998b1f12c261ee252154b31",
+      "chunkSha256": "9dd2ef6778f45a47485dab80fe556799635770f4fd485faf59061ce7d8a3639a",
       "sources": [],
       "verdict": "draft",
       "findings": []
@@ -668,7 +668,19 @@
         "File Index",
         "docs/"
       ],
-      "chunkSha256": "e28f00d1e3cc7254f86e158938b9a9a953c7c130d5a2d7156f1063f019a0b364",
+      "chunkSha256": "e20cffbf11ee45128d517eac29570100247cb98f392af6198db03eebf579cd0a",
+      "sources": [],
+      "verdict": "draft",
+      "findings": []
+    },
+    {
+      "chunkId": "03_index%2Ffile_index.md::File Index::repoWiki/::0",
+      "path": "03_index/file_index.md",
+      "breadcrumb": [
+        "File Index",
+        "repoWiki/"
+      ],
+      "chunkSha256": "e7b5ca593558f7f33bc7617741ce701b421f13c3f91cbca3f051ffcbe58acfad",
       "sources": [],
       "verdict": "draft",
       "findings": []

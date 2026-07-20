@@ -17,8 +17,6 @@
 - lifecycle → extensions/brain-wiki/src/lifecycle.ts — hardcoded grace period constants for page lifecycle transitions
 - obsidian-client → extensions/brain-wiki/src/obsidian-client.ts — Unix socket client for the Obsidian CLI
 - obsidian-io → extensions/brain-wiki/src/obsidian-io.ts — markdown/property IO boundary on top of ObsidianClient
-- obsidian-fs → extensions/brain-wiki/src/obsidian-fs.ts **(proposed)** — file operations via obsidian create/move/rename/delete
-- properties → extensions/brain-wiki/src/properties.ts **(proposed)** — lifecycle state management via obsidian property:*
 - project-sync → extensions/brain-wiki/src/project-sync.ts — deterministic Project/ workflow: create four-file project folders, scan/review canonical state, mutate project metadata, manage structured tasks, and promote qualifying work to LIST.md
 - sync → extensions/brain-wiki/src/sync.ts — bootstrap wiki topics from PARA folders; writes last_synced, para_source, sync-state.json
 - triage → extensions/brain-wiki/src/triage.ts — read, add, suggest, flag stale in LIST.md through Obsidian IO when available

@@ -77,8 +77,6 @@ flowchart LR
   Index -.-> ObsidianClient[src/obsidian-client.ts]
   Index --> ObsidianIo
   ObsidianIo --> ObsidianClient
-  Index -.-> ObsidianFs[src/obsidian-fs.ts]
-  Index -.-> Properties[src/properties.ts]
   Capture -.-> ObsidianClient
   Capture --> ObsidianIo
   Fm --> ObsidianIo
@@ -92,7 +90,7 @@ flowchart LR
   Graph -.-> ObsidianClient
 
   classDef new stroke-dasharray: 5 5
-  class ObsidianClient,ObsidianFs,Properties new
+  class ObsidianClient new
 ```
 
 | Module | Entry file | Status |
@@ -135,5 +133,3 @@ flowchart LR
 | workflow-gate | extensions/brain-wiki/src/workflow-gate.ts | current |
 | obsidian-client | extensions/brain-wiki/src/obsidian-client.ts | current |
 | obsidian-io | extensions/brain-wiki/src/obsidian-io.ts | current |
-| obsidian-fs | extensions/brain-wiki/src/obsidian-fs.ts | **proposed** |
-| properties | extensions/brain-wiki/src/properties.ts | **proposed** |

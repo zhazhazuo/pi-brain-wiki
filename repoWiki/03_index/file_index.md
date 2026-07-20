@@ -60,7 +60,6 @@
 - extensions/brain-wiki/src/obsidian-client.test.ts → Unit tests for ObsidianClient
 - extensions/brain-wiki/src/obsidian-io.ts → Markdown/property IO boundary backed by ObsidianClient
 - extensions/brain-wiki/src/obsidian-io.test.ts → Unit tests for CLI-backed markdown/property IO
-- extensions/brain-wiki/src/obsidian-fs.ts → New: file operations via obsidian create/move/rename/delete
 - extensions/brain-wiki/src/paths.ts → Resolves wiki root from cwd, computes all vault paths, resolves wikilinks to absolute paths
 - extensions/brain-wiki/src/project-schema.ts → Build deterministic `Project/` folder templates and validate canonical project frontmatter
 - extensions/brain-wiki/src/project-sync.ts → Create four-file project folders, scan/review canonical project state, mutate project metadata, manage structured tasks, and promote qualifying work to LIST.md
@@ -69,7 +68,6 @@
 - extensions/brain-wiki/src/project-timeline.ts → Format append-only typed timeline entries for project history
 - extensions/brain-wiki/src/graph.ts → Vault graph discovery: search, neighborhood traversal, and PKB bridging through Obsidian CLI
 - extensions/brain-wiki/src/graph.test.ts → Unit tests for graph discovery, traversal, and bridge output
-- extensions/brain-wiki/src/properties.ts → New: property helpers for wiki lifecycle via obsidian property:*
 - extensions/brain-wiki/src/skills.ts → Resolve package skills directory and discover SKILL.md files
 - extensions/brain-wiki/src/skills.test.ts → Unit tests for automatic package skill discovery
 - extensions/brain-wiki/src/scaffold.ts → Bootstraps vault directory structure (incl. discussions/, drafts/), templates, and metadata files
@@ -101,8 +99,11 @@
 ## docs/
 
 - docs/superpowers/specs/2026-06-21-external-context-design.md → External-context feature design, activation model, and tool contract
-- docs/00_overview/big_picture.md → High-level system overview: core flow, constraints, available tools
-- docs/00_overview/tech_stack.md → Technology stack: Node.js >=20, ESM TypeScript, filesystem storage, gray-matter
-- docs/01_maps/feature_map.md → Maps each feature to its source file with one-line description
-- docs/01_maps/module_map.md → Mermaid dependency diagram showing how extension modules connect
-- docs/01_maps/system_map.md → Architecture layers diagram: pi agent → tools → domain modules → filesystem
+
+## repoWiki/
+
+- repoWiki/00_overview/big_picture.md → High-level system overview: core flow, constraints, available tools
+- repoWiki/00_overview/tech_stack.md → Technology stack: Node.js >=20, ESM TypeScript, filesystem storage, gray-matter
+- repoWiki/01_maps/feature_map.md → Maps each feature to its source file with one-line description
+- repoWiki/01_maps/module_map.md → Mermaid dependency diagram showing how extension modules connect
+- repoWiki/01_maps/system_map.md → Architecture layers diagram: pi agent → tools → domain modules → filesystem
