@@ -5,3 +5,6 @@ npm-debug.log*
 .worktrees/
 .wiki/env.local.json
 !.wiki/env.local.example.json
+.agent-runs/
+.loop-data/
+.pi-subagents/

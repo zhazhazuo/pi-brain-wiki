@@ -6,10 +6,10 @@ active
 
 ## Current State
 
-- All five plan tasks landed on main (commits 736215a..cdad634); final whole-branch review clean after one fix wave.
-- Suite: 175 pass / 3 fail — the 3 failures are pre-existing on the base commit and unrelated (context-guards, project-sync ISO-week time bomb, context-gather-agent).
-- `npm run check` passes.
-- Live validation pending: one workshop session and one format-assist session in daily use.
+- Redesign landed on main (commits 736215a..cdad634); final review clean.
+- Full-lifecycle addendum landed on main (commits 4665c13..db13a7f): `wiki_task` modify (validated, audit-annotated) + delete (confirm-gated, audit-logged as `task-delete` events); skill documents discuss → propose → confirm → execute and close+recreate. Final review: ready to merge, zero Critical/Important.
+- Suite: 182 pass / 3 fail — the 3 failures are pre-existing and unrelated.
+- Live validation pending: one workshop session, one format-assist session, one project-discussion session with a modify/delete change set.
 - Manual step pending for Walker: copy the new summary template into the live vault at `<vault>/Wiki/.wiki/templates/summary.md` (template body in `extensions/brain-wiki/src/scaffold.ts`).
 
 ## Key Decisions
@@ -29,5 +29,5 @@ active
 
 ## Next
 
-- Walker: update the live vault template, then run one workshop session + one format-assist session. If both behave, mark this unit completed.
-- Follow-up (separate unit): fix the 3 pre-existing red tests; regenerate repoWiki.
+- Walker: update the live vault template, then run one workshop session + one format-assist session + one project-discussion session. If all behave, mark this unit completed.
+- Follow-up (separate unit): fix the 3 pre-existing red tests; regenerate repoWiki; opportunistic hardening (unchecked audit-annotate result, merged status-tag integration test, `ScanProposal` orphan deletion).
