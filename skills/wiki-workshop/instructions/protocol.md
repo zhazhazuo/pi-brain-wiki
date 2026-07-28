@@ -16,15 +16,16 @@ Before Walker provides a source, check LIST.md for unprocessed items:
 ## Phase 1: Receive Source
 
 Walker provides a source (URL, file, or text). Can come directly or from LIST.md.
+**Walker has already read the source.** Your reading is for grounding — never
+report the content back to him.
 
 ```
 1. wiki_capture_source → creates inbox packet + summary stub
-2. Read the extracted content → understand the source
-3. Tell Walker: "Here's what I got from this source."
-4. Classify the source weight (Trivial / Substantial / Heavy) per platform.md and announce it.
+2. Read the extracted content → ground yourself in the source (internal)
+3. Classify the source weight (Trivial / Substantial / Heavy) per platform.md and announce it.
    Walker may override.
-5. Append agent line to LIST.md under the item: "  A YYYY-MM-DDTHH:MM → Captured as SRC-ID"
-6. If Walker initiated this session for a LIST.md item, toggle [ ] → [>] first, then [ ] → [x] on completion
+4. Append agent line to LIST.md under the item: "  A YYYY-MM-DDTHH:MM → Captured as SRC-ID"
+5. If Walker initiated this session for a LIST.md item, toggle [ ] → [>] first, then [ ] → [x] on completion
 ```
 
 ## Phase 2: Orient to Existing Knowledge
@@ -45,14 +46,16 @@ Before building the platform, orient to what the wiki already knows.
 This is the supervised comprehension step. Build a shared conceptual platform before any takeaways are discussed. **Mandatory.** See `instructions/platform.md` for the full detail.
 
 ```
-3.1 Explain the new content at concept level (teach, don't paraphrase)
+3.1 Ground yourself in the source at concept level (internal — Walker has read it;
+    build your own model of its claims, concepts, and tensions)
 3.2 Search the PKB per brain-wiki's instructions/mini-search.md
     - Load mini-search.md if not loaded; ensure PARA scopes indexed
     - ctx_search with terms drawn from 3.1, 2-4 per query, batched in one call
     - Collect windows with file paths; do not read full PKB files unless a window is ambiguous
 3.3 Build the platform: "what you already know" + "what is genuinely new" + "where the edge is"
     - Cite PKB paths for every "what you already know" claim
-3.4 Present the platform and invite Walker's reaction
+3.4 Compress the platform into a short frame (3-6 lines) and derive the
+    Phase 4 questions from it
     - Soft gate for additive sources
     - Hard gate if the source contradicts PKB/wiki, implies a new topic, or the edge is ambiguous
 ```
@@ -65,16 +68,23 @@ This is the supervised comprehension step. Build a shared conceptual platform be
 
 **Never skip Phase 3.** The whole point of the workshop is supervised distillation — building a shared frame before writing, not filing.
 
-## Phase 4: Discuss Key Takeaways
+## Phase 4: Questions & Brainstorm
 
-Grounded in the platform, discuss what this source means for the wiki:
+Walker has read the source. Do not present takeaways — ask questions that move
+his understanding. Grounded in the platform:
 
 ```
-1. Present Walker with: "Here are the key takeaways I see from this source."
-2. Present Integration Targets: "This source should affect these topic pages: [list]"
-3. If the source is additive and the targets are clear, state the intended edits and continue to write.
-4. If the source is contradictory, ambiguous, or implies a new topic, ask Walker for confirmation before writing.
-   (These are the same hard-gate conditions from Phase 3.4 — resolve them here with Walker.)
+1. Present the compressed platform (3-6 lines: known / new / edge).
+2. Ask 2-5 probing questions aimed at the edge:
+   - tensions between the source and the cited PKB entries
+   - what the source's claims imply for Walker's projects or existing notes
+   - what struck Walker in the source, and whether it matches the edge you identified
+   - applications or ideas the source opens up
+3. Discuss Walker's answers. Refine the Bridge; capture ideas as they emerge.
+4. Present Integration Targets: "This source should affect these topic pages: [list]"
+5. Hard gate unchanged: if the source contradicts PKB/wiki, implies a new topic,
+   or the edge is ambiguous, wait for Walker's direction before writing.
+6. State the intended edits (summary page + integration targets) and continue.
 ```
 
 **Hard gate:** if the source produced concrete integration targets, do not edit summary or topic pages until graph traversal or bridging (Phase 2) and the platform (Phase 3) are complete.
@@ -84,8 +94,10 @@ Grounded in the platform, discuss what this source means for the wiki:
 After the takeaways and targets are clear, and after confirmation only when needed:
 
 ```
-1. Write or update the summary page (full content), including:
-   - `## Bridge` section — the platform from Phase 3 (already known / genuinely new / where the edge is), with PKB citations
+1. Write or update the summary page (a learning record, not a content summary), including:
+   - `## Core claim` — 2-3 sentences: the single claim or model the source advances
+   - `## Bridge` — the platform refined by the Phase 4 discussion, with PKB citations
+   - `## Discussion` — the Phase 4 record: questions asked, Walker's compressed answers, ideas generated
    - frontmatter `edges:` — one entry per knowledge-boundary question: id, text, state (open|exploring), optional targets, created date
    - `## Integration targets` — concrete page links, no `[[topics/...]]` placeholders
 2. Use wiki_ensure_page before creating any new topic

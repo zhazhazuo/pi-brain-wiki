@@ -8,7 +8,7 @@ If you can't re-read (page doesn't exist yet), that's fine — you're creating. 
 
 ## 2. The platform is mandatory — and it persists
 
-Every ingest runs Phase 3 (Understand & Connect) before Phase 4 (Discuss) and Phase 5 (Write). The platform teaches the new content at concept level and connects it to what Walker already knows via PKB search (`brain-wiki/instructions/mini-search.md`). Skipping Phase 3 reverts the workshop to filing.
+Every ingest runs Phase 3 (Understand & Connect) before Phase 4 (Questions & Brainstorm) and Phase 5 (Write). The platform grounds the agent and connects the source to what Walker already knows via PKB search (`brain-wiki/instructions/mini-search.md`); it feeds the Phase 4 questions and persists as the Bridge. Skipping Phase 3 reverts the workshop to filing.
 
 Depth scales with source weight (Trivial / Substantial / Heavy — see `protocol.md` and `platform.md`), but presence never scales to zero. Even a trivial source gets a one-line platform.
 
@@ -64,7 +64,7 @@ Follow all rules from `brain-wiki` skill:
 - Max 2 direct quotes per page
 - One claim per sentence, short sentences
 - Attribution over assertion
-- Length targets: summaries 20-40 lines, topics 5-20 lines
+- Length targets: summaries 15-30 lines (learning record, no content summary), topics 5-20 lines
 
 ## 9. Status management
 

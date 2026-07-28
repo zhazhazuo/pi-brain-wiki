@@ -6,16 +6,16 @@ This phase is **mandatory** for every ingest. Its depth scales with source weigh
 
 ## Sub-steps
 
-### 3.1 Explain the new content
+### 3.1 Ground yourself in the new content
 
-Produce a concept-level synthesis of the source. Not a paraphrase. Not a filing. Teach Walker what the source actually says at the level of ideas:
+Produce a concept-level synthesis of the source **for yourself**. Walker has already read it — this is your grounding, not a teaching block. Not a paraphrase. Not a filing. Model what the source actually says at the level of ideas:
 
 - what claim or model the source advances
 - what concepts it rests on
 - what it adds that is genuinely new vs. confirmatory
 - what its boundaries or tensions are
 
-Output: a short explain block, in plain teaching voice, scoped to what the source genuinely contributes.
+Output: an internal concept model, scoped to what the source genuinely contributes. It feeds 3.3 and the Phase 4 questions; it is not presented to Walker as content.
 
 ### 3.2 Search the PKB per the convention
 
@@ -49,11 +49,14 @@ The platform is the scaffolding that lets Walker react from a shared frame, not 
 
 Output: a platform block, in teaching voice, with PKB citations and a clearly marked edge. Each distinct edge should be phrased as a concrete question or tension — it will become a frontmatter `edges:` entry (`id`, `text`, `state: open`, optional `targets`) and appear in the generated `meta/edges.md` learning frontier.
 
-### 3.4 Present and invite reaction
+### 3.4 Compress the platform and derive questions
 
-Present the platform to Walker and explicitly invite reaction before Phase 4:
+Compress the platform into a short frame (3-6 lines: known / new / edge) — this is what Walker sees in Phase 4. Then derive 2-5 probing questions from the edge. A good edge question:
 
-> "Here is the platform I built from this source against your existing notes. Does this match how you understand the edge? Should I reframe anything before we discuss takeaways?"
+- targets a tension between the source and a cited PKB entry, or
+- asks what the source's claims imply for Walker's projects or notes, or
+- asks what struck Walker and whether it matches the edge you identified, or
+- opens an application or idea the source makes possible.
 
 **Soft gate for additive sources.** **Hard gate** when any of these hold:
 
@@ -91,4 +94,4 @@ The absorption loop and supervision requirements remain.
 - **Not disposable.** The platform starts as a conversational artifact, but it is persisted in Phase 5 as the `## Bridge` section of the summary page, with each edge recorded in frontmatter `edges:`. A platform that never reaches the page is a failed workshop.
 - **Not a source summary.** The full summary page content is written in Phase 5. The Bridge is the bridge, not the record.
 - **Not paraphrase.** 3.1 synthesizes at concept level; it must not restate the source verbatim.
-- **Not autonomous.** 3.4 always invites Walker's reaction before Phase 4.
+- **Not autonomous.** The Phase 4 questions always put Walker in the conversation before any writing.

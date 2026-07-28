@@ -3,7 +3,7 @@
 When processing a new source, complete ALL of these steps:
 
 - [ ] `wiki_capture_source` → inbox packet created
-- [ ] Read extracted content → understand the source
+- [ ] Read extracted content → ground yourself (Walker has read it; no report-back)
 - [ ] Classify source weight (Trivial / Substantial / Heavy); announce it; Walker may override
 - [ ] Append agent line to LIST.md under the item
 - [ ] **Phase 2 — Orient:**
@@ -12,19 +12,23 @@ When processing a new source, complete ALL of these steps:
 - [ ] `wiki_graph_traverse` or `wiki_graph_bridge` → concrete neighbors when available
 - [ ] Report current wiki state and likely integration targets to Walker
 - [ ] **Phase 3 — Understand & Connect (mandatory):**
-- [ ] 3.1 Explain the new content at concept level (teach, don't paraphrase)
+- [ ] 3.1 Ground yourself in the source at concept level (internal)
 - [ ] 3.2 Load `brain-wiki/instructions/mini-search.md`; ensure PARA scopes indexed per its recipe
 - [ ] 3.2 `ctx_search` with terms from 3.1 (2-4 per query, batched in one call; scope per source weight)
 - [ ] 3.3 Build the platform: what you already know (cite PKB paths) + what is genuinely new + where the edge is
-- [ ] 3.4 Present the platform and invite Walker's reaction (soft gate; hard gate if contradictory/new-topic/ambiguous)
+- [ ] 3.4 Compress the platform to 3-6 lines; derive the Phase 4 questions
 - [ ] If concrete targets exist, do not edit summary/topic pages until graph traversal/bridging and Phase 3 are complete
-- [ ] **Phase 4 — Discuss:**
-- [ ] Present key takeaways
+- [ ] **Phase 4 — Questions & Brainstorm:**
+- [ ] Present the compressed platform (3-6 lines: known / new / edge)
+- [ ] Ask 2-5 edge-focused questions
+- [ ] Discuss Walker's answers; refine the Bridge; capture ideas
 - [ ] Present Integration Targets
-- [ ] Get Walker confirmation only if the source is contradictory, ambiguous, or introduces a new topic
+- [ ] Hard gate: contradictory / new-topic / ambiguous → wait for Walker
 - [ ] **Phase 5 — Write:**
-- [ ] Write/update summary page with full content, including:
-- [ ] `## Bridge` section — the Phase 3 platform (known / new / edge), with PKB citations
+- [ ] Write/update summary page (learning record), including:
+- [ ] `## Core claim` — 2-3 sentences on the source's single claim or model
+- [ ] `## Bridge` section — the platform refined by Phase 4, with PKB citations
+- [ ] `## Discussion` section — questions asked, Walker's compressed answers, ideas
 - [ ] frontmatter `edges:` — one entry per knowledge-boundary question (id, text, state, targets, created)
 - [ ] `## Integration targets` — concrete page links, no `[[topics/...]]` placeholders
 - [ ] `wiki_ensure_page` for any new topics (concrete noun test!)
