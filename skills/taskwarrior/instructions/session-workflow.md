@@ -1,42 +1,38 @@
 # Session Workflow
 
+## The loop: read state → draft → confirm → add
+
 ```
-Session start
-  ├── wiki_task_scan()   → surface stale LIST.md items, propose promotions
-  ├── wiki_week()        → refresh weekly dashboard
-  │
-  During session
-  ├── Walker: "promote X" → wiki_task(promote) with validation
-  ├── Walker: "what's this week?" → task export filters (real-time)
-  ├── Agent completes work → wiki_task(done)
-  │
-  Session end
-  └── wiki_week()        → refresh WEEK.md
-```
+Session start (optional)
+  └── wiki_week() → refresh the weekly dashboard
 
----
+Format assist
+  ├── 1. Read state: gather real context with read-only CLI
+  │     - task projects                 → existing Domain.Outcome projects
+  │     - task tags                     → the tag vocabulary in use
+  │     - task export status:pending    → current load, scheduled patterns, estimates
+  ├── 2. Draft: shape Walker's plain-words description per creation-rules.md
+  │     - reuse an existing project when one fits; propose a new
+  │       Domain.SpecificOutcome only when nothing matches
+  │     - reuse existing tags; TYPE prefix → default tag mapping
+  │     - present the full field set: description, project, scheduled,
+  │       priority, estimate, tags (+ due/depends when relevant)
+  ├── 3. Confirm: Walker approves or adjusts the draft
+  └── 4. Add: wiki_task(action: "promote") with the confirmed fields
 
-## LIST.md Draining
+During session
+  ├── Walker: "annotate task N" → wiki_task(annotate)
+  └── Work completed → wiki_task(done)
 
-1. `wiki_task_scan(scope: "list_md")` finds items older than 7 days
-2. Propose promotion with all required fields
-3. On approval → `wiki_task(promote)`
-4. Append agent line to LIST.md: `A 2026-06-05T10:00 → Promoted to TW #20 [AI] estimate:1`
-5. Toggle `[ ]` → `[x]` in LIST.md
-
----
-
-## Bidirectional Linking
-
-**Task side:**
-```bash
-task <id> annotate "Wiki: [[topics/type-systems]]"
+Session end (optional)
+  └── wiki_week() → refresh WEEK.md
 ```
 
-**Wiki topic side** — add `## Tasks` section:
-```markdown
-## Tasks
-- [ ] #3 RD: Blog on type systems (scheduled: Jun 5, estimate: 1)
-```
+## Drafting guidance
 
-Maintain both sides. When task completes, update topic page if it produced knowledge.
+- Ground every draft in the read state. A draft that invents a project or
+  tag Walker never uses is a failed draft.
+- If Walker's description maps to an existing pending task, say so instead
+  of drafting a duplicate.
+- If the estimate would exceed 3 days, propose a split chain per
+  creation-rules.md before drafting.
