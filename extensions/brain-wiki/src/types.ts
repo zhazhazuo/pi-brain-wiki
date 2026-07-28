@@ -272,7 +272,8 @@ export type WikiEventKind =
   | "rebuild"
   | "consumed"
   | "archived"
-  | "cleared";
+  | "cleared"
+  | "task-delete";
 
 export interface WikiEvent {
   ts: string;

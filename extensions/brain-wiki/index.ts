@@ -62,6 +62,7 @@ import { triageList } from "./src/triage.ts";
 import { syncProject } from "./src/project-sync.ts";
 import { createWorkflow, rebuildWorkflowRoutes } from "./src/workflow.ts";
 import type {
+  ModificationPayload,
   ProjectSyncResult,
   RegistryData,
   StatusSummary,
@@ -73,7 +74,7 @@ import type {
   WikiPageType,
 } from "./src/types.ts";
 import { taskExec, taskExport } from "./src/task-cli.ts";
-import { validatePromotion } from "./src/task-validator.ts";
+import { validateModification, validatePromotion } from "./src/task-validator.ts";
 import { renderWeekMd, writeWeekMd } from "./src/wiki-week.ts";
 import { getPackageSkillPaths } from "./src/skills.ts";
 
@@ -151,6 +152,7 @@ const EVENT_KIND_ENUM = StringEnum([
   "consumed",
   "archived",
   "cleared",
+  "task-delete",
 ] as const);
 
 const priorityMap: Record<string, "H" | "M" | "L"> = {
@@ -1311,7 +1313,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     name: "wiki_task",
     label: "Wiki Task",
     description:
-      "Create, annotate, or complete Taskwarrior tasks with validation. Extension enforces rules; agent uses direct CLI for safe reads.",
+      "Create, modify, annotate, complete, or delete Taskwarrior tasks with validation. All writes are validated and confirmed; description/TYPE are immutable.",
     promptSnippet:
       "Create validated Taskwarrior tasks from a confirmed draft, annotate existing tasks, or mark tasks complete",
     promptGuidelines: [
@@ -1319,9 +1321,11 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       "Use promote action only after Walker confirms the drafted task.",
       "Use annotate action to add wiki links or context notes to existing tasks.",
       "Use done action to mark a task complete.",
+      "Use modify action for validated field changes after Walker confirms the change set; description and TYPE are immutable.",
+      "Use delete action only with confirm: true after Walker's explicit approval; deletion is audit-logged to the wiki event log.",
     ],
     parameters: Type.Object({
-      action: StringEnum(["promote", "annotate", "done"] as const),
+      action: StringEnum(["promote", "annotate", "done", "modify", "delete"] as const),
       description: Type.Optional(Type.String()),
       project: Type.Optional(Type.String()),
       scheduled: Type.Optional(Type.String()),
@@ -1340,9 +1344,13 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       dryRun: Type.Optional(Type.Boolean({ default: false })),
       taskId: Type.Optional(Type.Number()),
       text: Type.Optional(Type.String()),
+      addTags: Type.Optional(Type.Array(Type.String())),
+      removeTags: Type.Optional(Type.Array(Type.String())),
+      confirm: Type.Optional(Type.Boolean({ default: false })),
     }),
-    async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
-      return handleWikiTaskAction(pi, params) as any;
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const root = await resolveWikiRoot(ctx.cwd);
+      return handleWikiTaskAction(pi, params, root) as any;
     },
   });
 
@@ -1921,6 +1929,7 @@ function buildTaskAddArgs(payload: {
 async function handleWikiTaskAction(
   pi: ExtensionAPI,
   params: Record<string, unknown>,
+  root: string,
 ) {
   const runner = {
     exec: (command: string, args?: string[], options?: unknown) =>
@@ -2047,6 +2056,146 @@ async function handleWikiTaskAction(
     };
   }
 
+  if (params.action === "modify") {
+    if (!params.taskId) {
+      return {
+        content: [
+          { type: "text", text: "TaskId is required for modify action." },
+        ],
+        details: { success: false, errors: ["TaskId is required."] },
+      };
+    }
+    if (params.description) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Description/TYPE is immutable identity — close the task (done) and create a new one (promote) instead.",
+          },
+        ],
+        details: { success: false, errors: ["immutable_identity"] },
+      };
+    }
+
+    const modification: ModificationPayload = {
+      taskId: Number(params.taskId),
+      scheduled: params.scheduled ? String(params.scheduled) : undefined,
+      priority: params.priority
+        ? priorityMap[String(params.priority)]
+        : undefined,
+      estimate: params.estimate != null ? Number(params.estimate) : undefined,
+      due: params.due ? String(params.due) : undefined,
+      recur: params.recur ? String(params.recur) : undefined,
+      project: params.project ? String(params.project) : undefined,
+      addTags: params.addTags as string[] | undefined,
+      removeTags: params.removeTags as string[] | undefined,
+      dependsOn: params.dependsOn as string[] | undefined,
+    };
+
+    const validation = validateModification(modification);
+    if (!validation.valid) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Validation failed:\n${validation.errors.map((e) => `- ${e.field}: ${e.message}`).join("\n")}`,
+          },
+        ],
+        details: { success: false, validationResult: validation },
+      };
+    }
+
+    const id = Number(params.taskId);
+    const existing = (await taskExport(runner, String(id)))[0];
+    if (!existing) {
+      return {
+        content: [{ type: "text", text: `Task ${id} not found.` }],
+        details: { success: false, errors: [`Task ${id} not found.`] },
+      };
+    }
+
+    const STATUS_TAGS = ["IN_PROGRESS", "REVIEW", "BLOCKED", "STALE"];
+    const existingTags = existing.tags ?? [];
+    const mergedTags = [
+      ...existingTags.filter((t) => !(modification.removeTags ?? []).includes(t)),
+      ...(modification.addTags ?? []).filter((t) => !existingTags.includes(t)),
+    ];
+    if (mergedTags.filter((t) => STATUS_TAGS.includes(t)).length > 1) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Resulting tag set would have more than one status tag (IN_PROGRESS, REVIEW, BLOCKED, STALE).",
+          },
+        ],
+        details: { success: false, errors: ["too_many_status_tags"] },
+      };
+    }
+
+    const args: string[] = [String(id), "modify"];
+    const changes: string[] = [];
+    if (modification.scheduled) {
+      args.push(`scheduled:${modification.scheduled}`);
+      changes.push(`scheduled: ${existing.scheduled ?? "—"} → ${modification.scheduled}`);
+    }
+    if (modification.priority) {
+      args.push(`priority:${modification.priority}`);
+      changes.push(`priority: ${existing.priority ?? "—"} → ${modification.priority}`);
+    }
+    if (modification.estimate != null) {
+      args.push(`estimate:${modification.estimate}`);
+      changes.push(`estimate: ${existing.estimate ?? "—"} → ${modification.estimate}`);
+    }
+    if (modification.due) {
+      args.push(`due:${modification.due}`);
+      changes.push(`due: ${existing.due ?? "—"} → ${modification.due}`);
+    }
+    if (modification.recur) {
+      args.push(`recur:${modification.recur}`);
+      changes.push(`recur: ${existing.recur ?? "—"} → ${modification.recur}`);
+    }
+    if (modification.project) {
+      args.push(`project:${modification.project}`);
+      changes.push(`project: ${existing.project ?? "—"} → ${modification.project}`);
+    }
+    for (const tag of modification.addTags ?? []) args.push(`+${tag}`);
+    for (const tag of modification.removeTags ?? []) args.push(`-${tag}`);
+    if (modification.addTags?.length || modification.removeTags?.length) {
+      changes.push(`tags: ${existingTags.join(",") || "—"} → ${mergedTags.join(",")}`);
+    }
+    if (modification.dependsOn?.length) {
+      args.push(`depends:${modification.dependsOn.join(",")}`);
+      changes.push(`depends: → ${modification.dependsOn.join(",")}`);
+    }
+
+    const result = await taskExec(runner, args);
+    if (!result.success) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Task modify failed: ${result.errors?.join(", ") ?? result.stderr}`,
+          },
+        ],
+        details: { success: false, errors: result.errors },
+      };
+    }
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    await taskExec(runner, [
+      String(id),
+      "annotate",
+      `${stamp}: modified ${changes.join("; ")}`,
+    ]);
+
+    return {
+      content: [
+        { type: "text", text: `Modified task ${id}: ${changes.join("; ")}` },
+      ],
+      details: { success: true, taskId: id, changes },
+    };
+  }
+
   if (params.action === "annotate") {
     if (!params.taskId || !params.text) {
       return {
@@ -2097,6 +2246,79 @@ async function handleWikiTaskAction(
         },
       ],
       details: { success: result.success },
+    };
+  }
+
+  if (params.action === "delete") {
+    if (!params.taskId) {
+      return {
+        content: [
+          { type: "text", text: "TaskId is required for delete action." },
+        ],
+        details: { success: false, errors: ["TaskId is required."] },
+      };
+    }
+    if (params.confirm !== true) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Deletion requires Walker's explicit confirmation — re-call with confirm: true after he approves.",
+          },
+        ],
+        details: { success: false, errors: ["confirmation_required"] },
+      };
+    }
+
+    const id = Number(params.taskId);
+    const record = (await taskExport(runner, String(id)))[0];
+    if (!record) {
+      return {
+        content: [{ type: "text", text: `Task ${id} not found.` }],
+        details: { success: false, errors: [`Task ${id} not found.`] },
+      };
+    }
+
+    const result = await taskExec(runner, [
+      "rc.confirmation=off",
+      String(id),
+      "delete",
+    ]);
+    if (!result.success) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Task delete failed: ${result.errors?.join(", ") ?? result.stderr}`,
+          },
+        ],
+        details: { success: false, errors: result.errors },
+      };
+    }
+
+    await appendEvent(root, {
+      ts: new Date().toISOString(),
+      kind: "task-delete",
+      title: `Deleted task ${id}: ${record.description}`,
+      notes: [
+        `project:${record.project ?? "—"}`,
+        `scheduled:${record.scheduled ?? "—"}`,
+        `priority:${record.priority ?? "—"}`,
+        `estimate:${record.estimate ?? "—"}`,
+        `tags:${(record.tags ?? []).join(",") || "—"}`,
+        `uuid:${record.uuid ?? "—"}`,
+      ],
+      actor: "agent",
+    });
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Deleted task ${id}: ${record.description} (audit logged to wiki events)`,
+        },
+      ],
+      details: { success: true, taskId: id },
     };
   }
 
