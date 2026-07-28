@@ -36,7 +36,9 @@ summary:
 
 ## Source at a glance
 
-## Executive summary
+## Core claim
+2-3 sentences: the single claim or model this source advances.
+Walker has read the source — do not summarize its content here.
 
 ## Bridge
 
@@ -46,11 +48,9 @@ summary:
 
 **Where the edge is:** the tension, gap, or extension at the knowledge boundary.
 
-## Main claims
-
-## Important details and data points
-
-## Entities and concepts mentioned
+## Discussion
+The Phase 4 Q&A record: questions asked, Walker's compressed answers,
+ideas generated.
 
 ## Reliability / caveats
 
