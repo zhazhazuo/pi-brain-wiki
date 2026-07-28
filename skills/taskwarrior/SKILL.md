@@ -14,6 +14,9 @@ Load this skill when the user says:
 - "what's on this week" / "weekly view" / "refresh WEEK.md"
 - "mark task done" / "complete this task"
 - "annotate task" / "add note to task"
+- "reschedule this" / "move X to Thursday" / "push this to next week"
+- "drop this estimate" / "re-prioritize" / "reassign to project Y"
+- "delete task N" / "remove this task"
 
 ## Sub-files
 
@@ -29,6 +32,8 @@ Load this skill when the user says:
 | `wiki_task(action: "promote")` | Create validated task from a confirmed draft | `description`, `project`, `scheduled`, `priority`, `estimate`, `tags` required |
 | `wiki_task(action: "annotate")` | Add note to task | `taskId`, `text` required |
 | `wiki_task(action: "done")` | Complete task | `taskId` required |
+| `wiki_task(action: "modify")` | Validated field changes | `taskId` + fields (`scheduled`, `priority`, `estimate`, `due`, `project`, `addTags`, `removeTags`, `dependsOn`) |
+| `wiki_task(action: "delete")` | Delete with audit log | `taskId`, `confirm: true` — Walker's approval required |
 | `wiki_week()` | Refresh WEEK.md | No params |
 
 ## Quick Reference
@@ -38,10 +43,12 @@ Load this skill when the user says:
 - Validate all fields against `creation-rules.md` before proposing
 - Propose the draft to Walker, never auto-create
 - Chain split tasks with `depends:`
+- Execute every write through `wiki_task` — never raw `task modify` / `task delete`
 
 **Never:**
-- Modify core fields without Walker's instruction
-- Delete tasks
+- Modify or delete without Walker's confirmation
+- Run raw `task modify` / `task delete` — always go through `wiki_task`
+- Change a task's description or TYPE — close and recreate instead
 - Un-complete tasks
 - Create unscheduled tasks
 - Touch LIST.md — it is a plain inbox, not part of the task flow

@@ -36,3 +36,31 @@ Session end (optional)
   of drafting a duplicate.
 - If the estimate would exceed 3 days, propose a split chain per
   creation-rules.md before drafting.
+
+## Managing existing tasks (discuss a project or topic)
+
+When Walker wants to adjust existing work:
+
+```
+1. Read state: task export project:<X>  (or by tag / scheduled range)
+2. Discuss: what moves, what grows, what dies
+3. Propose a change set — create / modify / done / delete, each with exact fields
+4. Walker confirms — the whole set or item by item
+5. Execute via wiki_task only:
+   - modify → wiki_task(action: "modify", taskId, <fields>)
+     validated; audit annotation auto-appended
+   - delete → wiki_task(action: "delete", taskId, confirm: true)
+     only after Walker's explicit per-task yes; audit-logged
+6. Never run raw task modify / task delete yourself.
+```
+
+## Identity changes (rename / re-TYPE)
+
+Description and TYPE are immutable. When scope truly changes:
+
+```
+1. wiki_task(done) the old task with a final annotation:
+   "YYYY-MM-DD: Closed for scope change. Superseded by: <new topic>."
+2. wiki_task(promote) the new task, carrying dependsOn from the old
+   task's dependencies.
+```

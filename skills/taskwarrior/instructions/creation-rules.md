@@ -94,7 +94,7 @@ A task is marked `done` when:
 | `task add` | ✅ | Only via `wiki_task(promote)`. All fields required. |
 | `task annotate` | ✅ | Via `wiki_task(annotate)` or direct `task <id> annotate` |
 | `task done` | ✅ | Via `wiki_task(done)` or direct `task <id> done` |
-| `task modify` core fields | ❌ | Never without Walker's explicit instruction |
-| `task delete` | ❌ | Never |
+| `task modify` core fields | ✅ | Only via `wiki_task(modify)` — validated, audit annotation auto-appended. Never raw `task modify`. |
+| `task delete` | ⚠️ | Only via `wiki_task(delete)` with Walker's explicit per-task confirmation. Audit-logged to wiki events before deletion. |
 | Un-complete a task | ❌ | Never |
-| Modify immutable fields (description, project, TYPE) | ❌ | Never. Close task and create new one instead. |
+| Modify identity fields (description, TYPE) | ❌ | Never. Close task and create new one instead. Project reassignment IS allowed via `wiki_task(modify)`. |
