@@ -1,8 +1,9 @@
-import type { PromotionPayload, TaskValidationResult } from "./types.ts";
+import type { ModificationPayload, PromotionPayload, TaskValidationResult } from "./types.ts";
 
 const VALID_TYPES = ["BUG:", "FEAT:", "RD:", "REVIEW:", "SETUP:", "PLAN:", "MEETING:"];
 const VALID_ESTIMATES = [0.5, 1, 1.5, 2, 2.5, 3];
 const VALID_PRIORITIES = ["H", "M", "L"];
+const STATUS_TAGS = ["IN_PROGRESS", "REVIEW", "BLOCKED", "STALE"];
 
 export function validatePromotion(payload: PromotionPayload): TaskValidationResult {
   const errors: TaskValidationResult["errors"] = [];
@@ -78,6 +79,62 @@ export function validatePromotion(payload: PromotionPayload): TaskValidationResu
       field: "tags",
       code: "missing_tags",
       message: "At least one tag is required.",
+    });
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+export function validateModification(payload: ModificationPayload): TaskValidationResult {
+  const errors: TaskValidationResult["errors"] = [];
+
+  const hasChange =
+    payload.scheduled != null ||
+    payload.priority != null ||
+    payload.estimate != null ||
+    payload.due != null ||
+    payload.recur != null ||
+    payload.project != null ||
+    (payload.addTags?.length ?? 0) > 0 ||
+    (payload.removeTags?.length ?? 0) > 0 ||
+    (payload.dependsOn?.length ?? 0) > 0;
+  if (!hasChange) {
+    errors.push({
+      field: "modify",
+      code: "empty_modification",
+      message: "At least one field to modify is required.",
+    });
+  }
+
+  if (payload.project != null && !payload.project.includes(".")) {
+    errors.push({
+      field: "project",
+      code: "invalid_project_format",
+      message: "Project must be in Domain.SpecificOutcome format with a dot separator.",
+    });
+  }
+
+  if (payload.priority != null && !VALID_PRIORITIES.includes(payload.priority)) {
+    errors.push({
+      field: "priority",
+      code: "invalid_priority",
+      message: "Priority must be H, M, or L.",
+    });
+  }
+
+  if (payload.estimate != null && !VALID_ESTIMATES.includes(payload.estimate)) {
+    errors.push({
+      field: "estimate",
+      code: "invalid_estimate",
+      message: `Estimate must be one of: ${VALID_ESTIMATES.join(", ")}`,
+    });
+  }
+
+  if ((payload.addTags ?? []).filter((t) => STATUS_TAGS.includes(t)).length > 1) {
+    errors.push({
+      field: "addTags",
+      code: "too_many_status_tags",
+      message: `At most one status tag (${STATUS_TAGS.join(", ")}) is allowed.`,
     });
   }
 

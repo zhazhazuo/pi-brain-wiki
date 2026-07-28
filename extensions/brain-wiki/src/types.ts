@@ -738,6 +738,19 @@ export interface PromotionPayload {
   dependsOn?: string[];
 }
 
+export interface ModificationPayload {
+  taskId: number;
+  scheduled?: string;
+  priority?: "H" | "M" | "L";
+  estimate?: number;
+  due?: string;
+  recur?: string;
+  project?: string;
+  addTags?: string[];
+  removeTags?: string[];
+  dependsOn?: string[];
+}
+
 export interface WeekMdSection {
   heading: string;
   rows: Array<Record<string, string | number>>;
