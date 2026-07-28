@@ -1,6 +1,6 @@
 # Phase 3 — Understand & Connect
 
-Phase 3 is the core of supervised distillation. Between orienting to the wiki (Phase 2) and discussing takeaways (Phase 4), you build a **platform**: a shared conceptual frame that teaches the new content and connects it to what Walker already knows. You are not filing — you are helping Walker extend their knowledge boundary.
+Phase 3 is the core of supervised distillation. Between orienting to the wiki (Phase 2) and the Phase 4 questions, you build a **platform**: a shared conceptual frame that grounds you in the source and connects it to what Walker already knows. You are not filing — you are helping Walker extend their knowledge boundary.
 
 This phase is **mandatory** for every ingest. Its depth scales with source weight (see `protocol.md`).
 
@@ -64,7 +64,7 @@ Compress the platform into a short frame (3-6 lines: known / new / edge) — thi
 - the source implies a **new topic** not currently in the wiki
 - the edge identified in 3.3 is genuinely ambiguous
 
-On a hard gate, wait for Walker's input before Phase 4. On a soft gate, fold Walker's reaction into the Phase 4 confirmation.
+On a hard gate, wait for Walker's input before Phase 4. On a soft gate, fold Walker's reactions into the Phase 4 discussion.
 
 ## Source-weight scaling
 
@@ -72,7 +72,7 @@ Depth scales so the protocol does not over-spend on trivial ingests. Always pres
 
 | Weight | Signal | Phase 3 depth |
 |--------|--------|---------------|
-| **Trivial** | one-line LIST.md note, tweet, single-sentence reference | single-sentence explain + scoped search (`pkb-area` only) + 2-3 line platform; no separate reaction gate, fold reaction into Phase 4 confirmation |
+| **Trivial** | one-line LIST.md note, tweet, single-sentence reference | single-sentence explain + scoped search (`pkb-area` only) + 2-3 line platform; no separate reaction gate, fold reaction into the Phase 4 discussion |
 | **Substantial** | article chapter, paper section, blog post with a model | full 3.1-3.4 protocol |
 | **Heavy** | full paper, book chapter, spec | full protocol plus multi-query PKB search and multiple platform drafts if Walker requests |
 
@@ -85,7 +85,7 @@ When the session is topic refinement rather than ingest, Phase 3 applies in a mo
 - 3.1 becomes "explain what the topic currently claims"
 - 3.2 searches the PKB for notes adjacent to the topic that have not yet been distilled
 - 3.3 builds the platform as "what is already known but not yet synthesized into this topic"
-- 3.4 invites reaction
+- 3.4 compresses the platform and derives the Phase 4 questions
 
 The absorption loop and supervision requirements remain.
 

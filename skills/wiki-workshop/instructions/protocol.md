@@ -43,7 +43,7 @@ Before building the platform, orient to what the wiki already knows.
 
 ## Phase 3: Understand & Connect
 
-This is the supervised comprehension step. Build a shared conceptual platform before any takeaways are discussed. **Mandatory.** See `instructions/platform.md` for the full detail.
+This is the supervised comprehension step. Build a shared conceptual platform before the Phase 4 questions. **Mandatory.** See `instructions/platform.md` for the full detail.
 
 ```
 3.1 Ground yourself in the source at concept level (internal — Walker has read it;
@@ -91,7 +91,7 @@ his understanding. Grounded in the platform:
 
 ## Phase 5: Write
 
-After the takeaways and targets are clear, and after confirmation only when needed:
+After the discussion and targets are clear, and after confirmation only when needed:
 
 ```
 1. Write or update the summary page (a learning record, not a content summary), including:
