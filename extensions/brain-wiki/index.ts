@@ -64,7 +64,6 @@ import { createWorkflow, rebuildWorkflowRoutes } from "./src/workflow.ts";
 import type {
   ProjectSyncResult,
   RegistryData,
-  ScanProposal,
   StatusSummary,
   TriageResult,
   WorkflowParams,
@@ -76,11 +75,6 @@ import type {
 import { taskExec, taskExport } from "./src/task-cli.ts";
 import { validatePromotion } from "./src/task-validator.ts";
 import { renderWeekMd, writeWeekMd } from "./src/wiki-week.ts";
-import { scanVaultForTasks } from "./src/task-scan.ts";
-import {
-  markListItemPromoted,
-  syncCompletedTasksToList,
-} from "./src/task-sync.ts";
 import { getPackageSkillPaths } from "./src/skills.ts";
 
 const dirtyRoots = new Set<string>();
@@ -1319,10 +1313,10 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     description:
       "Create, annotate, or complete Taskwarrior tasks with validation. Extension enforces rules; agent uses direct CLI for safe reads.",
     promptSnippet:
-      "Promote LIST.md items into validated Taskwarrior tasks, annotate existing tasks, or mark tasks complete",
+      "Create validated Taskwarrior tasks from a confirmed draft, annotate existing tasks, or mark tasks complete",
     promptGuidelines: [
       "Use graph and vault search first when the task is derived from a source or wiki topic.",
-      "Use promote action when creating new tasks from LIST.md or scan proposals.",
+      "Use promote action only after Walker confirms the drafted task.",
       "Use annotate action to add wiki links or context notes to existing tasks.",
       "Use done action to mark a task complete.",
     ],
@@ -1340,7 +1334,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       wikiLinks: Type.Optional(Type.Array(Type.String())),
       source: Type.Optional(
         Type.String({
-          description: "Source reference, e.g. LIST.md:2026-06-01:item-3",
+          description: "Source reference, e.g. a wiki page path or external URL",
         }),
       ),
       dryRun: Type.Optional(Type.Boolean({ default: false })),
@@ -1348,48 +1342,7 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       text: Type.Optional(Type.String()),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
-      const root = await resolveWikiRoot(_ctx.cwd);
-      const client = await getObsidianClient(root);
-      return handleWikiTaskAction(pi, params, root, client) as any;
-    },
-  });
-
-  pi.registerTool({
-    name: "wiki_task_scan",
-    label: "Wiki Task Scan",
-    description:
-      "Analyze vault state and propose Taskwarrior tasks automatically.",
-    promptSnippet:
-      "Scan LIST.md, projects, and wiki meta for items that could become Taskwarrior tasks",
-    parameters: Type.Object({
-      scope: Type.Optional(
-        StringEnum(["list_md", "projects", "wiki_meta", "all"] as const),
-      ),
-      since: Type.Optional(
-        Type.String({
-          description: "ISO date for staleness threshold (default: 7 days ago)",
-        }),
-      ),
-    }),
-    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const root = await resolveWikiRoot(ctx.cwd);
-      const client = await getObsidianClient(root);
-      const runner = {
-        exec: (command: string, args?: string[], options?: unknown) =>
-          pi.exec(command, args, options),
-      };
-      const syncResult = await syncCompletedTasksToList(root, runner, client);
-      const registry = await loadRegistry(root);
-      const proposals = await scanVaultForTasks(root, registry, {
-        scope: params.scope ?? "all",
-        since: params.since,
-      });
-      return {
-        content: [
-          { type: "text", text: formatScanResult(proposals, syncResult) },
-        ],
-        details: { proposals, syncResult },
-      };
+      return handleWikiTaskAction(pi, params) as any;
     },
   });
 
@@ -1402,12 +1355,10 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
     async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
       const root = await resolveWikiRoot(ctx.cwd);
       const vaultRoot = resolve(root, "..");
-      const client = await getObsidianClient(root);
       const runner = {
         exec: (command: string, args?: string[], options?: unknown) =>
           pi.exec(command, args, options),
       };
-      const syncResult = await syncCompletedTasksToList(root, runner, client);
       const records = await taskExport(
         runner,
         "status:pending or status:completed",
@@ -1415,13 +1366,8 @@ export default function brainWikiExtension(pi: ExtensionAPI) {
       const md = renderWeekMd(records);
       const path = await writeWeekMd(vaultRoot, md);
       return {
-        content: [
-          {
-            type: "text",
-            text: `WEEK.md refreshed at ${path}${syncResult.markedDone > 0 ? ` (${syncResult.markedDone} LIST.md items synced)` : ""}`,
-          },
-        ],
-        details: { path, text: md, syncResult },
+        content: [{ type: "text", text: `WEEK.md refreshed at ${path}` }],
+        details: { path, text: md },
       };
     },
   });
@@ -1972,35 +1918,9 @@ function buildTaskAddArgs(payload: {
   return args;
 }
 
-function formatScanResult(
-  proposals: ScanProposal[],
-  syncResult?: { markedDone: number; errors: string[] },
-): string {
-  const parts: string[] = [];
-  if (syncResult && syncResult.markedDone > 0) {
-    parts.push(`Synced ${syncResult.markedDone} completed task(s) to LIST.md.`);
-  }
-  if (syncResult && syncResult.errors.length > 0) {
-    parts.push(`Sync errors: ${syncResult.errors.join("; ")}`);
-  }
-  if (proposals.length === 0) {
-    parts.push("No task proposals found.");
-    return parts.join("\n");
-  }
-  parts.push(`Found ${proposals.length} proposals:`);
-  const lines = proposals.map(
-    (p, i) =>
-      `${i + 1}. ${p.description}\n   project: ${p.project} | estimate: ${p.estimate} | priority: ${p.priority} | scheduled: ${p.scheduled}\n   reason: ${p.reason} | source: ${p.source}`,
-  );
-  parts.push(lines.join("\n\n"));
-  return parts.join("\n\n");
-}
-
 async function handleWikiTaskAction(
   pi: ExtensionAPI,
   params: Record<string, unknown>,
-  _root: string,
-  client: ObsidianClient | null,
 ) {
   const runner = {
     exec: (command: string, args?: string[], options?: unknown) =>
@@ -2110,20 +2030,10 @@ async function handleWikiTaskAction(
       }
     }
 
-    // Annotate source reference and mark LIST.md as promoted
+    // Annotate source reference
     if (taskId && params.source) {
       const source = String(params.source);
       await taskExec(runner, [String(taskId), "annotate", `source: ${source}`]);
-      const match = source.match(/^LIST\.md:(\d{4}-\d{2}-\d{2}):item-(\d+)$/);
-      if (match) {
-        const [, date, itemIndexStr] = match;
-        await markListItemPromoted(
-          _root,
-          date,
-          parseInt(itemIndexStr, 10),
-          client,
-        );
-      }
     }
 
     return {
