@@ -74,8 +74,7 @@ Full rules in `instructions/writing-standards.md`. Key points:
 | `wiki_lint` | Run deterministic health checks, including page-type conformance rules |
 | `wiki_scan_activity` | Scan vault and wiki activity |
 | `wiki_rebuild_meta` | Force rescan and rebuild metadata |
-| `wiki_task` | Taskwarrior: promote/annotate/done (load `taskwarrior` skill) |
-| `wiki_task_scan` | Taskwarrior: scan vault for task proposals |
+| `wiki_task` | Taskwarrior: create from confirmed draft / annotate / done (load `taskwarrior` skill) |
 | `wiki_week` | Taskwarrior: refresh WEEK.md dashboard |
 
 ## Taskwarrior

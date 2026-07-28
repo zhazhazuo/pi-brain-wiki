@@ -64,7 +64,7 @@ Workshop finishes      → Logs event, topics updated, Map can query them next t
 
 | Type | Purpose | Template sections |
 |------|---------|-------------------|
-| `summary` | Per-source distillation | Source at a glance, Executive summary, Main claims, Integration targets |
+| `summary` | Per-source learning record | Source at a glance, Core claim, Bridge, Discussion, Integration targets |
 | `topic` | Knowledge map entry | Current understanding, Connections, Open questions |
 | `plan` | Orientation | Priorities, Timeboxed blocks, Dependencies |
 | `review` | Attention analysis | Activity clusters, Neglected areas, Emerging patterns |
