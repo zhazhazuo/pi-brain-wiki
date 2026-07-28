@@ -30,7 +30,7 @@ Most file-based LLM workflows behave like one-shot RAG. `pi-brain-wiki` creates 
 | "What topics are related to X?" | **Map** | Reads topic page → follows wikilinks → surfaces connected knowledge |
 | "Is there conflicting info about X?" | **Map** | Surfaces contradictions across summaries and topics, cites both sides |
 | "I found this article/video/paper" | **Workshop** | `wiki_capture_source` → inbox packet + summary stub → Phase 3 builds a platform connecting it to your PKB → supervised integration |
-| "Integrate this into the wiki" | **Workshop** | Absorption loop: orient → understand & connect (PKB search) → discuss takeaways → get confirmation → write |
+| "Integrate this into the wiki" | **Workshop** | Absorption loop: orient → understand & connect (PKB search) → questions & brainstorm → get confirmation → write |
 | "This topic page is thin, enrich it" | **Workshop** | Reads existing summaries that informed it → identifies gaps → proposes edits → confirms with Walker |
 | "Create a new topic page for X" | **Workshop** | Concrete noun test → `wiki_ensure_page` → write with substance → anti-thinning |
 | "Two sources disagree, reconcile" | **Workshop** | Flags both claims as `contested`, surfaces to Walker, waits for input |

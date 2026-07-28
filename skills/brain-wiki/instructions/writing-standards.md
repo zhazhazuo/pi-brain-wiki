@@ -28,7 +28,7 @@ Maximum **2 direct quotes** per page. Pick the lines that hit hardest. Quotes ca
 
 | Type | Target Lines | Split Signal |
 |------|-------------|-------------|
-| Summary | 20-40 lines | >60 |
+| Summary | 15-30 lines | >60 |
 | Topic | 5-20 lines | >30 |
 | Plan | 20-40 lines | >60 |
 | Review | 20-40 lines | >60 |
