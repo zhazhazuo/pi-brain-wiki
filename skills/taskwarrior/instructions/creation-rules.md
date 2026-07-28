@@ -26,6 +26,7 @@ The description is the **immutable identity** of the task. It names the subject,
 | `FEAT: Voice Recording for FR&IT` | `Build voice recording feature` (imperative) |
 
 **Rules:**
+
 - Noun-based, not verb-based.
 - No URLs, no IDs, no dates in the description.
 - If the scope changes, close the task and create a new one — do not modify the description.
@@ -95,6 +96,6 @@ A task is marked `done` when:
 | `task annotate` | ✅ | Via `wiki_task(annotate)` or direct `task <id> annotate` |
 | `task done` | ✅ | Via `wiki_task(done)` or direct `task <id> done` |
 | `task modify` core fields | ✅ | Only via `wiki_task(modify)` — validated, audit annotation auto-appended. Never raw `task modify`. |
-| `task delete` | ⚠️ | Only via `wiki_task(delete)` with Walker's explicit per-task confirmation. Audit-logged to wiki events before deletion. |
+| `task delete` | ⚠️ | Only via `wiki_task(delete)` with Walker's explicit per-task confirmation. Audit-logged to wiki events when deletion succeeds. |
 | Un-complete a task | ❌ | Never |
 | Modify identity fields (description, TYPE) | ❌ | Never. Close task and create new one instead. Project reassignment IS allowed via `wiki_task(modify)`. |
